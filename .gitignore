@@ -1,0 +1,4 @@
+node_modules
+dist
+.impeccable/config.local.json
+.impeccable/hook.cache.json

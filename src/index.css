@@ -1,0 +1,132 @@
+@import "tailwindcss";
+@import "@fontsource/noto-sans/400.css";
+@import "@fontsource/noto-sans/500.css";
+@import "@fontsource/noto-sans/600.css";
+@import "@fontsource/noto-sans/700.css";
+@import "@fontsource/noto-sans-sc/chinese-simplified-400.css";
+@import "@fontsource/noto-sans-sc/chinese-simplified-600.css";
+
+/* AsiaVerify Portal tokens, sampled from the pKYB Figma frames. */
+@theme {
+  --font-sans: "Noto Sans", "Noto Sans SC", ui-sans-serif, system-ui, sans-serif;
+
+  --color-navy-950: #0b1016;
+  --color-navy-900: #111a24;
+  --color-navy-800: #172636;
+  --color-navy-700: #1f3954;
+  --color-navy-600: #2a4a6a;
+
+  --color-brand-50: #eaf5ef;
+  --color-brand-100: #d3eadd;
+  --color-brand-300: #8fcaa9;
+  --color-brand-400: #2fbf87;
+  --color-brand-600: #0d7a58;
+  --color-brand-700: #0a6a4d;
+  --color-brand-800: #08573f;
+
+  --color-ink: #1d2329;
+  --color-ink-2: #4d5761;
+  --color-ink-3: #77818a;
+  --color-line: #e3e7ea;
+  --color-line-strong: #cfd5da;
+  --color-canvas: #f7f8f8;
+  --color-wash: #f1f3f4;
+
+  --color-high: #c2362f;
+  --color-high-bg: #fdeeed;
+  --color-high-line: #f2c4c0;
+  --color-high-cell: #d9473f;
+  --color-high-hover: #a52b25;
+  --color-high-ramp-1: #f6cfcb;
+  --color-high-ramp-2: #e9928a;
+  --color-high-on-dark: #ffb4ae;
+  --color-medium: #9a6200;
+  --color-medium-bg: #fdf4e1;
+  --color-medium-line: #efd7a3;
+  --color-medium-cell: #e7a83a;
+  --color-low: #4f5c67;
+  --color-low-bg: #f0f2f4;
+  --color-low-line: #d6dbe0;
+  --color-low-cell: #a9b4bd;
+
+  --color-info: #2a63c4;
+  --color-info-bg: #eef3fc;
+  --color-info-line: #c9d8f3;
+
+  --shadow-pop: 0 8px 24px -6px rgb(13 22 32 / 0.18), 0 2px 6px -2px rgb(13 22 32 / 0.12);
+  --shadow-dialog: 0 24px 64px -12px rgb(13 22 32 / 0.35);
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@layer base {
+  html {
+    color: var(--color-ink);
+    background: var(--color-canvas);
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  ::selection {
+    background: var(--color-brand-100);
+    color: var(--color-navy-900);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-brand-600);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+  input,
+  select,
+  textarea {
+    caret-color: var(--color-brand-700);
+  }
+  .tnum {
+    font-variant-numeric: tabular-nums;
+  }
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-line-strong) transparent;
+  }
+  .nav-scroll {
+    scrollbar-color: var(--color-navy-600) transparent;
+  }
+  a {
+    text-underline-offset: 3px;
+  }
+}
+
+dialog::backdrop {
+  background: rgb(11 16 22 / 0.55);
+}
+dialog[open] {
+  animation: dialog-in 220ms var(--ease-out-expo);
+}
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.985);
+  }
+}
+
+.toast-in {
+  animation: toast-in 260ms var(--ease-out-expo);
+}
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

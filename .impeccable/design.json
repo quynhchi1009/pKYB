@@ -1,0 +1,188 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-06T00:00:00Z",
+  "title": "Design System: AsiaVerify Portal (pKYB)",
+  "extensions": {
+    "colorMeta": {
+      "navy-950": { "role": "secondary", "displayName": "Night Navy Deep", "canonical": "#0b1016", "tonalRamp": ["#0b1016", "#111a24", "#172636", "#1f3954", "#2a4a6a", "#5b7591", "#9fb1c4", "#e3e9ef"] },
+      "navy-900": { "role": "secondary", "displayName": "Night Navy", "canonical": "#111a24", "tonalRamp": ["#0b1016", "#111a24", "#172636", "#1f3954", "#2a4a6a", "#5b7591", "#9fb1c4", "#e3e9ef"] },
+      "navy-800": { "role": "secondary", "displayName": "Night Navy Mid", "canonical": "#172636", "tonalRamp": ["#0b1016", "#111a24", "#172636", "#1f3954", "#2a4a6a", "#5b7591", "#9fb1c4", "#e3e9ef"] },
+      "navy-700": { "role": "secondary", "displayName": "Night Navy Lift", "canonical": "#1f3954", "tonalRamp": ["#0b1016", "#111a24", "#172636", "#1f3954", "#2a4a6a", "#5b7591", "#9fb1c4", "#e3e9ef"] },
+      "brand-50": { "role": "primary", "displayName": "Mint Wash", "canonical": "#eaf5ef", "tonalRamp": ["#08573f", "#0a6a4d", "#0d7a58", "#2fbf87", "#8fcaa9", "#d3eadd", "#eaf5ef", "#f6fbf8"] },
+      "brand-100": { "role": "primary", "displayName": "Mint Selection", "canonical": "#d3eadd", "tonalRamp": ["#08573f", "#0a6a4d", "#0d7a58", "#2fbf87", "#8fcaa9", "#d3eadd", "#eaf5ef", "#f6fbf8"] },
+      "brand-300": { "role": "primary", "displayName": "Mint Line", "canonical": "#8fcaa9", "tonalRamp": ["#08573f", "#0a6a4d", "#0d7a58", "#2fbf87", "#8fcaa9", "#d3eadd", "#eaf5ef", "#f6fbf8"] },
+      "brand-400": { "role": "primary", "displayName": "Signal Green (on navy only)", "canonical": "#2fbf87", "tonalRamp": ["#08573f", "#0a6a4d", "#0d7a58", "#2fbf87", "#8fcaa9", "#d3eadd", "#eaf5ef", "#f6fbf8"] },
+      "brand-600": { "role": "primary", "displayName": "Focus Green", "canonical": "#0d7a58", "tonalRamp": ["#08573f", "#0a6a4d", "#0d7a58", "#2fbf87", "#8fcaa9", "#d3eadd", "#eaf5ef", "#f6fbf8"] },
+      "brand-700": { "role": "primary", "displayName": "Ledger Green", "canonical": "#0a6a4d", "tonalRamp": ["#08573f", "#0a6a4d", "#0d7a58", "#2fbf87", "#8fcaa9", "#d3eadd", "#eaf5ef", "#f6fbf8"] },
+      "brand-800": { "role": "primary", "displayName": "Ledger Green Deep", "canonical": "#08573f", "tonalRamp": ["#08573f", "#0a6a4d", "#0d7a58", "#2fbf87", "#8fcaa9", "#d3eadd", "#eaf5ef", "#f6fbf8"] },
+      "ink": { "role": "neutral", "displayName": "Ink", "canonical": "#1d2329", "tonalRamp": ["#1d2329", "#4d5761", "#77818a", "#cfd5da", "#e3e7ea", "#f1f3f4", "#f7f8f8", "#ffffff"] },
+      "ink-2": { "role": "neutral", "displayName": "Ink 2", "canonical": "#4d5761", "tonalRamp": ["#1d2329", "#4d5761", "#77818a", "#cfd5da", "#e3e7ea", "#f1f3f4", "#f7f8f8", "#ffffff"] },
+      "ink-3": { "role": "neutral", "displayName": "Ink 3", "canonical": "#77818a", "tonalRamp": ["#1d2329", "#4d5761", "#77818a", "#cfd5da", "#e3e7ea", "#f1f3f4", "#f7f8f8", "#ffffff"] },
+      "line": { "role": "neutral", "displayName": "Hairline", "canonical": "#e3e7ea", "tonalRamp": ["#1d2329", "#4d5761", "#77818a", "#cfd5da", "#e3e7ea", "#f1f3f4", "#f7f8f8", "#ffffff"] },
+      "line-strong": { "role": "neutral", "displayName": "Hairline Strong", "canonical": "#cfd5da", "tonalRamp": ["#1d2329", "#4d5761", "#77818a", "#cfd5da", "#e3e7ea", "#f1f3f4", "#f7f8f8", "#ffffff"] },
+      "canvas": { "role": "neutral", "displayName": "Canvas", "canonical": "#f7f8f8", "tonalRamp": ["#1d2329", "#4d5761", "#77818a", "#cfd5da", "#e3e7ea", "#f1f3f4", "#f7f8f8", "#ffffff"] },
+      "wash": { "role": "neutral", "displayName": "Wash", "canonical": "#f1f3f4", "tonalRamp": ["#1d2329", "#4d5761", "#77818a", "#cfd5da", "#e3e7ea", "#f1f3f4", "#f7f8f8", "#ffffff"] },
+      "white": { "role": "neutral", "displayName": "Panel White", "canonical": "#ffffff", "tonalRamp": ["#1d2329", "#4d5761", "#77818a", "#cfd5da", "#e3e7ea", "#f1f3f4", "#f7f8f8", "#ffffff"] },
+      "high": { "role": "tertiary", "displayName": "High (text, destructive)", "canonical": "#c2362f", "tonalRamp": ["#5e1a16", "#8a2620", "#c2362f", "#d9473f", "#e9928a", "#f2c4c0", "#f6cfcb", "#fdeeed"] },
+      "high-bg": { "role": "tertiary", "displayName": "High Tint", "canonical": "#fdeeed", "tonalRamp": ["#5e1a16", "#8a2620", "#c2362f", "#d9473f", "#e9928a", "#f2c4c0", "#f6cfcb", "#fdeeed"] },
+      "high-line": { "role": "tertiary", "displayName": "High Line", "canonical": "#f2c4c0", "tonalRamp": ["#5e1a16", "#8a2620", "#c2362f", "#d9473f", "#e9928a", "#f2c4c0", "#f6cfcb", "#fdeeed"] },
+      "high-cell": { "role": "tertiary", "displayName": "High Cell", "canonical": "#d9473f", "tonalRamp": ["#5e1a16", "#8a2620", "#c2362f", "#d9473f", "#e9928a", "#f2c4c0", "#f6cfcb", "#fdeeed"] },
+      "medium": { "role": "tertiary", "displayName": "Medium (text)", "canonical": "#9a6200", "tonalRamp": ["#4a2f00", "#6f4700", "#9a6200", "#c98a1c", "#e7a83a", "#efd7a3", "#f7e7c4", "#fdf4e1"] },
+      "medium-bg": { "role": "tertiary", "displayName": "Medium Tint", "canonical": "#fdf4e1", "tonalRamp": ["#4a2f00", "#6f4700", "#9a6200", "#c98a1c", "#e7a83a", "#efd7a3", "#f7e7c4", "#fdf4e1"] },
+      "medium-line": { "role": "tertiary", "displayName": "Medium Line", "canonical": "#efd7a3", "tonalRamp": ["#4a2f00", "#6f4700", "#9a6200", "#c98a1c", "#e7a83a", "#efd7a3", "#f7e7c4", "#fdf4e1"] },
+      "medium-cell": { "role": "tertiary", "displayName": "Medium Cell", "canonical": "#e7a83a", "tonalRamp": ["#4a2f00", "#6f4700", "#9a6200", "#c98a1c", "#e7a83a", "#efd7a3", "#f7e7c4", "#fdf4e1"] },
+      "low": { "role": "tertiary", "displayName": "Low (text)", "canonical": "#4f5c67", "tonalRamp": ["#232a30", "#38424b", "#4f5c67", "#7d8994", "#a9b4bd", "#d6dbe0", "#e6e9ec", "#f0f2f4"] },
+      "low-bg": { "role": "tertiary", "displayName": "Low Tint", "canonical": "#f0f2f4", "tonalRamp": ["#232a30", "#38424b", "#4f5c67", "#7d8994", "#a9b4bd", "#d6dbe0", "#e6e9ec", "#f0f2f4"] },
+      "low-line": { "role": "tertiary", "displayName": "Low Line", "canonical": "#d6dbe0", "tonalRamp": ["#232a30", "#38424b", "#4f5c67", "#7d8994", "#a9b4bd", "#d6dbe0", "#e6e9ec", "#f0f2f4"] },
+      "low-cell": { "role": "tertiary", "displayName": "Low Cell", "canonical": "#a9b4bd", "tonalRamp": ["#232a30", "#38424b", "#4f5c67", "#7d8994", "#a9b4bd", "#d6dbe0", "#e6e9ec", "#f0f2f4"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "The triage headline count only." },
+      "headline": { "displayName": "Headline", "purpose": "Page h1 (26px; report pages 24px, Search 22px)." },
+      "title": { "displayName": "Title", "purpose": "Dialog titles, section headings, result counts. The company lead change uses 20px." },
+      "body": { "displayName": "Body", "purpose": "Page intros, dialog prose, buttons and tabs. Prose capped at 62-64ch." },
+      "body-dense": { "displayName": "Body dense", "purpose": "Table cells, filters, menus, toasts, panel labels (600 in ink-2)." },
+      "label": { "displayName": "Label", "purpose": "Table headers and meta lines. 11px only for chip counts, the New tag and legends." }
+    },
+    "shadows": [
+      { "name": "pop", "value": "0 8px 24px -6px rgb(13 22 32 / 0.18), 0 2px 6px -2px rgb(13 22 32 / 0.12)", "purpose": "Menus, notification popover, toasts, heatmap tooltips." },
+      { "name": "dialog", "value": "0 24px 64px -12px rgb(13 22 32 / 0.35)", "purpose": "Modal dialogs and the mobile nav drawer." }
+    ],
+    "motion": [
+      { "name": "ease-out-expo", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Entrance curve for dialogs and toasts." },
+      { "name": "dialog-in", "value": "220ms ease-out-expo; from opacity 0, translateY(8px) scale(0.985)", "purpose": "Modal dialog entrance." },
+      { "name": "toast-in", "value": "260ms ease-out-expo; from opacity 0, translateY(10px)", "purpose": "Toast entrance." },
+      { "name": "state", "value": "150ms colors", "purpose": "Button, row and tab hover/active colour changes; 200ms for sidebar width." },
+      { "name": "reduced-motion", "value": "animation and transition durations 0.01ms", "purpose": "Honoured globally under prefers-reduced-motion: reduce." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The single filled action per view; the next triage step.",
+      "html": "<button class=\"ds-btn-primary\">Review High first <svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M5 12h14\"/><path d=\"m12 5 7 7-7 7\"/></svg></button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 16px; border: 0; border-radius: 4px; background: var(--color-brand-700, #0a6a4d); color: #fff; font-family: var(--font-sans, 'Noto Sans', sans-serif); font-size: 14px; font-weight: 600; cursor: pointer; transition: background-color 150ms; } .ds-btn-primary:hover { background: var(--color-brand-800, #08573f); } .ds-btn-primary:active { background: var(--color-navy-800, #172636); } .ds-btn-primary:focus-visible { outline: 2px solid var(--color-brand-600, #0d7a58); outline-offset: 2px; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Default button: green outline for page-level and non-leading actions.",
+      "html": "<button class=\"ds-btn-secondary\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"><path d=\"M5 12h14\"/><path d=\"M12 5v14\"/></svg> New monitor</button>",
+      "css": ".ds-btn-secondary { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 16px; border: 1px solid var(--color-brand-700, #0a6a4d); border-radius: 4px; background: #fff; color: var(--color-brand-700, #0a6a4d); font-family: var(--font-sans, 'Noto Sans', sans-serif); font-size: 14px; font-weight: 600; cursor: pointer; transition: background-color 150ms; } .ds-btn-secondary:hover { background: var(--color-brand-50, #eaf5ef); } .ds-btn-secondary:focus-visible { outline: 2px solid var(--color-brand-600, #0d7a58); outline-offset: 2px; }"
+    },
+    {
+      "name": "Destructive Confirm",
+      "kind": "custom",
+      "refersTo": "button-danger",
+      "description": "Dialog footer for a destructive action: ghost Cancel (focused first) then the red confirm.",
+      "html": "<div class=\"ds-dialog-footer\"><button class=\"ds-btn-ghost\">Cancel</button><button class=\"ds-btn-danger\">Stop monitoring</button></div>",
+      "css": ".ds-dialog-footer { display: flex; justify-content: flex-end; gap: 12px; padding: 16px 24px; background: var(--color-canvas, #f7f8f8); border-top: 1px solid var(--color-line, #e3e7ea); font-family: var(--font-sans, 'Noto Sans', sans-serif); } .ds-btn-ghost, .ds-btn-danger { height: 36px; padding: 0 16px; border: 0; border-radius: 4px; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; transition: background-color 150ms, color 150ms; } .ds-btn-ghost { background: transparent; color: var(--color-ink-2, #4d5761); } .ds-btn-ghost:hover { background: var(--color-wash, #f1f3f4); color: var(--color-ink, #1d2329); } .ds-btn-danger { background: var(--color-high, #c2362f); color: #fff; } .ds-btn-danger:hover { background: #a52b25; } .ds-btn-ghost:focus-visible, .ds-btn-danger:focus-visible { outline: 2px solid var(--color-brand-600, #0d7a58); outline-offset: 2px; }"
+    },
+    {
+      "name": "Select Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Labelled filter select; hairline-strong border, green border on focus, no glow.",
+      "html": "<label class=\"ds-field\"><span class=\"ds-field-label\">Severity</span><select class=\"ds-select\"><option>All severities</option><option>High</option><option>Medium</option><option>Low</option></select></label>",
+      "css": ".ds-field { display: flex; flex-direction: column; gap: 4px; font-family: var(--font-sans, 'Noto Sans', sans-serif); } .ds-field-label { font-size: 12px; font-weight: 500; color: var(--color-ink-2, #4d5761); } .ds-select { height: 36px; padding: 0 10px; border: 1px solid var(--color-line-strong, #cfd5da); border-radius: 4px; background: #fff; color: var(--color-ink, #1d2329); font: inherit; font-size: 13px; } .ds-select:hover { border-color: var(--color-ink-3, #77818a); } .ds-select:focus { outline: none; border-color: var(--color-brand-600, #0d7a58); }"
+    },
+    {
+      "name": "Severity Pills",
+      "kind": "chip",
+      "refersTo": "severity-pill-high",
+      "description": "The only status colour: High, Medium, Low, each with tint, line, text and cell dot.",
+      "html": "<div class=\"ds-sev-row\"><span class=\"ds-sev ds-sev-high\"><i></i>High</span><span class=\"ds-sev ds-sev-medium\"><i></i>Medium</span><span class=\"ds-sev ds-sev-low\"><i></i>Low</span></div>",
+      "css": ".ds-sev-row { display: flex; gap: 8px; font-family: var(--font-sans, 'Noto Sans', sans-serif); } .ds-sev { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 10px; border: 1px solid; border-radius: 9999px; font-size: 12px; font-weight: 600; } .ds-sev i { width: 6px; height: 6px; border-radius: 9999px; } .ds-sev-high { color: var(--color-high, #c2362f); background: var(--color-high-bg, #fdeeed); border-color: var(--color-high-line, #f2c4c0); } .ds-sev-high i { background: var(--color-high-cell, #d9473f); } .ds-sev-medium { color: var(--color-medium, #9a6200); background: var(--color-medium-bg, #fdf4e1); border-color: var(--color-medium-line, #efd7a3); } .ds-sev-medium i { background: var(--color-medium-cell, #e7a83a); } .ds-sev-low { color: var(--color-low, #4f5c67); background: var(--color-low-bg, #f0f2f4); border-color: var(--color-low-line, #d6dbe0); } .ds-sev-low i { background: var(--color-low-cell, #a9b4bd); }"
+    },
+    {
+      "name": "Category Chip",
+      "kind": "chip",
+      "refersTo": "category-chip",
+      "description": "Category identity by green line icon in a neutral chip, with the mapped severity dot.",
+      "html": "<span class=\"ds-cat\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M21 12c.552 0 1.005-.449.95-.998a10 10 0 0 0-8.953-8.951c-.55-.055-.998.398-.998.95v8a1 1 0 0 0 1 1z\"/><path d=\"M21.21 15.89A10 10 0 1 1 8 2.83\"/></svg>Ownership<i></i></span>",
+      "css": ".ds-cat { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 8px; border: 1px solid var(--color-line, #e3e7ea); border-radius: 4px; background: #fff; color: var(--color-ink-2, #4d5761); font-family: var(--font-sans, 'Noto Sans', sans-serif); font-size: 12px; } .ds-cat svg { color: var(--color-brand-700, #0a6a4d); } .ds-cat i { width: 6px; height: 6px; border-radius: 9999px; background: var(--color-high-cell, #d9473f); }"
+    },
+    {
+      "name": "Monitor Row (unreviewed)",
+      "kind": "custom",
+      "refersTo": "panel",
+      "description": "Stacked row below md: navy unreviewed dot, semibold name, meta line, severity and category, actions in a menu.",
+      "html": "<div class=\"ds-row\"><div class=\"ds-row-main\"><p class=\"ds-row-name\"><i class=\"ds-unrev\"></i>Silver Freight Pte. Ltd.</p><p class=\"ds-row-meta\">Singapore · Detected 05 Oct 2026</p><p class=\"ds-row-tags\"><span class=\"ds-pill\"><i></i>High</span></p></div><button class=\"ds-more\" aria-label=\"More actions\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><circle cx=\"5\" cy=\"12\" r=\"1.6\"/><circle cx=\"12\" cy=\"12\" r=\"1.6\"/><circle cx=\"19\" cy=\"12\" r=\"1.6\"/></svg></button></div>",
+      "css": ".ds-row { display: flex; gap: 12px; padding: 14px 16px; background: #fff; border: 1px solid var(--color-line, #e3e7ea); border-radius: 6px; font-family: var(--font-sans, 'Noto Sans', sans-serif); max-width: 380px; } .ds-row-main { flex: 1; min-width: 0; } .ds-row p { margin: 0; } .ds-row-name { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: var(--color-ink, #1d2329); } .ds-unrev { width: 8px; height: 8px; border-radius: 9999px; background: var(--color-navy-900, #111a24); flex-shrink: 0; } .ds-row-meta { margin-top: 2px; font-size: 12px; color: var(--color-ink-3, #77818a); font-variant-numeric: tabular-nums; } .ds-row-tags { margin-top: 8px; } .ds-pill { display: inline-flex; align-items: center; gap: 6px; height: 20px; padding: 0 8px; border: 1px solid var(--color-high-line, #f2c4c0); border-radius: 9999px; background: var(--color-high-bg, #fdeeed); color: var(--color-high, #c2362f); font-size: 11px; font-weight: 600; } .ds-pill i { width: 6px; height: 6px; border-radius: 9999px; background: var(--color-high-cell, #d9473f); } .ds-more { display: grid; place-items: center; width: 32px; height: 32px; border: 0; border-radius: 4px; background: transparent; color: var(--color-ink-3, #77818a); cursor: pointer; } .ds-more:hover { background: var(--color-wash, #f1f3f4); color: var(--color-ink, #1d2329); } .ds-more:focus-visible { outline: 2px solid var(--color-brand-600, #0d7a58); outline-offset: 2px; }"
+    },
+    {
+      "name": "Row Action Menu",
+      "kind": "custom",
+      "refersTo": "panel",
+      "description": "Portal-rendered 200px menu; destructive item in high red, confirmed by dialog.",
+      "html": "<div class=\"ds-menu\" role=\"menu\"><button role=\"menuitem\">Review</button><button role=\"menuitem\" class=\"ds-menu-danger\">Stop monitoring</button></div>",
+      "css": ".ds-menu { width: 200px; padding: 4px 0; background: #fff; border: 1px solid var(--color-line, #e3e7ea); border-radius: 6px; box-shadow: 0 8px 24px -6px rgb(13 22 32 / 0.18), 0 2px 6px -2px rgb(13 22 32 / 0.12); font-family: var(--font-sans, 'Noto Sans', sans-serif); } .ds-menu button { display: flex; width: 100%; padding: 8px 12px; border: 0; background: transparent; text-align: left; font: inherit; font-size: 13px; color: var(--color-ink, #1d2329); cursor: pointer; } .ds-menu button:hover, .ds-menu button:focus-visible { background: var(--color-wash, #f1f3f4); outline: none; } .ds-menu .ds-menu-danger { color: var(--color-high, #c2362f); }"
+    },
+    {
+      "name": "Sidebar Navigation",
+      "kind": "nav",
+      "refersTo": "panel",
+      "description": "Navy gradient sidebar with white-alpha rows and a brand-400 active sub-nav marker.",
+      "html": "<nav class=\"ds-nav\"><a class=\"ds-nav-row\">Search</a><a class=\"ds-nav-row ds-nav-parent\">pKYB <span class=\"ds-new\">New</span></a><div class=\"ds-nav-sub\"><a class=\"ds-nav-subrow is-active\">Monitoring</a><a class=\"ds-nav-subrow\">Severity Settings</a></div><a class=\"ds-nav-row\">My Plan</a></nav>",
+      "css": ".ds-nav { display: flex; flex-direction: column; gap: 2px; width: 252px; padding: 16px 12px; background: linear-gradient(180deg, var(--color-navy-700, #1f3954), var(--color-navy-900, #111a24) 55%, var(--color-navy-950, #0b1016)); font-family: var(--font-sans, 'Noto Sans', sans-serif); } .ds-nav a { cursor: pointer; text-decoration: none; } .ds-nav-row { display: flex; align-items: center; gap: 12px; height: 40px; padding: 0 12px; border-radius: 4px; font-size: 14px; color: rgb(255 255 255 / 0.75); transition: background-color 150ms, color 150ms; } .ds-nav-row:hover, .ds-nav-subrow:hover { background: rgb(255 255 255 / 0.05); color: #fff; } .ds-nav-parent { color: #fff; font-weight: 600; } .ds-new { display: inline-flex; align-items: center; height: 18px; padding: 0 6px; border: 1px solid rgb(143 202 169 / 0.6); border-radius: 3px; background: var(--color-brand-50, #eaf5ef); color: var(--color-brand-800, #08573f); font-size: 11px; font-weight: 600; } .ds-nav-sub { display: flex; flex-direction: column; gap: 2px; margin-left: 21px; padding: 2px 0 2px 12px; border-left: 1px solid rgb(255 255 255 / 0.12); } .ds-nav-subrow { position: relative; display: flex; align-items: center; height: 36px; padding: 0 12px; border-radius: 4px; font-size: 14px; color: rgb(255 255 255 / 0.7); } .ds-nav-subrow.is-active { background: rgb(255 255 255 / 0.07); color: #fff; font-weight: 600; } .ds-nav-subrow.is-active::before { content: ''; position: absolute; top: 8px; bottom: 8px; left: -13px; width: 2px; border-radius: 9999px; background: var(--color-brand-400, #2fbf87); }"
+    },
+    {
+      "name": "Toast",
+      "kind": "custom",
+      "refersTo": "toast",
+      "description": "Navy system feedback with a Signal Green check; bottom-right.",
+      "html": "<div class=\"ds-toast\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"m9 12 2 2 4-4\"/></svg><div><p class=\"ds-toast-t\">Stopped monitoring Silver Pine Traders</p><p class=\"ds-toast-b\">History stays available under Order history.</p></div></div>",
+      "css": ".ds-toast { display: flex; gap: 12px; max-width: 380px; padding: 12px 16px; border-radius: 6px; background: var(--color-navy-900, #111a24); color: #fff; box-shadow: 0 8px 24px -6px rgb(13 22 32 / 0.18), 0 2px 6px -2px rgb(13 22 32 / 0.12); font-family: var(--font-sans, 'Noto Sans', sans-serif); } .ds-toast svg { flex-shrink: 0; margin-top: 2px; color: var(--color-brand-400, #2fbf87); } .ds-toast p { margin: 0; font-size: 13px; } .ds-toast-t { font-weight: 600; } .ds-toast-b { margin-top: 2px; color: rgb(255 255 255 / 0.7); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Night Desk Ledger",
+    "overview": "This is the established AsiaVerify Portal, and pKYB runs inside it as a native module. Nothing about it was reinvented for pKYB. A dark navy gradient frames the workspace in the top bar and sidebar. Inside that frame the content sits on near-white canvas, in white panels with hairline borders. One deep green carries every committed action, and a three-step severity scale carries every status. The frame is calm and heavy, and the content is light and dense: the dark frame holds the room and the ledger inside does the work.\n\nThe density is analyst-grade. Body text is 14px, tables and secondary text are 13px, and meta text is 12px. Panels are flat, with no ambient shadow. Depth comes from the navy frame against the pale canvas and from two shadows reserved for things that float: menus, toasts, tooltips and dialogs. Colour is rationed. Green means \"act or go here\", red, amber and slate mean severity, and navy means \"the system is speaking\": selections, toasts, tooltips and the unreviewed marker.\n\nSeverity is the only status colour. The nine change categories are told apart by green line icons, never by hue, so whenever a user remaps severity in Severity Settings, the colour of every table row, chip dot, feed entry, heatmap and alert follows.",
+    "keyCharacteristics": [
+      "Navy gradient chrome (top bar and sidebar) around a light content area on canvas.",
+      "A single green primary action per view, plus green outline and ghost buttons for everything else.",
+      "Severity is a three-step scale (High red, Medium amber, Low slate). Each step has text, background, border and cell tints.",
+      "Category identity is a green line icon inside a neutral chip.",
+      "Hairline borders and small radii (4px controls, 6px panels), and flat surfaces at rest.",
+      "Noto Sans throughout, with Noto Sans SC for Chinese names, and tabular figures for every count and date."
+    ],
+    "rules": [
+      { "name": "The Severity Is the Only Status Colour Rule", "body": "Red, amber and slate mean High, Medium and Low and nothing else, except that red also marks destructive actions. Categories never get their own hue. They are shown with a green line icon in a neutral chip, and a severity dot when severity matters. A multi-category event takes the colour of its worst severity.", "section": "colors" },
+      { "name": "The Green on Navy Rule", "body": "Signal Green (brand-400) appears only on the navy chrome and on navy surfaces such as toasts. On white, green is always brand-700 or darker.", "section": "colors" },
+      { "name": "The Navy Speaks for the System Rule", "body": "Navy-900 surfaces inside the content area (toasts, tooltips, the bulk-selection bar, the unreviewed dot) mark system state or feedback, never a brand moment.", "section": "colors" },
+      { "name": "The Tabular Figures Rule", "body": "Every count, date, registration number and credit figure is set with tabular figures so columns line up across thousands of rows.", "section": "typography" },
+      { "name": "The Sentence-Case Label Rule", "body": "Panel and section labels are sentence case, semibold, ink-2, 12–13px (for example \"Needs review\" or \"Active monitors\"). Weight and colour carry the hierarchy.", "section": "typography" },
+      { "name": "The Stacked Rows Rule", "body": "Every data table has two renderings from the same rows. At md and above it is a horizontally scrollable table with a minimum width. Below md it becomes a divided list of stacked rows: name line, meta line (flag, jurisdiction, date), then severity pill and category chips, with the ⋯ menu at the right. Never squeeze a table down to a phone width.", "section": "layout" },
+      { "name": "The Flat Until Floating Rule", "body": "A surface gets a shadow only if it overlays other content. Panels separate themselves with a hairline border, never a shadow.", "section": "elevation" },
+      { "name": "The One Filled Primary Rule", "body": "Each view has at most one primary (filled green) button: the next step in triage (\"Review High first\", \"Download fresh report\"). When a lead change takes the primary on a company page, the header download becomes secondary.", "section": "components" },
+      { "name": "The Confirm Before Destroy Rule", "body": "\"Stop monitoring\" is never a visible row or header button. A single company's stop lives in its ⋯ menu as a red item. Bulk stop lives in the navy selection bar. Both open a confirm dialog that names the company or count, explains what stays (history under Order history), and confirms with the danger button, with Cancel focused first.", "section": "components" }
+    ],
+    "dos": [
+      "Do keep severity as the only status hue: High red, Medium amber, Low slate. Every severity-coloured element reads from the user's mapping, so a remap recolours tables, feed, heatmaps and alerts at once.",
+      "Do identify change categories with the green line icon inside a neutral 4px chip.",
+      "Do use exactly one filled green primary per view, and make it the next triage step.",
+      "Do put destructive actions in a ⋯ menu (or the bulk-selection bar) and always confirm them in a dialog with the danger button.",
+      "Do render every data table as stacked rows below md.",
+      "Do mark unreviewed items with the 8px navy-900 dot and a semibold name.",
+      "Do write cadence copy as \"Last checked\" and \"Checks run automatically\".",
+      "Do use tabular figures for every number and date.",
+      "Do keep panels flat with 1px hairline borders, and keep shadows for elements that float."
+    ],
+    "donts": [
+      "Don't give categories their own colours or rainbow badges.",
+      "Don't use Signal Green (brand-400) on white surfaces.",
+      "Don't place a visible \"Stop\" or \"Delete\" link inline in a table row.",
+      "Don't promise a check cadence: no \"checks every N days\", no countdowns, no next-check dates.",
+      "Don't add shadows to panels or cards at rest, or use radii larger than 8px.",
+      "Don't introduce a second typeface. Noto Sans with Noto Sans SC covers every role."
+    ]
+  }
+}
