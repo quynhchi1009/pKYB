@@ -135,6 +135,7 @@ export function Dialog({
   footer,
   width = 560,
   labelledBy = "dialog-title",
+  bare = false,
 }: {
   open: boolean;
   onClose: () => void;
@@ -143,6 +144,8 @@ export function Dialog({
   footer?: ReactNode;
   width?: number;
   labelledBy?: string;
+  /** Render children edge to edge, without the standard header and footer. */
+  bare?: boolean;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
   useEffect(() => {
@@ -163,7 +166,8 @@ export function Dialog({
       className="m-auto max-h-[calc(100dvh-32px)] w-[calc(100vw-32px)] overflow-hidden rounded-[8px] bg-white p-0 text-ink shadow-dialog"
       style={{ maxWidth: width }}
     >
-      {open && (
+      {open && bare && children}
+      {open && !bare && (
         <div className="flex max-h-[calc(100dvh-32px)] flex-col">
           <header className="flex items-start justify-between gap-4 border-b border-line px-6 pt-5 pb-4">
             <h2 id={labelledBy} className="text-[18px] leading-snug font-semibold text-ink">

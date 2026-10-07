@@ -15,7 +15,7 @@ colors:
   brand-800: "#08573f"
   ink: "#1d2329"
   ink-2: "#4d5761"
-  ink-3: "#77818a"
+  ink-3: "#646e77"
   line: "#e3e7ea"
   line-strong: "#cfd5da"
   canvas: "#f7f8f8"
