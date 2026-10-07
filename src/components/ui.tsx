@@ -228,7 +228,10 @@ export function Dialog({
   );
 }
 
-/** Small action menu rendered in a portal so table overflow never clips it. Arrow keys move, Escape returns focus to the trigger. */
+/**
+ * Small action menu rendered in a portal so table overflow never clips it. Arrow keys move, Escape returns focus to the trigger.
+ * It follows its trigger while the page or a table scrolls, and closes only once the trigger leaves the viewport.
+ */
 export function Menu({
   label,
   trigger,
@@ -244,10 +247,17 @@ export function Menu({
   const btn = useRef<HTMLButtonElement>(null);
   const list = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState({ top: 0, left: 0 });
-  useLayoutEffect(() => {
-    if (!open || !btn.current) return;
+  const place = () => {
+    if (!btn.current) return;
     const r = btn.current.getBoundingClientRect();
-    setPos({ top: r.bottom + 4, left: Math.max(8, r.right - 200) });
+    if (r.bottom < 0 || r.top > window.innerHeight) return setOpen(false);
+    // Open upward when there's no room below for the list.
+    const h = list.current?.offsetHeight ?? 0;
+    const below = r.bottom + 4 + h <= window.innerHeight - 8;
+    setPos({ top: below || !h ? r.bottom + 4 : r.top - 4 - h, left: Math.max(8, Math.min(r.right - 200, window.innerWidth - 208)) });
+  };
+  useLayoutEffect(() => {
+    if (open) place();
   }, [open]);
   useEffect(() => {
     if (!open) return;
@@ -257,11 +267,11 @@ export function Menu({
       setOpen(false);
       btn.current?.focus();
     };
-    window.addEventListener("scroll", close, true);
+    window.addEventListener("scroll", place, true);
     window.addEventListener("resize", close);
     window.addEventListener("keydown", key);
     return () => {
-      window.removeEventListener("scroll", close, true);
+      window.removeEventListener("scroll", place, true);
       window.removeEventListener("resize", close);
       window.removeEventListener("keydown", key);
     };

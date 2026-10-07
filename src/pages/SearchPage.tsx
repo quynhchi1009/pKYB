@@ -108,15 +108,15 @@ export function SearchPage() {
                   </p>
                   <div className="mt-3 flex items-center gap-2">
                     {mon ? (
-                      <Link to={`/pkyb/monitoring/${mon.id}`} className="inline-flex h-8 items-center gap-1.5 rounded-full bg-brand-50 px-3 text-[12px] font-semibold text-brand-800">
+                      <Link to={`/pkyb/monitoring/${mon.id}`} aria-label={`Monitoring ${c.name}: open its pKYB page`} className="inline-flex h-8 items-center gap-1.5 rounded-full bg-brand-50 px-3 text-[12px] font-semibold text-brand-800">
                         <span className="size-1.5 rounded-full bg-brand-600" /> Monitoring
                       </Link>
                     ) : (
-                      <Button size="sm" variant="secondary" onClick={() => setCreating(c)}>
+                      <Button size="sm" variant="secondary" onClick={() => setCreating(c)} aria-label={`Create pKYB monitor for ${c.name}`}>
                         <Radar className="size-3.5" /> Create pKYB monitor
                       </Button>
                     )}
-                    <Link to={`/report/${c.id}`} className="inline-flex h-8 items-center px-2 text-[13px] font-semibold text-brand-700">
+                    <Link to={`/report/${c.id}`} aria-label={`View report options for ${c.name}`} className="inline-flex h-8 items-center px-2 text-[13px] font-semibold text-brand-700">
                       View
                     </Link>
                   </div>
@@ -153,15 +153,15 @@ export function SearchPage() {
                     <td className="px-4 py-3">
                       <span className="flex items-center justify-end gap-2">
                         {mon ? (
-                          <Link to={`/pkyb/monitoring/${mon.id}`} className="inline-flex h-8 items-center gap-1.5 rounded-full bg-brand-50 px-3 text-[12px] font-semibold text-brand-800 hover:bg-brand-100">
+                          <Link to={`/pkyb/monitoring/${mon.id}`} aria-label={`Monitoring ${c.name}: open its pKYB page`} className="inline-flex h-8 items-center gap-1.5 rounded-full bg-brand-50 px-3 text-[12px] font-semibold text-brand-800 hover:bg-brand-100">
                             <span className="size-1.5 rounded-full bg-brand-600" /> Monitoring
                           </Link>
                         ) : (
-                          <Button size="sm" variant="secondary" onClick={() => setCreating(c)}>
+                          <Button size="sm" variant="secondary" onClick={() => setCreating(c)} aria-label={`Create pKYB monitor for ${c.name}`}>
                             <Radar className="size-3.5" /> Create pKYB monitor
                           </Button>
                         )}
-                        <Link to={`/report/${c.id}`} className="inline-flex h-8 items-center px-2 text-[13px] font-semibold text-brand-700 hover:underline">
+                        <Link to={`/report/${c.id}`} aria-label={`View report options for ${c.name}`} className="inline-flex h-8 items-center px-2 text-[13px] font-semibold text-brand-700 hover:underline">
                           View
                         </Link>
                       </span>

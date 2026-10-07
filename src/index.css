@@ -17,6 +17,8 @@
   --color-navy-600: #2a4a6a;
 
   --color-brand-50: #eaf5ef;
+  /* brand-50 at 70% over white, solid so pinned table cells can carry it without showing what scrolls beneath. */
+  --color-row-selected: #f0f8f4;
   --color-brand-100: #d3eadd;
   --color-brand-300: #8fcaa9;
   --color-brand-400: #2fbf87;

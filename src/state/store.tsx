@@ -5,7 +5,9 @@ import {
   iso,
   generateMonitors,
   type Company,
+  DECISION_LABEL,
   type Monitor,
+  type ReviewDecision,
   type Severity,
   type SeverityMap,
 } from "../data/model";
@@ -21,6 +23,9 @@ export type Queue = { ids: string[]; label: string; search: string };
 /** Who changed the org-wide severity mapping last, and what they changed. */
 export type SeverityChange = { summary: string; by: string; at: string };
 
+/** Every review records a decision, so the change log reads as an audit trail, not a checklist. */
+export type ReviewInput = { decision: ReviewDecision; note?: string };
+
 export type Toast = { id: number; title: string; body?: string; tone?: "success" | "neutral"; action?: { label: string; onClick: () => void } };
 
 type Store = {
@@ -34,9 +39,9 @@ type Store = {
   createMonitor: (c: Company) => Monitor;
   stopMonitors: (ids: string[]) => void;
   /** Set reviewed state on many events at once. Returns nothing; callers keep the ids for Undo. */
-  setReviewed: (eventIds: string[], reviewed: boolean) => void;
-  /** Marks events reviewed and shows a toast with Undo. */
-  reviewWithUndo: (eventIds: string[], label?: string, body?: string) => void;
+  setReviewed: (eventIds: string[], reviewed: boolean, review?: ReviewInput) => void;
+  /** Records a review decision on events and shows a toast with Undo. */
+  reviewWithUndo: (eventIds: string[], review: ReviewInput & { title?: string; body?: string }) => void;
   reports: Record<string, "generating" | "ready">;
   /** The list the analyst opened a company from, so the company page can offer "Next". */
   queue: Queue | null;
@@ -70,7 +75,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, []);
   const dismissToast = useCallback((id: number) => setToasts((all) => all.filter((x) => x.id !== id)), []);
 
-  const setReviewed = useCallback((eventIds: string[], reviewed: boolean) => {
+  const setReviewed = useCallback((eventIds: string[], reviewed: boolean, review?: ReviewInput) => {
     const ids = new Set(eventIds);
     setMonitors((all) =>
       all.map((m) =>
@@ -78,7 +83,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           ? {
               ...m,
               events: m.events.map((e) =>
-                ids.has(e.id) ? { ...e, reviewed, reviewedBy: reviewed ? "You" : undefined, reviewedAt: reviewed ? iso(TODAY) : undefined } : e,
+                ids.has(e.id)
+                  ? {
+                      ...e,
+                      reviewed,
+                      reviewedBy: reviewed ? "You" : undefined,
+                      reviewedAt: reviewed ? iso(TODAY) : undefined,
+                      decision: reviewed ? review?.decision : undefined,
+                      note: reviewed ? review?.note?.trim() || undefined : undefined,
+                    }
+                  : e,
               ),
             }
           : m,
@@ -86,11 +100,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     );
   }, []);
   const reviewWithUndo = useCallback(
-    (eventIds: string[], label?: string, body?: string) => {
+    (eventIds: string[], { title, body, ...review }: ReviewInput & { title?: string; body?: string }) => {
       if (!eventIds.length) return;
-      setReviewed(eventIds, true);
+      setReviewed(eventIds, true, review);
+      const what = eventIds.length === 1 ? "Reviewed" : `${eventIds.length.toLocaleString("en-GB")} changes reviewed`;
       toast({
-        title: label ?? (eventIds.length === 1 ? "Marked as reviewed" : `${eventIds.length} changes marked as reviewed`),
+        title: title ?? `${what} · ${DECISION_LABEL[review.decision].toLowerCase()}`,
         body,
         action: { label: "Undo", onClick: () => setReviewed(eventIds, false) },
       });

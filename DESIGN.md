@@ -7,6 +7,7 @@ colors:
   navy-800: "#172636"
   navy-700: "#1f3954"
   brand-50: "#eaf5ef"
+  row-selected: "#f0f8f4"
   brand-100: "#d3eadd"
   brand-300: "#8fcaa9"
   brand-400: "#2fbf87"
@@ -47,6 +48,12 @@ typography:
     fontWeight: 600
     lineHeight: 1.25
     letterSpacing: "-0.015em"
+  lead-title:
+    fontFamily: "Noto Sans, Noto Sans SC, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "20px"
+    fontWeight: 600
+    lineHeight: 1.375
+    letterSpacing: "-0.01em"
   title:
     fontFamily: "Noto Sans, Noto Sans SC, ui-sans-serif, system-ui, sans-serif"
     fontSize: "18px"
@@ -304,10 +311,22 @@ Buttons are compact and decisive.
 - **Corner style:** 6px.
 - **Background:** white on canvas, with a 1px hairline border and no shadow.
 - **Internal padding:** 20px, 24px at lg.
-- **Tables:** 13px cells, 12px semibold ink-2 headers, hairline row dividers. Rows highlight in canvas on hover and in mint wash when selected. The whole row is clickable. Columns that support sorting show a down arrow when active.
-- **Bulk selection:** when rows are selected, a navy-900 bar appears above the table with the selected count, a visible "Clear selection", the review action and a ⋯ menu holding the destructive action. Row selectors are real checkboxes (`role="checkbox"`, 24px).
-- **Pending-changes bar:** Severity & Notification Settings has one save model. Edits stay drafts until saved. A sticky navy-900 bar at the foot of the page states the count, how many companies change severity and the in-app alert volume before and after, with a ghost Discard and a white Save changes. Saving shows a toast with Undo, and the mapping footer records who changed it last and when.
+- **Tables:** 13px cells, 12px semibold ink-2 headers, hairline row dividers. Rows highlight in canvas on hover and in row-selected (solid brand-50 at 70% over white) when selected. The whole row is clickable. Columns that support sorting show a down arrow when active.
+- **Pinned identity columns:** on wide portfolio tables the checkbox and Company columns are sticky on horizontal scroll, with a 1px inset hairline on the right edge. Pinned cells carry their own solid fill, so every cell takes the row state. Secondary facts such as "Checked 02 Oct 2026" go on the company's meta line rather than in a column of their own.
+- **Bulk selection:** when rows are selected, a navy-900 bar appears above the table with the selected count, a visible "Clear selection", the review action ("Review N changes…") and a ⋯ menu holding the destructive action. Row selectors are real checkboxes (`role="checkbox"`, 24px).
+- **Result bar:** an action on the whole filtered result ("Review all N…") sits in a bar at the top of the result with the count, never among the filters. CSV export sits in the result's footer, beside the pager.
+- **CSV export:** every audit export (order history, a company's change log, the change feed) goes through `data/csv.ts`. It writes UTF-8 with a BOM so Chinese names open correctly, and prefixes any cell starting with `=`, `+`, `-` or `@` with an apostrophe so no cell runs as a formula.
+- **Pending-changes bar:** Severity Settings has one save model. Edits stay drafts until saved. A sticky navy-900 bar at the foot of the page states the count, how many companies change severity and the in-app alert volume before and after, with a ghost Discard and a white Save changes. Saving shows a toast with Undo, and the mapping footer records who changed it last and when.
 - **Status notice:** Stopped and Inactive company pages lead with a white panel (hairline-strong border, no tint) that says what the status means and offers "Create pKYB monitor". Inactive never claims checks, a baseline or a cost. Activity and change-log panels render only when the company has changes.
+
+### Review decisions
+A review is a decision, not a tick, because the change log is the client's audit trail.
+- **Decisions:** "No action needed" or "Actioned". Each review records the decision, the reviewer, the date and an optional note of up to 500 characters.
+- **Lead card (company page):** the lead change shows a field diff, then the primary "Get fresh KYB Basic report", then a canvas footer titled "Record your review". The footer holds the two decisions as radio cards (white with a line-strong border; selected has a brand-700 border on brand-50), a note field, and a secondary "Record review" that stays disabled until a decision is chosen. Ordering a fresh report pre-selects Actioned and pre-fills the note.
+- **Field diff:** a hairline-bordered list with Field, Baseline (date) and Registry now (date) columns. Each row has the category chip, the field name in 13px semibold, the baseline value in ink-2 and the current value in ink at 500, and "In the fresh report: <section>" in 12px ink-3. Below md the columns stack, with inline 11px labels. Changed values are never colour-coded, because severity is the only status colour.
+- **Review menu (lists):** in the change log and the feed, each unreviewed change has a 32px outlined "Review ▾" menu with the two decisions and "Add a note…", which opens the review dialog.
+- **Review dialog:** used for bulk review, for a whole company's changes from its ⋯ menu, and for a single change with a note. It always asks for the decision. When High changes are included it names how many and suggests reviewing them one by one.
+- **Recorded outcome:** the decision in 12px semibold ink-2, then "reviewer · date" in ink-3, then "Note: …" in ink-2. After a review, focus moves to this outcome. Where the list hides reviewed changes (the feed), focus moves to the next row's Review button.
 
 ### Inputs and fields
 - **Style:** 36px tall (40px on the Search hero), 4px radius, white with a 1px line-strong border, 13px ink text, ink-3 placeholder. A 12px medium ink-2 label sits above.
@@ -319,16 +338,16 @@ Buttons are compact and decisive.
 - **Tabs:** 44px tall, 14px. Active is semibold ink with a 2px brand-700 underline and a mint count badge. Inactive is ink-2 with a wash count badge. Labels shorten below sm.
 
 ### Menus, dialogs and toasts
-- **⋯ menu:** a 32px ghost icon trigger opens a 200px, 6px-radius white menu with the pop shadow. It is rendered in a portal so tables never clip it. Items are 13px, with wash on hover and focus, and danger items are high-red text.
+- **⋯ menu:** a 32px ghost icon trigger opens a 200px, 6px-radius white menu with the pop shadow. It is rendered in a portal so tables never clip it. It follows its trigger while the page scrolls, opens upward when there is no room below, and closes only when the trigger leaves the viewport. Items are 13px, with wash on hover and focus, and danger items are high-red text.
 - **Dialog:** a native modal, 8px radius, dialog shadow, navy-950 backdrop at 55%. The header has an 18px title and a close button above a hairline. The body is padded 20px by 24px. The footer sits on canvas, right-aligned, with a ghost Cancel before the confirming button. It enters over 220ms (8px rise, 0.985 scale) on the out-expo curve.
 - **Toast:** navy-900, 6px radius, pop shadow, brand-400 check icon, 13px semibold title with a 70% white body, bottom-right, up to 380px wide. It enters over 260ms with a 10px rise. Its timer pauses while the pointer or keyboard focus is on it, so Undo is never taken away mid-reach.
 - **Credit-spending confirm:** ordering a monitor or a fresh KYB Basic report states the price before the click (on the button and in the dialog) and focuses Cancel first, so Enter on open never spends credits. Until the KYB Basic price is confirmed it reads "xx credits", from one place in `data/model.ts`.
 
-**The Confirm Before Destroy Rule.** "Stop monitoring" is never a visible row or header button. A single company's stop lives in its ⋯ menu as a red item. Bulk stop lives in the navy selection bar. Both open a confirm dialog that names the company or count, explains what stays (history under Order history), and confirms with the danger button, with Cancel focused first.
+**The Confirm Before Destroy Rule.** "Stop monitoring" is never a visible row or header button. A single company's stop lives in its ⋯ menu as a red item. Bulk stop lives in the navy selection bar. Both open a confirm dialog that names the company or count, leads with any unreviewed changes (and how many are High), explains what stays (history under Order history) and that no further monitoring credits are charged, and confirms with the danger button, with Cancel focused first.
 
 ### Signature: unreviewed marker and heatmap
 - **Unreviewed dot:** an 8px navy-900 dot before the company name, with the name in semibold instead of medium. It means "has unreviewed changes" and stays separate from severity, so it is never tinted.
-- **Heatmap:** an SVG grid with weeks as columns and Monday at the top. Cells are 12–13px with a 3px gap and 2px corners. Month labels and Mon/Wed/Fri labels are 9–10px ink-3. Hovering shows a navy-900 tooltip, and the selected day gets a 1.5px navy-900 stroke. The portfolio High-severity ramp is four steps: wash for none, then #f6cfcb, #e9928a and high-cell, with a matching inline legend. The grid opens scrolled to the most recent weeks.
+- **Heatmap:** an SVG grid with weeks as columns and Monday at the top. Cells are 12–13px with a 3px gap and 2px corners. Month labels and Mon/Wed/Fri labels are 9–10px ink-3. Hovering shows a navy-900 tooltip, and the selected day gets a 1.5px navy-900 stroke. The portfolio High-severity ramp is four steps: wash for none, then #f6cfcb, #e9928a and high-cell, with a matching inline legend. The grid opens scrolled to the most recent weeks. Below md, the portfolio heatmap in the triage band collapses behind a "Show unreviewed High changes per day" toggle, so the table starts within the first screen.
 
 ## Do's and Don'ts
 
@@ -344,7 +363,9 @@ Buttons are compact and decisive.
 - **Do** keep panels flat with 1px hairline borders, and keep shadows for elements that float.
 - **Do** show the price before any action that spends credits, and focus Cancel first in its confirm.
 - **Do** keep every interactive control at least 24px, and give days with changes in a heatmap a keyboard path (one tab stop, arrow keys).
-- **Do** give one count one meaning: the bell, the chips, the heatmap and the feed all count unreviewed changes, and the bell's link opens exactly the set it counted.
+- **Do** give one count one meaning, and put its unit on screen. The headline and chips count companies. "Unreviewed changes" counts changes. "Your in-app alerts · N unread" is exactly the bell's number and links to the same feed view.
+- **Do** record a decision with every review, including bulk review.
+- **Do** show what changed, field by field, before asking the client to spend credits on a report.
 
 ### Don't:
 - **Don't** give categories their own colours or rainbow badges.

@@ -73,7 +73,7 @@ function NotificationBell() {
       <button
         ref={trigger}
         onClick={() => setOpen((o) => !o)}
-        aria-label={`Notifications, ${items.length} unread`}
+        aria-label={`pKYB alerts, ${items.length} unread`}
         aria-expanded={open}
         className="relative grid size-9 place-items-center rounded-[4px] text-white/85 hover:bg-white/10 hover:text-white"
       >
@@ -89,13 +89,15 @@ function NotificationBell() {
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
           <div className="absolute top-11 right-0 z-50 w-[min(380px,calc(100vw-24px))] overflow-hidden rounded-[6px] border border-line bg-white text-ink shadow-pop">
             <div className="flex items-baseline justify-between border-b border-line px-4 py-3">
-              <p className="text-[14px] font-semibold">pKYB alerts</p>
+              <p className="text-[14px] font-semibold">
+                pKYB alerts{items.length > 0 && <span className="font-normal text-ink-2 tnum"> · {items.length} unread</span>}
+              </p>
               <Link to="/pkyb/settings" onClick={() => setOpen(false)} className="text-[12px] text-brand-700 hover:underline">
-                Alert settings
+                Severity Settings
               </Link>
             </div>
             <ul className="max-h-[360px] overflow-y-auto">
-              {items.length === 0 && <li className="px-4 py-6 text-center text-[13px] text-ink-2">No unread alerts at the severities you chose in Alert settings.</li>}
+              {items.length === 0 && <li className="px-4 py-6 text-center text-[13px] text-ink-2">No unread alerts at the severities you chose in Severity Settings.</li>}
               {items.slice(0, 8).map((n) => (
                 <li key={n.id}>
                   <Link

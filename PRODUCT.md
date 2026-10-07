@@ -49,6 +49,8 @@ Two positioning questions are **open, not decided**:
 - **Announcements:** a modal or prompt on login, and "NEW" tags.
 - **Downstream action:** after a high-priority change, the client downloads a new KYB Basic report.
 - **Other views:** an activity feed (reverse-chronological change events) and a case board (New / Reviewing / Actioned / No action needed) are in the requirements. The case board is an open question.
+- **Review decisions:** reviewing a change records "No action needed" or "Actioned", with the reviewer, the date and an optional note. These map to the case board's end states, and there is no "Reviewing" state yet. The change log exports as CSV.
+- **Field-level diff (open):** the company page shows each changed field's baseline and current values, so the analyst can judge a change before buying a report. This assumes the change-detection API returns before and after values per field. The prototype uses demo values, and this must be confirmed with the API team.
 
 ## Capabilities and Constraints
 
@@ -72,6 +74,7 @@ Two positioning questions are **open, not decided**:
   - Confirm before acting, for a single order or a multi-select bulk action.
   - Idempotent: deleting an already-deleted order still succeeds.
   - Deletion may become a permission-restricted action for team accounts. This is open.
+  - **Billing on stop:** the UI says only that no further monitoring credits are charged. Whether any of the current year is refunded is **open**.
 - **Scale:** lists must handle thousands of rows with server-side pagination, search and filtering. Tables can be sorted by severity.
 - **Cadence copy:** check timing varies by jurisdiction and is not guaranteed. Never imply a schedule.
   - Write "last checked" or "checks run automatically".

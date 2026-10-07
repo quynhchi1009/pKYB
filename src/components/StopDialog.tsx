@@ -1,11 +1,14 @@
+import { PRICING, worstSeverity } from "../data/model";
 import { useStore } from "../state/store";
 import { Button, Dialog, nf } from "./ui";
 
 export function StopDialog({ targets, onClose, onDone }: { targets: Array<{ id: string; name: string }>; onClose: () => void; onDone?: () => void }) {
-  const { stopMonitors, toast, monitors } = useStore();
+  const { stopMonitors, toast, monitors, severity } = useStore();
   const single = targets.length === 1;
   const ids = new Set(targets.map((t) => t.id));
-  const unreviewed = monitors.filter((m) => ids.has(m.id)).reduce((n, m) => n + m.events.filter((e) => !e.reviewed).length, 0);
+  const open = monitors.filter((m) => ids.has(m.id)).flatMap((m) => m.events.filter((e) => !e.reviewed));
+  const unreviewed = open.length;
+  const high = open.filter((e) => worstSeverity(e.categories, severity) === "high").length;
   const shown = targets.slice(0, 5);
 
   const confirm = () => {
@@ -46,16 +49,26 @@ export function StopDialog({ targets, onClose, onDone }: { targets: Array<{ id: 
             {targets.length > shown.length && <li className="py-0.5 text-ink-2">and {nf.format(targets.length - shown.length)} more</li>}
           </ul>
         )}
-        <p>
-          We'll stop checking {single ? "this company's" : "these companies'"} registry record. {single ? "Its" : "Their"} change history and baseline report stay
-          available under Order history. Monitoring {single ? "it" : "them"} again means creating a new monitor, with a new baseline report.
-        </p>
         {unreviewed > 0 && (
           <p className="font-medium text-ink">
-            {nf.format(unreviewed)} {unreviewed === 1 ? "change is" : "changes are"} still unreviewed. {unreviewed === 1 ? "It stays" : "They stay"} in the history,
-            unreviewed.
+            {nf.format(unreviewed)} {unreviewed === 1 ? "change is" : "changes are"} still unreviewed
+            {high > 0 && (
+              <>
+                , <span className="text-high">including {nf.format(high)} High</span>
+              </>
+            )}
+            . {unreviewed === 1 ? "It stays" : "They stay"} in the history, unreviewed.
           </p>
         )}
+        <p>
+          We'll stop checking {single ? "this company's" : "these companies'"} registry record. {single ? "Its" : "Their"} change history and baseline report stay
+          available under Order history.
+        </p>
+        {/* Refunds for the current monitoring year are not confirmed (PRODUCT.md, open questions), so the copy only states what certainly stops. */}
+        <p>
+          No further monitoring credits ({PRICING.monitorCredits} per company per year) are charged after you stop. Monitoring {single ? "it" : "them"} again means
+          creating a new monitor, with a new baseline report.
+        </p>
       </div>
     </Dialog>
   );

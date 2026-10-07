@@ -96,18 +96,20 @@ export function SeveritySettings() {
   return (
     <div className="mx-auto max-w-[1280px] px-4 pt-6 pb-16 lg:px-8">
       <header className="max-w-[72ch]">
-        <h1 className="text-[26px] leading-tight font-semibold tracking-[-0.015em]">Severity & Notification Settings</h1>
+        <h1 className="text-[26px] leading-tight font-semibold tracking-[-0.015em]">Severity Settings</h1>
         <p className="mt-1 text-[14px] text-ink-2">
-          Map each change category to a severity tier. This mapping drives colour-coding across the monitoring table, heatmap and change feed. Changes apply when you save.
+          Set a severity for each change category, and choose which severities notify you. Severity drives the colours in the monitoring table, heatmaps and change feed.
+          Nothing changes until you save.
         </p>
       </header>
 
-      <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_380px]">
+      {/* Two columns only from xl: at lg the 380px notifications column squeezed the category names to a few letters. */}
+      <div className="mt-8 grid gap-8 xl:grid-cols-[minmax(0,1fr)_380px]">
         <section aria-labelledby="map-h">
           <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
             <div className="max-w-[60ch]">
               <h2 id="map-h" className="text-[18px] font-semibold">
-                Category Severity Mapping
+                Category severity
               </h2>
               <p className="mt-0.5 text-[13px] text-ink-2">
                 Applies to all your monitors. When one change touches several categories, it takes the most severe tier. Earlier changes keep the severity they had when detected, shown as “was Low”.
@@ -123,7 +125,7 @@ export function SeveritySettings() {
           </div>
 
           <div className="overflow-hidden rounded-[6px] border border-line bg-white">
-            <div className="grid grid-cols-[minmax(0,1fr)_minmax(124px,200px)] gap-4 border-b border-line bg-wash px-5 py-2.5 text-[12px] font-semibold text-ink-2">
+            <div className="grid grid-cols-[minmax(132px,1fr)_minmax(124px,200px)] gap-4 border-b border-line bg-wash px-5 py-2.5 text-[12px] font-semibold text-ink-2">
               <span>Change category</span>
               <span>Severity</span>
             </div>
@@ -133,7 +135,7 @@ export function SeveritySettings() {
                 const cur = draftMap[c];
                 const unsaved = cur !== severity[c];
                 return (
-                  <li key={c} className="grid grid-cols-[minmax(0,1fr)_minmax(124px,200px)] items-center gap-4 px-5 py-3">
+                  <li key={c} className="grid grid-cols-[minmax(132px,1fr)_minmax(124px,200px)] items-center gap-4 px-5 py-3">
                     <span className="flex min-w-0 items-start gap-3">
                       <Icon className="mt-0.5 size-[18px] shrink-0 text-brand-700" aria-hidden />
                       <span className="min-w-0">
@@ -185,14 +187,15 @@ export function SeveritySettings() {
           </div>
         </section>
 
-        <section aria-labelledby="notif-h" className="self-start rounded-[6px] border border-line bg-white lg:sticky lg:top-[80px]">
+        <section aria-labelledby="notif-h" className="self-start rounded-[6px] border border-line bg-white xl:sticky xl:top-[80px]">
           <div className="flex items-center gap-2 border-b border-line px-5 py-4">
             <Bell className="size-5 text-brand-700" aria-hidden />
             <h2 id="notif-h" className="text-[18px] font-semibold">
               Notifications
             </h2>
           </div>
-          <div className="divide-y divide-line">
+          {/* Stacked under the mapping (below xl), the three channels sit side by side instead of as a tall column. */}
+          <div className="divide-y divide-line md:grid md:grid-cols-3 md:divide-x md:divide-y-0 xl:block xl:divide-x-0 xl:divide-y">
             {CHANNELS.map((ch) => (
               <fieldset key={ch.key} className="px-5 py-4">
                 <legend className="sr-only">{ch.title}</legend>

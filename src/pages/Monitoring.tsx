@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowDown, ArrowRight, ArrowUpDown, Check, ChevronLeft, ChevronRight, Download, Ellipsis, Plus, Search, Square, SquareCheck, SquareMinus, X } from "lucide-react";
+import { ArrowDown, ArrowRight, ArrowUpDown, Check, ChevronDown, ChevronLeft, ChevronRight, Download, Ellipsis, Plus, Search, Square, SquareCheck, SquareMinus, X } from "lucide-react";
 import {
   CATEGORIES,
   CATEGORY_LABEL,
@@ -9,8 +9,10 @@ import {
   SEVERITY_LABEL,
   SEVERITY_RANK,
   STATUS_COPY,
+  DECISION_LABEL,
   TODAY,
   addDays,
+  fieldChanges,
   iso,
   jurisdictionByCode,
   worstSeverity,
@@ -25,7 +27,9 @@ import { applyFilters, buildRow, describeFilters, filtersFromParams, type Filter
 import { Heatmap } from "../components/Heatmap";
 import { StopDialog } from "../components/StopDialog";
 import { CreateMonitorDialog } from "../components/CreateMonitorDialog";
-import { Button, CategoryChip, Dialog, EventSeverity, Flag, Menu, SEV_STYLE, Select, SeverityPill, cx, formatDate, formatDateLong, nf } from "../components/ui";
+import { Button, CategoryChip, EventSeverity, Flag, Menu, SEV_STYLE, Select, SeverityPill, cx, formatDate, formatDateLong, nf } from "../components/ui";
+import { ReviewDialog, ReviewMenu, ReviewStatus } from "../components/Review";
+import { downloadCsv } from "../data/csv";
 
 type Tab = "active" | "feed" | "history";
 type Update = (patch: Record<string, string | null>) => void;
@@ -38,10 +42,21 @@ const TABS: Array<[Tab, string, string]> = [
 
 const PAGE = 25;
 const HIGH_RAMP = ["var(--color-wash)", "var(--color-high-ramp-1)", "var(--color-high-ramp-2)", "var(--color-high-cell)"];
+function useMedia(query: string) {
+  const [match, setMatch] = useState(() => window.matchMedia(query).matches);
+  useEffect(() => {
+    const mq = window.matchMedia(query);
+    const on = () => setMatch(mq.matches);
+    mq.addEventListener("change", on);
+    return () => mq.removeEventListener("change", on);
+  }, [query]);
+  return match;
+}
+
 const asCompany = (m: Monitor): Company => ({ id: m.id, name: m.name, localName: m.localName, regNo: m.regNo, jurisdiction: m.jurisdiction, status: "Registered" });
 
 export function Monitoring() {
-  const { monitors, severity, setQueue } = useStore();
+  const { monitors, severity, setQueue, prefs } = useStore();
   const [params, setParams] = useSearchParams();
   const navigate = useNavigate();
   const tab = (params.get("tab") as Tab) || "active";
@@ -61,6 +76,9 @@ export function Monitoring() {
     );
   const setTab = (t: Tab) => update({ tab: t === "active" ? null : t });
   const day = params.get("day");
+  // On phones the 26-week grid would push the table below the fold, so it waits behind a toggle.
+  const narrow = useMedia("(max-width: 767px)");
+  const [showHeat, setShowHeat] = useState(false);
   const status = (params.get("status") as MonitorStatus | null) ?? "all";
 
   const active = useMemo(() => monitors.filter((m) => m.status === "active"), [monitors]);
@@ -75,22 +93,26 @@ export function Monitoring() {
     const by: Record<Severity, number> = { high: 0, medium: 0, low: 0 };
     let companies = 0;
     for (const r of rows) if (r.unreviewedSev) (by[r.unreviewedSev]++, companies++);
-    const since = iso(addDays(TODAY, -30));
     const heatSince = iso(addDays(TODAY, -26 * 7));
-    let recent = 0;
+    // Two counts of changes, each with one meaning: every unreviewed change, and the subset the bell counts as alerts.
+    let unreviewed = 0;
+    let alerts = 0;
     let peak = 1;
     // The heatmap shares the headline's lens: unreviewed High changes, so it lightens as the queue shrinks.
     const highByDay = new Map<string, number>();
     for (const r of rows)
       for (const e of r.m.events) {
-        if (e.date >= since) recent++;
-        if (e.reviewed || worstSeverity(e.categories, severity) !== "high") continue;
+        if (e.reviewed) continue;
+        const s = worstSeverity(e.categories, severity);
+        unreviewed++;
+        if (prefs.inApp[s]) alerts++;
+        if (s !== "high") continue;
         const n = (highByDay.get(e.date) ?? 0) + 1;
         highByDay.set(e.date, n);
         if (e.date >= heatSince && n > peak) peak = n;
       }
-    return { by, companies, recent, highByDay, peak };
-  }, [rows, severity]);
+    return { by, companies, unreviewed, alerts, highByDay, peak };
+  }, [rows, severity, prefs]);
   // The ramp scales to the busiest day on screen, so it never saturates into one flat colour.
   const rampStep = (n: number) => (n === 0 ? 0 : n <= triage.peak / 3 ? 1 : n <= (2 * triage.peak) / 3 ? 2 : 3);
 
@@ -136,12 +158,13 @@ export function Monitoring() {
             {/* The chips are the severity filter for the table below: press one to narrow to it, press it again to clear. */}
             <div role="group" aria-label="Filter companies by their most severe unreviewed change" className="mt-4 flex flex-wrap gap-2">
               {(["high", "medium", "low"] as Severity[]).map((s) => {
-                const pressed = tab === "active" && f.sev === s;
+                // A chip filters to companies whose most severe unreviewed change is this tier, so it sets both filters and clears both.
+                const pressed = tab === "active" && f.sev === s && f.unrev;
                 return (
                   <button
                     key={s}
                     aria-pressed={pressed}
-                    onClick={() => (pressed ? update({ sev: null }) : update({ tab: null, unrev: "1", sev: s }))}
+                    onClick={() => (pressed ? update({ sev: null, unrev: null }) : update({ tab: null, unrev: "1", sev: s }))}
                     className={cx(
                       "inline-flex h-8 items-center gap-2 rounded-full border px-3 text-[13px] transition-colors hover:brightness-[0.97] max-sm:h-10",
                       SEV_STYLE[s].bg,
@@ -152,6 +175,7 @@ export function Monitoring() {
                   >
                     {pressed ? <Check className="size-3.5" strokeWidth={2.5} aria-hidden /> : <span className={cx("size-2 rounded-full", SEV_STYLE[s].dot)} aria-hidden />}
                     <span className="font-semibold tnum">{nf.format(triage.by[s])}</span> {SEVERITY_LABEL[s]}
+                    <span className="sr-only"> {triage.by[s] === 1 ? "company" : "companies"}</span>
                   </button>
                 );
               })}
@@ -161,12 +185,28 @@ export function Monitoring() {
             <Button variant="primary" onClick={startReview} disabled={!firstSeverity}>
               {firstSeverity ? `Review ${firstSeverity} first` : "Nothing to review"} {firstSeverity && <ArrowRight className="size-4" />}
             </Button>
-            <dl className="text-[13px]">
-              <dt className="text-ink-3">Changes, last 30 days</dt>
-              <dd className="font-semibold tnum">{nf.format(triage.recent)}</dd>
+            <dl className="flex gap-x-6 text-[13px]">
+              <div>
+                <dt className="text-ink-3">Unreviewed changes</dt>
+                <dd className="font-semibold tnum">{nf.format(triage.unreviewed)}</dd>
+              </div>
+              <div>
+                <dt className="text-ink-3">Your in-app alerts</dt>
+                <dd>
+                  <Link to="/pkyb/monitoring?tab=feed&alerts=1" className="font-semibold text-brand-700 tnum hover:underline">
+                    {nf.format(triage.alerts)} unread
+                  </Link>
+                </dd>
+              </div>
             </dl>
           </div>
         </div>
+        {narrow && !showHeat ? (
+          <button onClick={() => setShowHeat(true)} aria-expanded={false} className="flex h-11 items-center justify-between gap-2 border-t border-line bg-canvas/60 px-5 text-left text-[13px] font-semibold text-brand-700">
+            Show unreviewed High changes per day
+            <ChevronDown className="size-4" aria-hidden />
+          </button>
+        ) : (
         <div className="border-t border-line bg-canvas/60 p-5 lg:border-t-0 lg:border-l lg:p-6">
           <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
             <p className="text-[13px] font-semibold text-ink-2">Unreviewed High-severity changes per day · last 26 weeks</p>
@@ -196,6 +236,7 @@ export function Monitoring() {
           />
           <p className="mt-2 text-[12px] text-ink-3">Select a day to open its unreviewed High changes in the feed.</p>
         </div>
+        )}
       </section>
 
       <div role="tablist" aria-label="Monitoring views" onKeyDown={onTabKey} className="mt-8 flex gap-1 overflow-x-auto overflow-y-hidden border-b border-line">
@@ -342,8 +383,9 @@ function ActiveTable({ rows, f, update, page, search }: { rows: Row[]; f: Filter
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [stopping, setStopping] = useState<Array<{ id: string; name: string }>>([]);
   const [confirmReview, setConfirmReview] = useState(false);
+  const [rowReview, setRowReview] = useState<{ ids: string[]; name: string } | null>(null);
   const { q, jur, sev, cat, unrev: onlyUnreviewed, sort } = f;
-  const { reviewWithUndo, setQueue, severity } = useStore();
+  const { setQueue, severity } = useStore();
   const setPage = (n: number) => update({ page: n ? String(n) : null });
   const setSort = (v: "severity" | "date") => update({ sort: v === "severity" ? null : v });
 
@@ -364,11 +406,6 @@ function ActiveTable({ rows, f, update, page, search }: { rows: Row[]; f: Filter
     for (const r of rows) if (selected.has(r.m.id)) for (const e of r.m.events) if (!e.reviewed) mix[worstSeverity(e.categories, severity)]++;
     return mix;
   }, [rows, selected, severity]);
-  const doReview = () => {
-    reviewWithUndo(selectedUnreviewed, `${nf.format(selectedUnreviewed.length)} changes marked as reviewed`);
-    setSelected(new Set());
-    setConfirmReview(false);
-  };
   const allOnPage = pageRows.length > 0 && pageRows.every((r) => selected.has(r.m.id));
   const someOnPage = pageRows.some((r) => selected.has(r.m.id));
   const toggle = (id: string) =>
@@ -382,8 +419,17 @@ function ActiveTable({ rows, f, update, page, search }: { rows: Row[]; f: Filter
 
   return (
     <>
-      {/* Severity is filtered by the triage chips above, so the bar carries no second severity control. */}
+      {/* Severity is filtered by the triage chips above, so the bar carries no second severity control; it echoes the active one so it stays visible. */}
       <FilterBar q={q} setQ={(v) => update({ q: v })} jur={jur} setJur={(v) => update({ jur: v })} cat={cat} setCat={(v) => update({ cat: v })}>
+        {sev !== "all" && (
+          <span className={cx("inline-flex h-9 items-center gap-2 rounded-full border pr-1.5 pl-3 text-[13px] font-semibold max-sm:h-11", SEV_STYLE[sev].bg, SEV_STYLE[sev].line, SEV_STYLE[sev].text)}>
+            <span className={cx("size-2 rounded-full", SEV_STYLE[sev].dot)} aria-hidden />
+            {SEVERITY_LABEL[sev]} severity
+            <button aria-label={`Clear ${SEVERITY_LABEL[sev]} severity filter`} onClick={() => update({ sev: null })} className="grid size-6 place-items-center rounded-full hover:bg-white/70">
+              <X className="size-3.5" />
+            </button>
+          </span>
+        )}
         <label className="flex h-9 cursor-pointer items-center gap-2 rounded-[4px] border border-line-strong bg-white px-3 text-[13px] select-none max-sm:h-11">
           <input type="checkbox" checked={onlyUnreviewed} onChange={(e) => update({ unrev: e.target.checked ? "1" : null })} className="size-4 accent-brand-700" />
           Unreviewed only
@@ -418,11 +464,11 @@ function ActiveTable({ rows, f, update, page, search }: { rows: Row[]; f: Filter
               </button>
               <button
                 disabled={selectedUnreviewed.length === 0}
-                onClick={() => (selectedMix.high > 0 ? setConfirmReview(true) : doReview())}
+                onClick={() => setConfirmReview(true)}
                 className="inline-flex h-8 items-center gap-1.5 rounded-[4px] bg-white px-3 font-semibold text-navy-900 hover:bg-brand-50 disabled:opacity-50 max-sm:h-10"
               >
                 <Check className="size-4" />
-                {selectedUnreviewed.length ? `Mark ${nf.format(selectedUnreviewed.length)} reviewed` : "Nothing to review"}
+                {selectedUnreviewed.length ? `Review ${nf.format(selectedUnreviewed.length)} changes…` : "Nothing to review"}
               </button>
               <Menu
                 label="More bulk actions"
@@ -440,7 +486,7 @@ function ActiveTable({ rows, f, update, page, search }: { rows: Row[]; f: Filter
             const j = jurisdictionByCode[r.m.jurisdiction];
             const isSel = selected.has(r.m.id);
             return (
-              <li key={r.m.id} className={cx("flex gap-3 px-4 py-3.5", isSel && "bg-brand-50/70")}>
+              <li key={r.m.id} className={cx("flex gap-3 px-4 py-3.5", isSel && "bg-row-selected")}>
                 <button role="checkbox" aria-checked={isSel} aria-label={`Select ${r.m.name}`} onClick={() => toggle(r.m.id)} className="-mx-3 -my-2.5 grid size-11 shrink-0 place-items-center text-ink-3">
                   {isSel ? <SquareCheck className="size-4 text-brand-700" aria-hidden /> : <Square className="size-4" aria-hidden />}
                 </button>
@@ -468,7 +514,7 @@ function ActiveTable({ rows, f, update, page, search }: { rows: Row[]; f: Filter
                   trigger={<Ellipsis className="size-4" />}
                   items={[
                     ...(r.unreviewed
-                      ? [{ label: `Mark ${r.unreviewed} reviewed`, onSelect: () => reviewWithUndo(r.m.events.filter((e) => !e.reviewed).map((e) => e.id)) }]
+                      ? [{ label: `Review ${r.unreviewed} ${r.unreviewed === 1 ? "change" : "changes"}…`, onSelect: () => setRowReview({ ids: r.m.events.filter((e) => !e.reviewed).map((e) => e.id), name: r.m.name }) }]
                       : []),
                     { label: "Stop monitoring", danger: true, onSelect: () => setStopping([{ id: r.m.id, name: r.m.name }]) },
                   ]}
@@ -484,10 +530,11 @@ function ActiveTable({ rows, f, update, page, search }: { rows: Row[]; f: Filter
           )}
         </ul>
         <div className="overflow-x-auto max-md:hidden">
-          <table className="w-full min-w-[960px] text-left text-[13px]">
-            <thead className="border-b border-line text-[12px] text-ink-2">
-              <tr>
-                <th className="w-10 py-1.5 pl-3">
+          {/* The checkbox and Company columns stay pinned, so a row is still identifiable when the table scrolls sideways. */}
+          <table className="w-full min-w-[820px] border-separate border-spacing-0 text-left text-[13px] [&_td]:border-b [&_td]:border-line [&_tr:last-child_td]:border-b-0">
+            <thead className="text-[12px] text-ink-2">
+              <tr className="[&>th]:border-b [&>th]:border-line">
+                <th className="sticky left-0 z-[2] w-10 bg-white py-1.5 pl-3">
                   <button
                     role="checkbox"
                     aria-checked={allOnPage ? true : someOnPage ? "mixed" : false}
@@ -504,11 +551,11 @@ function ActiveTable({ rows, f, update, page, search }: { rows: Row[]; f: Filter
                     {allOnPage ? <SquareCheck className="size-4 text-brand-700" aria-hidden /> : someOnPage ? <SquareMinus className="size-4 text-brand-700" aria-hidden /> : <Square className="size-4" aria-hidden />}
                   </button>
                 </th>
-                <th className="px-3 py-2.5 font-semibold">Company</th>
+                <th className="sticky left-10 z-[2] bg-white px-3 py-2.5 font-semibold shadow-[inset_-1px_0_0_var(--color-line)]">Company</th>
                 <th className="px-3 py-2.5 font-semibold">Jurisdiction</th>
                 <th className="px-3 py-1.5 font-semibold" aria-sort={sort === "severity" ? "descending" : "none"}>
                   <button onClick={() => setSort("severity")} title="Sort by severity, most severe first" className={cx("inline-flex h-6 items-center gap-1", sort === "severity" && "text-ink")}>
-                    Change by severity {sort === "severity" ? <ArrowDown className="size-3.5" aria-hidden /> : <ArrowUpDown className="size-3.5 text-ink-3" aria-hidden />}
+                    Change <span className="sr-only">, sorted by severity</span> {sort === "severity" ? <ArrowDown className="size-3.5" aria-hidden /> : <ArrowUpDown className="size-3.5 text-ink-3" aria-hidden />}
                   </button>
                 </th>
                 <th className="px-3 py-1.5 font-semibold" aria-sort={sort === "date" ? "descending" : "none"}>
@@ -516,38 +563,37 @@ function ActiveTable({ rows, f, update, page, search }: { rows: Row[]; f: Filter
                     Detected {sort === "date" ? <ArrowDown className="size-3.5" aria-hidden /> : <ArrowUpDown className="size-3.5 text-ink-3" aria-hidden />}
                   </button>
                 </th>
-                <th className="px-3 py-2.5 font-semibold whitespace-nowrap">Last checked</th>
                 <th className="w-[112px] py-2.5 pr-4" />
               </tr>
             </thead>
-            <tbody className="divide-y divide-line">
+            <tbody>
               {pageRows.map((r) => {
                 const j = jurisdictionByCode[r.m.jurisdiction];
                 const isSel = selected.has(r.m.id);
+                // Pinned cells need a solid fill of their own, so every cell takes the row state rather than the <tr>.
+                const fill = isSel ? "bg-row-selected" : "bg-white group-hover:bg-canvas";
                 return (
-                  <tr
-                    key={r.m.id}
-                    onClick={() => open(r.m.id)}
-                    className={cx("cursor-pointer align-top transition-colors", isSel ? "bg-brand-50/70" : "hover:bg-canvas")}
-                  >
-                    <td className="py-3 pl-3" onClick={(e) => e.stopPropagation()}>
+                  <tr key={r.m.id} onClick={() => open(r.m.id)} className="group cursor-pointer align-top [&>td]:transition-colors">
+                    <td className={cx("sticky left-0 z-[1] py-3 pl-3", fill)} onClick={(e) => e.stopPropagation()}>
                       <button role="checkbox" aria-checked={isSel} aria-label={`Select ${r.m.name}`} onClick={() => toggle(r.m.id)} className="grid size-6 place-items-center text-ink-3 hover:text-ink">
                         {isSel ? <SquareCheck className="size-4 text-brand-700" aria-hidden /> : <Square className="size-4" aria-hidden />}
                       </button>
                     </td>
-                    <td className="max-w-[300px] px-3 py-3">
+                    <td className={cx("sticky left-10 z-[1] max-w-[300px] min-w-[220px] px-3 py-3 shadow-[inset_-1px_0_0_var(--color-line)]", fill)}>
                       <span className="flex items-center gap-2">
                         {r.unreviewed > 0 && <span className="size-2 shrink-0 rounded-full bg-navy-900" title={`${r.unreviewed} unreviewed`} aria-label={`${r.unreviewed} unreviewed changes`} />}
                         <span className={cx("truncate text-[14px] text-ink", r.unreviewed > 0 ? "font-semibold" : "font-medium")}>{r.m.name}</span>
                       </span>
-                      <span className={cx("block text-[12px] text-ink-3 tnum", r.unreviewed > 0 && "pl-4")}>{r.m.regNo}</span>
+                      <span className={cx("block text-[12px] text-ink-3 tnum", r.unreviewed > 0 && "pl-4")}>
+                        {r.m.regNo} · Checked {formatDate(r.m.lastChecked)}
+                      </span>
                     </td>
-                    <td className="px-3 py-3.5 whitespace-nowrap">
+                    <td className={cx("px-3 py-3.5 whitespace-nowrap", fill)}>
                       <span className="flex items-center gap-2 text-ink-2">
                         <Flag code={j.code} /> {j.name}
                       </span>
                     </td>
-                    <td className="px-3 py-3">
+                    <td className={cx("px-3 py-3", fill)}>
                       {r.latest && r.latestSev ? (
                         <span className="flex flex-wrap items-center gap-1.5">
                           <EventSeverity event={r.latest} size="sm" />
@@ -559,9 +605,8 @@ function ActiveTable({ rows, f, update, page, search }: { rows: Row[]; f: Filter
                         <span className="text-ink-3">No changes since baseline</span>
                       )}
                     </td>
-                    <td className="px-3 py-3.5 whitespace-nowrap text-ink-2 tnum">{r.latest ? formatDate(r.latest.date) : "—"}</td>
-                    <td className="px-3 py-3.5 whitespace-nowrap text-ink-3 tnum">{formatDate(r.m.lastChecked)}</td>
-                    <td className="py-2.5 pr-3" onClick={(e) => e.stopPropagation()}>
+                    <td className={cx("px-3 py-3.5 whitespace-nowrap text-ink-2 tnum", fill)}>{r.latest ? formatDate(r.latest.date) : "—"}</td>
+                    <td className={cx("py-2.5 pr-3", fill)} onClick={(e) => e.stopPropagation()}>
                       <span className="flex items-center justify-end gap-1">
                         <Link to={`/pkyb/monitoring/${r.m.id}`} onClick={remember} className="inline-flex h-8 items-center px-2 text-[13px] font-semibold text-brand-700 hover:underline">
                           {r.unreviewed > 0 ? "Review" : "View"}
@@ -571,7 +616,7 @@ function ActiveTable({ rows, f, update, page, search }: { rows: Row[]; f: Filter
                           trigger={<Ellipsis className="size-4" />}
                           items={[
                             ...(r.unreviewed
-                              ? [{ label: `Mark ${r.unreviewed} reviewed`, onSelect: () => reviewWithUndo(r.m.events.filter((e) => !e.reviewed).map((e) => e.id)) }]
+                              ? [{ label: `Review ${r.unreviewed} ${r.unreviewed === 1 ? "change" : "changes"}…`, onSelect: () => setRowReview({ ids: r.m.events.filter((e) => !e.reviewed).map((e) => e.id), name: r.m.name }) }]
                               : []),
                             { label: "Stop monitoring", danger: true, onSelect: () => setStopping([{ id: r.m.id, name: r.m.name }]) },
                           ]}
@@ -583,7 +628,7 @@ function ActiveTable({ rows, f, update, page, search }: { rows: Row[]; f: Filter
               })}
               {pageRows.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="px-4 py-14 text-center">
+                  <td colSpan={6} className="px-4 py-14 text-center">
                     <p className="text-[14px] font-semibold">No monitors match these filters</p>
                     <p className="mt-1 text-[13px] text-ink-2">Try another jurisdiction or severity, or clear filters to see all {nf.format(rows.length)} active monitors.</p>
                   </td>
@@ -597,40 +642,40 @@ function ActiveTable({ rows, f, update, page, search }: { rows: Row[]; f: Filter
         </div>
       </div>
       <StopDialog targets={stopping} onClose={() => setStopping([])} onDone={() => setSelected(new Set())} />
-      <Dialog
-        open={confirmReview}
+      <ReviewDialog
+        eventIds={confirmReview ? selectedUnreviewed : []}
+        title={`Review ${nf.format(selectedUnreviewed.length)} ${selectedUnreviewed.length === 1 ? "change" : "changes"}`}
         onClose={() => setConfirmReview(false)}
-        width={480}
-        labelledBy="confirm-review-title"
-        title={`Mark ${nf.format(selectedUnreviewed.length)} changes as reviewed?`}
-        footer={
-          <>
-            <Button variant="ghost" onClick={() => setConfirmReview(false)} data-autofocus="">
-              Cancel
-            </Button>
-            <Button variant="primary" onClick={doReview}>
-              Mark {nf.format(selectedUnreviewed.length)} reviewed
-            </Button>
-          </>
-        }
+        onDone={() => setSelected(new Set())}
       >
-        <div className="flex flex-col gap-3 text-[14px] text-ink-2">
-          <p>
-            This includes <span className="font-semibold text-high">{nf.format(selectedMix.high)} High-severity</span>{" "}
-            {selectedMix.high === 1 ? "change" : "changes"} across {nf.format(selected.size)} {selected.size === 1 ? "company" : "companies"}.
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {(["high", "medium", "low"] as Severity[]).map((lv) =>
-              selectedMix[lv] ? (
-                <span key={lv} className="inline-flex items-center gap-1.5 text-[13px]">
-                  <SeverityPill level={lv} size="sm" /> <span className="tnum">{nf.format(selectedMix[lv])}</span>
-                </span>
-              ) : null,
-            )}
-          </div>
-          <p>Each review is recorded with your name and today's date in the company's change log.</p>
+        <p>
+          Across {nf.format(selected.size)} {selected.size === 1 ? "company" : "companies"}.
+          {selectedMix.high > 0 && (
+            <>
+              {" "}
+              <span className="font-semibold text-high">
+                {nf.format(selectedMix.high)} {selectedMix.high === 1 ? "is" : "are"} High severity
+              </span>
+              , so review {selectedMix.high === 1 ? "it" : "them"} one by one unless a single decision fits all of them.
+            </>
+          )}
+        </p>
+        <div className="flex flex-wrap gap-3">
+          {(["high", "medium", "low"] as Severity[]).map((lv) =>
+            selectedMix[lv] ? (
+              <span key={lv} className="inline-flex items-center gap-1.5 text-[13px]">
+                <SeverityPill level={lv} size="sm" /> <span className="tnum">{nf.format(selectedMix[lv])}</span>
+              </span>
+            ) : null,
+          )}
         </div>
-      </Dialog>
+      </ReviewDialog>
+      <ReviewDialog
+        eventIds={rowReview?.ids ?? []}
+        title={`Review ${rowReview?.ids.length === 1 ? "change" : `${nf.format(rowReview?.ids.length ?? 0)} changes`} for ${rowReview?.name ?? ""}`}
+        body={rowReview?.name}
+        onClose={() => setRowReview(null)}
+      />
     </>
   );
 }
@@ -689,11 +734,31 @@ function ChangeFeed({
     return out.sort((a, b) => (a.e.date === b.e.date ? SEVERITY_RANK[b.s] - SEVERITY_RANK[a.s] : a.e.date < b.e.date ? 1 : -1));
   }, [rows, day, jur, sev, cat, severity, showReviewed, alertsOnly, prefs]);
   useEffect(() => setPage(0), [day, jur, sev, cat, showReviewed, alertsOnly]);
-  const { reviewWithUndo, setQueue } = useStore();
+  const { setQueue } = useStore();
+  const [reviewAll, setReviewAll] = useState(false);
   const rememberFeed = () =>
     setQueue({ ids: [...new Set(events.map((x) => x.m.id))], label: day ? `Change feed · ${formatDate(day)}` : "Change feed", search });
   const unreviewedHere = useMemo(() => events.filter((x) => !x.e.reviewed).map((x) => x.e.id), [events]);
   const slice = events.slice(page * PAGE, (page + 1) * PAGE);
+  const exportFeed = () =>
+    downloadCsv(
+      `pkyb-change-feed-${iso(TODAY)}.csv`,
+      ["Detected", "Company", "Registration no.", "Jurisdiction", "Categories", "Severity now", "Severity when detected", "Fields changed", "Review", "Reviewed by", "Reviewed on", "Note"],
+      events.map(({ e, m, s }) => [
+        e.date,
+        m.name,
+        m.regNo,
+        jurisdictionByCode[m.jurisdiction].name,
+        e.categories.map((c) => CATEGORY_LABEL[c]).join("; "),
+        SEVERITY_LABEL[s],
+        SEVERITY_LABEL[e.detectedSeverity],
+        fieldChanges(e, m).map((fc) => `${fc.field}: ${fc.before} → ${fc.after}`).join("; "),
+        e.reviewed ? (e.decision ? DECISION_LABEL[e.decision] : "Reviewed") : "Unreviewed",
+        e.reviewedBy ?? "",
+        e.reviewedAt ?? "",
+        e.note ?? "",
+      ]),
+    );
   const groups: Array<[string, typeof slice]> = [];
   for (const it of slice) {
     const g = groups[groups.length - 1];
@@ -708,11 +773,6 @@ function ChangeFeed({
           <input type="checkbox" checked={showReviewed} disabled={alertsOnly} onChange={(e) => setIncludeReviewed(e.target.checked)} className="size-4 accent-brand-700" />
           Include reviewed
         </label>
-        {unreviewedHere.length > 0 && (day || jur !== "all" || sev !== "all" || cat !== "all" || alertsOnly) && (
-          <Button variant="secondary" className="order-last ml-auto" onClick={() => reviewWithUndo(unreviewedHere)}>
-            <Check className="size-4" /> Mark all {nf.format(unreviewedHere.length)} reviewed
-          </Button>
-        )}
         {alertsOnly && (
           <span className="inline-flex h-9 items-center gap-2 rounded-full border border-brand-300 bg-brand-50 pr-1.5 pl-3 text-[13px] font-semibold text-brand-800">
             Your in-app alerts
@@ -731,9 +791,23 @@ function ChangeFeed({
         )}
       </FilterBar>
       <div className="rounded-[6px] border border-line bg-white">
+        {/* Acting on the whole result sits with the result, not among the filters. */}
+        {events.length > 0 && (
+          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-t-[6px] border-b border-line px-4 py-2.5">
+            <p className="text-[13px] text-ink-2">
+              <span className="font-semibold text-ink tnum">{nf.format(events.length)}</span> {events.length === 1 ? "change" : "changes"}
+              {unreviewedHere.length !== events.length && <span className="tnum"> · {nf.format(unreviewedHere.length)} unreviewed</span>}
+            </p>
+            {unreviewedHere.length > 1 && (day || jur !== "all" || sev !== "all" || cat !== "all" || alertsOnly) && (
+              <Button variant="secondary" size="sm" onClick={() => setReviewAll(true)}>
+                <Check className="size-3.5" /> Review all {nf.format(unreviewedHere.length)}…
+              </Button>
+            )}
+          </div>
+        )}
         {groups.map(([date, items]) => (
           <section key={date} aria-label={formatDateLong(date)}>
-            <h2 className="sticky top-14 z-[1] border-b border-line bg-canvas px-4 py-2 first:rounded-t-[6px] text-[12px] font-semibold text-ink-2">{formatDateLong(date)}</h2>
+            <h2 className="sticky top-14 z-[1] border-b border-line bg-canvas px-4 py-2 text-[12px] font-semibold text-ink-2">{formatDateLong(date)}</h2>
             <ul className="divide-y divide-line">
               {items.map(({ e, m }) => (
                 <li key={e.id} className="relative grid gap-2 px-4 py-3 hover:bg-canvas sm:grid-cols-[104px_minmax(0,1fr)_auto] sm:items-center sm:gap-4">
@@ -759,14 +833,11 @@ function ChangeFeed({
                       </span>
                     </span>
                     {e.reviewed ? (
-                      <span className="text-[12px] text-ink-3">Reviewed</span>
+                      <span className="relative z-[1]">
+                        <ReviewStatus event={e} />
+                      </span>
                     ) : (
-                      <button
-                        onClick={() => reviewWithUndo([e.id], undefined, m.name)}
-                        className="relative z-[1] inline-flex h-8 w-fit items-center gap-1.5 rounded-[4px] border border-brand-700 px-3 text-[13px] font-semibold text-brand-700 hover:bg-brand-50 max-sm:h-10"
-                      >
-                        <Check className="size-3.5" /> Mark reviewed
-                      </button>
+                      <ReviewMenu event={e} name={m.name} />
                     )}
                 </li>
               ))}
@@ -785,10 +856,24 @@ function ChangeFeed({
             </p>
           </div>
         )}
-        <div className="border-t border-line">
+        <div className="flex flex-wrap items-center justify-between border-t border-line">
+          {events.length > 0 ? (
+            <Button variant="ghost" size="sm" onClick={exportFeed} className="ml-2">
+              <Download className="size-3.5" /> Export {nf.format(events.length)} as CSV
+            </Button>
+          ) : (
+            <span />
+          )}
           <Pager page={page} setPage={setPage} total={events.length} />
         </div>
       </div>
+      <ReviewDialog
+        eventIds={reviewAll ? unreviewedHere : []}
+        title={`Review ${nf.format(unreviewedHere.length)} changes`}
+        onClose={() => setReviewAll(false)}
+      >
+        <p>Every unreviewed change matching these filters, across {nf.format(new Set(events.filter((x) => !x.e.reviewed).map((x) => x.m.id)).size)} companies.</p>
+      </ReviewDialog>
     </>
   );
 }
@@ -814,17 +899,13 @@ function OrderHistory({ status, setStatus }: { status: "all" | MonitorStatus; se
   }, [monitors, status, jur, q]);
   useEffect(() => setPage(0), [status, jur, q]);
 
-  const exportCsv = () => {
-    const head = ["Company", "Registration no.", "Jurisdiction", "Status", "Created", "Ended", "Changes recorded"];
-    const lines = list.map((m) => [m.name, m.regNo, jurisdictionByCode[m.jurisdiction].name, STATUS_COPY[m.status].label, m.createdAt, m.endedAt ?? "", String(m.events.length)]);
-    const csv = [head, ...lines].map((r) => r.map((v) => `"${v.replace(/"/g, '""')}"`).join(",")).join("\n");
-    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `pkyb-order-history-${iso(TODAY)}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
+  const exportCsv = () =>
+    downloadCsv(
+      `pkyb-order-history-${iso(TODAY)}.csv`,
+      ["Company", "Registration no.", "Jurisdiction", "Status", "Created", "Ended", "Changes recorded"],
+      list.map((m) => [m.name, m.regNo, jurisdictionByCode[m.jurisdiction].name, STATUS_COPY[m.status].label, m.createdAt, m.endedAt ?? "", String(m.events.length)]),
+    );
+  const pageList = list.slice(page * PAGE, (page + 1) * PAGE);
 
   return (
     <>
@@ -865,7 +946,40 @@ function OrderHistory({ status, setStatus }: { status: "all" | MonitorStatus; se
         </Button>
       </FilterBar>
       <div className="overflow-hidden rounded-[6px] border border-line bg-white">
-        <div className="overflow-x-auto">
+        {/* Below md the same rows render as a stacked list (the Stacked Rows Rule). */}
+        <ul className="divide-y divide-line md:hidden">
+          {pageList.map((m) => (
+            <li key={m.id} className="px-4 py-3.5">
+              <Link to={`/pkyb/monitoring/${m.id}`} className="block truncate text-[14px] font-medium text-ink hover:underline">
+                {m.name}
+              </Link>
+              <span className="mt-0.5 flex items-center gap-1.5 text-[12px] text-ink-3">
+                <Flag code={m.jurisdiction} /> {jurisdictionByCode[m.jurisdiction].name} · <span className="tnum">{m.regNo}</span>
+              </span>
+              <span className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px] text-ink-2">
+                <StatusBadge status={m.status} />
+                <span className="tnum">
+                  {formatDate(m.createdAt)} – {m.endedAt ? formatDate(m.endedAt) : "runs until stopped"}
+                </span>
+                <span className="tnum">
+                  {nf.format(m.events.length)} {m.events.length === 1 ? "change" : "changes"}
+                </span>
+              </span>
+              {m.status !== "active" && (
+                <Button variant="link" size="sm" className="mt-1" onClick={() => setCreating(asCompany(m))} aria-label={`Create pKYB monitor for ${m.name}`}>
+                  Create pKYB monitor
+                </Button>
+              )}
+            </li>
+          ))}
+          {list.length === 0 && (
+            <li className="px-4 py-12 text-center">
+              <p className="text-[14px] font-semibold">No orders match</p>
+              <p className="mt-1 text-[13px] text-ink-2">Try another status or jurisdiction, or clear the search.</p>
+            </li>
+          )}
+        </ul>
+        <div className="overflow-x-auto max-md:hidden">
           <table className="w-full min-w-[940px] text-left text-[13px]">
             <thead className="border-b border-line text-[12px] text-ink-2">
               <tr>
@@ -881,7 +995,7 @@ function OrderHistory({ status, setStatus }: { status: "all" | MonitorStatus; se
               </tr>
             </thead>
             <tbody className="divide-y divide-line">
-              {list.slice(page * PAGE, (page + 1) * PAGE).map((m) => (
+              {pageList.map((m) => (
                 <tr key={m.id} className="hover:bg-canvas">
                   <td className="px-4 py-3">
                     <Link to={`/pkyb/monitoring/${m.id}`} className="block font-medium text-ink hover:text-brand-700 hover:underline">
@@ -932,7 +1046,6 @@ function OrderHistory({ status, setStatus }: { status: "all" | MonitorStatus; se
 export function StatusBadge({ status }: { status: MonitorStatus }) {
   return (
     <span
-      title={STATUS_COPY[status].explain}
       className={cx(
         "inline-flex h-6 items-center gap-1.5 rounded-[4px] border px-2 text-[12px] font-semibold",
         status === "active" && "border-brand-300 bg-brand-50 text-brand-800",
