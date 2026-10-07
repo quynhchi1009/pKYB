@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from "react";
+import { useMemo, useRef, useState, type ReactNode } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   ArrowLeftToLine,
@@ -11,17 +11,15 @@ import {
   List,
   LogOut,
   Menu as MenuIcon,
-  Moon,
   Radar,
   Search,
   Settings,
-  ShoppingCart,
   Store,
   Tag,
   X,
 } from "lucide-react";
 import { useStore } from "../state/store";
-import { CATEGORY_LABEL, SEVERITY_RANK, worstSeverity } from "../data/model";
+import { CATEGORY_LABEL, SEVERITY_LABEL, SEVERITY_RANK, worstSeverity } from "../data/model";
 import { NewTag, SEV_STYLE, Toasts, cx, formatDate } from "./ui";
 
 function Logo() {
@@ -42,6 +40,7 @@ function titleFor(path: string) {
 function NotificationBell() {
   const { monitors, severity, prefs } = useStore();
   const [open, setOpen] = useState(false);
+  const trigger = useRef<HTMLButtonElement>(null);
   const items = useMemo(() => {
     const out: Array<{ id: string; monitorId: string; name: string; date: string; label: string; sev: ReturnType<typeof worstSeverity> }> = [];
     for (const m of monitors) {
@@ -56,18 +55,32 @@ function NotificationBell() {
     return out.sort((a, b) => (a.date === b.date ? SEVERITY_RANK[b.sev] - SEVERITY_RANK[a.sev] : a.date < b.date ? 1 : -1));
   }, [monitors, severity, prefs]);
 
+  const close = () => {
+    setOpen(false);
+    trigger.current?.focus();
+  };
+
   return (
-    <div className="relative">
+    <div
+      className="relative"
+      onKeyDown={(e) => {
+        if (e.key === "Escape" && open) {
+          e.stopPropagation();
+          close();
+        }
+      }}
+    >
       <button
+        ref={trigger}
         onClick={() => setOpen((o) => !o)}
         aria-label={`Notifications, ${items.length} unread`}
         aria-expanded={open}
         className="relative grid size-9 place-items-center rounded-[4px] text-white/85 hover:bg-white/10 hover:text-white"
       >
-        <Bell className="size-5" />
+        <Bell className="size-5" aria-hidden />
         {items.length > 0 && (
-          <span className="absolute -top-0.5 -right-1 grid h-[18px] min-w-[18px] place-items-center rounded-full bg-brand-400 px-1 text-[11px] font-bold text-navy-950 tnum">
-            {items.length > 99 ? "99" : items.length}
+          <span aria-hidden className="absolute -top-0.5 -right-1 grid h-[18px] min-w-[18px] place-items-center rounded-full bg-brand-400 px-1 text-[11px] font-bold text-navy-950 tnum">
+            {items.length > 99 ? "99+" : items.length}
           </span>
         )}
       </button>
@@ -82,6 +95,7 @@ function NotificationBell() {
               </Link>
             </div>
             <ul className="max-h-[360px] overflow-y-auto">
+              {items.length === 0 && <li className="px-4 py-6 text-center text-[13px] text-ink-2">No unread alerts at the severities you chose in Alert settings.</li>}
               {items.slice(0, 8).map((n) => (
                 <li key={n.id}>
                   <Link
@@ -89,9 +103,12 @@ function NotificationBell() {
                     onClick={() => setOpen(false)}
                     className="flex gap-3 border-b border-line/70 px-4 py-3 hover:bg-canvas"
                   >
-                    <span className={cx("mt-1.5 size-2 shrink-0 rounded-full", SEV_STYLE[n.sev].dot)} />
+                    <span className={cx("mt-1.5 size-2 shrink-0 rounded-full", SEV_STYLE[n.sev].dot)} aria-hidden />
                     <span className="min-w-0">
-                      <span className="block truncate text-[13px] font-semibold">{n.name}</span>
+                      <span className="block truncate text-[13px] font-semibold">
+                        <span className="sr-only">{SEVERITY_LABEL[n.sev]} severity. </span>
+                        {n.name}
+                      </span>
                       <span className="block text-[12px] text-ink-2">
                         {n.label} changed · {formatDate(n.date)}
                       </span>
@@ -100,12 +117,13 @@ function NotificationBell() {
                 </li>
               ))}
             </ul>
+            {/* The feed opens on the same set the bell counts: unreviewed changes at the severities you get alerts for. */}
             <Link
-              to="/pkyb/monitoring?unrev=1"
+              to="/pkyb/monitoring?tab=feed&alerts=1"
               onClick={() => setOpen(false)}
               className="block px-4 py-2.5 text-center text-[13px] font-semibold text-brand-700 hover:bg-brand-50"
             >
-              See all {items.length} unreviewed changes
+              {items.length ? `See all ${items.length} unread alerts in the change feed` : "Open the change feed"}
             </Link>
           </div>
         </>
@@ -222,29 +240,29 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-dvh bg-canvas">
+      <a
+        href="#main"
+        className="sr-only z-[70] rounded-[4px] bg-white px-4 py-2 text-[14px] font-semibold text-brand-700 shadow-pop focus:not-sr-only focus:fixed focus:top-2 focus:left-2"
+      >
+        Skip to main content
+      </a>
       <header className="sticky top-0 z-30 flex h-14 items-center gap-4 bg-[linear-gradient(90deg,var(--color-navy-700),var(--color-navy-900)_55%,var(--color-navy-950))] px-4 text-white lg:px-6">
         <button className="-ml-1 grid size-9 place-items-center rounded-[4px] hover:bg-white/10 lg:hidden" onClick={() => setDrawer(true)} aria-label="Open navigation">
           <MenuIcon className="size-5" />
         </button>
-        <Link to="/pkyb/monitoring" aria-label="AsiaVerify home" className={cx("shrink-0 transition-[width]", collapsed ? "lg:w-[40px]" : "lg:w-[212px]")}>
+        <Link to="/pkyb/monitoring" aria-label="AsiaVerify home" className={cx("shrink-0", collapsed ? "lg:w-[40px]" : "lg:w-[212px]")}>
           <Logo />
         </Link>
         <span className="truncate text-[16px] font-semibold max-sm:hidden">{titleFor(loc.pathname)}</span>
         <div className="ml-auto flex items-center gap-1">
-          <button aria-label="Dark mode" className="grid size-9 place-items-center rounded-[4px] text-white/85 hover:bg-white/10 hover:text-white">
-            <Moon className="size-5" />
-          </button>
           <NotificationBell />
-          <button aria-label="Cart" className="grid size-9 place-items-center rounded-[4px] text-white/85 hover:bg-white/10 hover:text-white">
-            <ShoppingCart className="size-5" />
-          </button>
         </div>
       </header>
 
       <div className="flex">
         <aside
           className={cx(
-            "sticky top-14 h-[calc(100dvh-56px)] shrink-0 bg-[linear-gradient(180deg,var(--color-navy-700),var(--color-navy-900)_55%,var(--color-navy-950))] transition-[width] duration-200 max-lg:hidden",
+            "sticky top-14 h-[calc(100dvh-56px)] shrink-0 bg-[linear-gradient(180deg,var(--color-navy-700),var(--color-navy-900)_55%,var(--color-navy-950))] max-lg:hidden",
             collapsed ? "w-[72px]" : "w-[252px]",
           )}
         >
@@ -268,7 +286,9 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
         )}
 
-        <main className="min-w-0 flex-1">{children}</main>
+        <main id="main" tabIndex={-1} className="min-w-0 flex-1 focus:outline-none">
+          {children}
+        </main>
       </div>
       <Toasts />
     </div>

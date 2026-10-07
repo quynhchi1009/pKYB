@@ -1,11 +1,9 @@
 import { createContext, useCallback, useContext, useMemo, useRef, useState, type ReactNode } from "react";
 import {
-  DEFAULT_SEVERITY,
   DEMO_ORG_SEVERITY,
   TODAY,
   iso,
   generateMonitors,
-  type Category,
   type Company,
   type Monitor,
   type Severity,
@@ -20,22 +18,25 @@ export type NotifyPrefs = {
 
 export type Queue = { ids: string[]; label: string; search: string };
 
+/** Who changed the org-wide severity mapping last, and what they changed. */
+export type SeverityChange = { summary: string; by: string; at: string };
+
 export type Toast = { id: number; title: string; body?: string; tone?: "success" | "neutral"; action?: { label: string; onClick: () => void } };
 
 type Store = {
   monitors: Monitor[];
   severity: SeverityMap;
-  setSeverity: (c: Category, s: Severity) => void;
-  resetSeverity: () => void;
+  /** Replaces the whole mapping and records who changed it, so the page can show attribution. */
+  saveSeverity: (map: SeverityMap, summary: string) => void;
+  severityChange: SeverityChange | null;
   prefs: NotifyPrefs;
   savePrefs: (p: NotifyPrefs) => void;
   createMonitor: (c: Company) => Monitor;
   stopMonitors: (ids: string[]) => void;
-  markReviewed: (monitorId: string, eventId?: string) => void;
   /** Set reviewed state on many events at once. Returns nothing; callers keep the ids for Undo. */
   setReviewed: (eventIds: string[], reviewed: boolean) => void;
   /** Marks events reviewed and shows a toast with Undo. */
-  reviewWithUndo: (eventIds: string[], label?: string) => void;
+  reviewWithUndo: (eventIds: string[], label?: string, body?: string) => void;
   reports: Record<string, "generating" | "ready">;
   /** The list the analyst opened a company from, so the company page can offer "Next". */
   queue: Queue | null;
@@ -51,6 +52,7 @@ const Ctx = createContext<Store | null>(null);
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [monitors, setMonitors] = useState<Monitor[]>(() => generateMonitors());
   const [severity, setSeverityMap] = useState<SeverityMap>(DEMO_ORG_SEVERITY);
+  const [severityChange, setSeverityChange] = useState<SeverityChange | null>(null);
   const [prefs, setPrefs] = useState<NotifyPrefs>({
     inApp: { low: false, medium: true, high: true },
     weekly: { low: true, medium: true, high: true },
@@ -61,10 +63,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [queue, setQueue] = useState<Queue | null>(null);
   const seq = useRef(0);
 
+  // Toasts dismiss themselves (see Toasts in ui.tsx) so a hover or focus can pause the timer.
   const toast = useCallback((t: Omit<Toast, "id">) => {
     const id = ++seq.current;
     setToasts((all) => [...all, { ...t, id }]);
-    window.setTimeout(() => setToasts((all) => all.filter((x) => x.id !== id)), t.action ? 8000 : 5200);
   }, []);
   const dismissToast = useCallback((id: number) => setToasts((all) => all.filter((x) => x.id !== id)), []);
 
@@ -84,11 +86,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     );
   }, []);
   const reviewWithUndo = useCallback(
-    (eventIds: string[], label?: string) => {
+    (eventIds: string[], label?: string, body?: string) => {
       if (!eventIds.length) return;
       setReviewed(eventIds, true);
       toast({
         title: label ?? (eventIds.length === 1 ? "Marked as reviewed" : `${eventIds.length} changes marked as reviewed`),
+        body,
         action: { label: "Undo", onClick: () => setReviewed(eventIds, false) },
       });
     },
@@ -103,8 +106,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     () => ({
       monitors,
       severity,
-      setSeverity: (c, s) => setSeverityMap((m) => ({ ...m, [c]: s })),
-      resetSeverity: () => setSeverityMap(DEFAULT_SEVERITY),
+      saveSeverity: (map, summary) => {
+        setSeverityMap(map);
+        setSeverityChange({ summary, by: "You", at: iso(TODAY) });
+      },
+      severityChange,
       prefs,
       savePrefs: setPrefs,
       createMonitor: (c) => {
@@ -128,14 +134,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         setMonitors((all) =>
           all.map((m) => (ids.includes(m.id) && m.status === "active" ? { ...m, status: "stopped", endedAt: iso(TODAY) } : m)),
         ),
-      markReviewed: (monitorId, eventId) =>
-        setMonitors((all) =>
-          all.map((m) =>
-            m.id !== monitorId
-              ? m
-              : { ...m, events: m.events.map((e) => (!eventId || e.id === eventId ? { ...e, reviewed: true } : e)) },
-          ),
-        ),
       setReviewed,
       reviewWithUndo,
       reports,
@@ -146,7 +144,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       toast,
       dismissToast,
     }),
-    [monitors, severity, prefs, toasts, toast, dismissToast, setReviewed, reviewWithUndo, reports, requestReport, queue],
+    [monitors, severity, severityChange, prefs, toasts, toast, dismissToast, setReviewed, reviewWithUndo, reports, requestReport, queue],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

@@ -49,10 +49,6 @@
   --color-low-line: #d6dbe0;
   --color-low-cell: #a9b4bd;
 
-  --color-info: #2a63c4;
-  --color-info-bg: #eef3fc;
-  --color-info-line: #c9d8f3;
-
   --shadow-pop: 0 8px 24px -6px rgb(13 22 32 / 0.18), 0 2px 6px -2px rgb(13 22 32 / 0.12);
   --shadow-dialog: 0 24px 64px -12px rgb(13 22 32 / 0.35);
 

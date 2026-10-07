@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useLayoutEffect, useRef, useState, type ButtonHTMLAttributes, type ReactNode } from "react";
+import { forwardRef, useEffect, useLayoutEffect, useRef, useState, type ButtonHTMLAttributes, type KeyboardEvent, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import * as Flags from "country-flag-icons/react/3x2";
 import {
@@ -15,8 +15,8 @@ import {
   CheckCircle2,
   type LucideIcon,
 } from "lucide-react";
-import { CATEGORY_LABEL, SEVERITY_LABEL, jurisdictionByCode, type Category, type Severity } from "../data/model";
-import { useStore } from "../state/store";
+import { CATEGORY_LABEL, SEVERITY_LABEL, jurisdictionByCode, worstSeverity, type Category, type ChangeEvent, type Severity } from "../data/model";
+import { useStore, type Toast } from "../state/store";
 
 export const cx = (...c: Array<string | false | null | undefined>) => c.filter(Boolean).join(" ");
 
@@ -57,7 +57,13 @@ export const Button = forwardRef<HTMLButtonElement, BtnProps>(function Button(
       ref={ref}
       className={cx(
         "inline-flex shrink-0 items-center justify-center gap-1.5 rounded-[4px] font-semibold whitespace-nowrap transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-50",
-        variant === "link" ? (size === "md" ? "text-[14px]" : "text-[13px]") : size === "md" ? "h-9 px-4 text-[14px]" : "h-8 px-3 text-[13px]",
+        variant === "link"
+          ? size === "md"
+            ? "text-[14px]"
+            : "text-[13px]"
+          : size === "md"
+            ? "h-9 px-4 text-[14px] max-sm:h-11"
+            : "h-8 px-3 text-[13px] max-sm:h-10",
         variant === "primary" && "bg-brand-700 text-white hover:bg-brand-800 active:bg-navy-800",
         variant === "secondary" && "border border-brand-700 bg-white text-brand-700 hover:bg-brand-50",
         variant === "ghost" && "text-ink-2 hover:bg-wash hover:text-ink",
@@ -88,6 +94,29 @@ export function SeverityPill({ level, size = "md" }: { level: Severity; size?: "
   );
 }
 
+/**
+ * A change's severity under the client's current mapping. Severity is a lens the client can re-aim, so when
+ * today's mapping reads differently from the day the change was detected, the original stays visible as a note.
+ */
+export function EventSeverity({ event, size = "md" }: { event: ChangeEvent; size?: "sm" | "md" }) {
+  const { severity } = useStore();
+  const now = worstSeverity(event.categories, severity);
+  const was = event.detectedSeverity;
+  return (
+    <span className="inline-flex flex-wrap items-center gap-x-2 gap-y-0.5">
+      <SeverityPill level={now} size={size} />
+      {was !== now && (
+        <>
+          <span className="sr-only">Detected as {SEVERITY_LABEL[was]}.</span>
+          <span aria-hidden className="text-[11px] whitespace-nowrap text-ink-3">
+            was {SEVERITY_LABEL[was]}
+          </span>
+        </>
+      )}
+    </span>
+  );
+}
+
 export function CategoryChip({ category, showSeverity = true }: { category: Category; showSeverity?: boolean }) {
   const { severity } = useStore();
   const Icon = CATEGORY_ICON[category];
@@ -99,7 +128,12 @@ export function CategoryChip({ category, showSeverity = true }: { category: Cate
     >
       <Icon className={cx("size-3.5", showSeverity ? "text-brand-700" : "text-ink-3")} strokeWidth={2} aria-hidden />
       {CATEGORY_LABEL[category]}
-      {showSeverity && <span className={cx("size-1.5 rounded-full", SEV_STYLE[sev].dot)} aria-label={`${sev} severity`} />}
+      {showSeverity && (
+        <>
+          <span className={cx("size-1.5 rounded-full", SEV_STYLE[sev].dot)} aria-hidden />
+          <span className="sr-only">, {SEVERITY_LABEL[sev]} severity</span>
+        </>
+      )}
     </span>
   );
 }
@@ -151,7 +185,12 @@ export function Dialog({
   useEffect(() => {
     const d = ref.current;
     if (!d) return;
-    if (open && !d.open) d.showModal();
+    if (open && !d.open) {
+      d.showModal();
+      // Children mount before the dialog opens, so React's autoFocus runs on a hidden node and is lost.
+      // `data-autofocus` marks the control that should take focus once the dialog is actually showing.
+      d.querySelector<HTMLElement>("[data-autofocus]")?.focus();
+    }
     if (!open && d.open) d.close();
   }, [open]);
   return (
@@ -189,7 +228,7 @@ export function Dialog({
   );
 }
 
-/** Small action menu rendered in a portal so table overflow never clips it. */
+/** Small action menu rendered in a portal so table overflow never clips it. Arrow keys move, Escape returns focus to the trigger. */
 export function Menu({
   label,
   trigger,
@@ -203,6 +242,7 @@ export function Menu({
 }) {
   const [open, setOpen] = useState(false);
   const btn = useRef<HTMLButtonElement>(null);
+  const list = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState({ top: 0, left: 0 });
   useLayoutEffect(() => {
     if (!open || !btn.current) return;
@@ -212,7 +252,11 @@ export function Menu({
   useEffect(() => {
     if (!open) return;
     const close = () => setOpen(false);
-    const key = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    const key = (e: globalThis.KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      setOpen(false);
+      btn.current?.focus();
+    };
     window.addEventListener("scroll", close, true);
     window.addEventListener("resize", close);
     window.addEventListener("keydown", key);
@@ -222,6 +266,18 @@ export function Menu({
       window.removeEventListener("keydown", key);
     };
   }, [open]);
+  const move = (e: KeyboardEvent<HTMLDivElement>) => {
+    const els = Array.from(list.current?.querySelectorAll<HTMLElement>('[role="menuitem"]') ?? []);
+    if (!els.length) return;
+    const i = els.indexOf(document.activeElement as HTMLElement);
+    const to = e.key === "ArrowDown" ? (i + 1) % els.length : e.key === "ArrowUp" ? (i - 1 + els.length) % els.length : e.key === "Home" ? 0 : e.key === "End" ? els.length - 1 : -1;
+    if (to < 0) {
+      if (e.key === "Tab") setOpen(false);
+      return;
+    }
+    e.preventDefault();
+    els[to].focus();
+  };
   return (
     <>
       <button
@@ -233,7 +289,7 @@ export function Menu({
           e.stopPropagation();
           setOpen((o) => !o);
         }}
-        className={triggerClassName ?? "grid size-8 place-items-center rounded-[4px] text-ink-3 hover:bg-wash hover:text-ink"}
+        className={triggerClassName ?? "grid size-8 place-items-center rounded-[4px] text-ink-3 hover:bg-wash hover:text-ink max-sm:size-11"}
       >
         {trigger}
       </button>
@@ -242,7 +298,10 @@ export function Menu({
           <>
             <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
             <div
+              ref={list}
               role="menu"
+              aria-label={label}
+              onKeyDown={move}
               className="fixed z-50 w-[200px] rounded-[6px] border border-line bg-white py-1 shadow-pop"
               style={pos}
             >
@@ -254,10 +313,11 @@ export function Menu({
                   onClick={(e) => {
                     e.stopPropagation();
                     setOpen(false);
+                    btn.current?.focus();
                     it.onSelect();
                   }}
                   className={cx(
-                    "flex w-full items-center gap-2 px-3 py-2 text-left text-[13px] hover:bg-wash focus-visible:bg-wash focus-visible:outline-none",
+                    "flex min-h-9 w-full items-center gap-2 px-3 py-2 text-left text-[13px] hover:bg-wash focus-visible:bg-wash focus-visible:outline-none",
                     it.danger ? "text-high" : "text-ink",
                   )}
                 >
@@ -273,32 +333,69 @@ export function Menu({
   );
 }
 
+/** One toast. Its timer pauses while the pointer or keyboard focus is on it, so Undo is never snatched away mid-reach. */
+function ToastItem({ t, onDismiss }: { t: Toast; onDismiss: () => void }) {
+  const remaining = useRef(t.action ? 8000 : 5200);
+  const started = useRef(0);
+  const timer = useRef<number | undefined>(undefined);
+  const running = useRef(false);
+  const resume = () => {
+    if (running.current) return;
+    running.current = true;
+    started.current = Date.now();
+    timer.current = window.setTimeout(onDismiss, Math.max(remaining.current, 2000));
+  };
+  const pause = () => {
+    if (!running.current) return;
+    running.current = false;
+    window.clearTimeout(timer.current);
+    remaining.current -= Date.now() - started.current;
+  };
+  useEffect(() => {
+    resume();
+    return () => {
+      window.clearTimeout(timer.current);
+      running.current = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  return (
+    <div
+      onMouseEnter={pause}
+      onMouseLeave={resume}
+      onFocus={pause}
+      onBlur={(e) => !e.currentTarget.contains(e.relatedTarget as Node | null) && resume()}
+      className="toast-in pointer-events-auto flex gap-3 rounded-[6px] bg-navy-900 px-4 py-3 text-white shadow-pop"
+    >
+      <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-brand-400" aria-hidden />
+      <div className="min-w-0 flex-1">
+        <p className="text-[13px] font-semibold">{t.title}</p>
+        {t.body && <p className="mt-0.5 text-[13px] text-white/70">{t.body}</p>}
+      </div>
+      {t.action && (
+        <button
+          onClick={() => {
+            t.action!.onClick();
+            onDismiss();
+          }}
+          className="-my-1 h-8 shrink-0 rounded-[4px] px-2 text-[13px] font-semibold text-brand-400 hover:bg-white/10"
+        >
+          {t.action.label}
+        </button>
+      )}
+      <button onClick={onDismiss} aria-label="Dismiss" className="grid size-6 shrink-0 place-items-center rounded-[4px] text-white/60 hover:text-white">
+        <X className="size-4" />
+      </button>
+    </div>
+  );
+}
+
 export function Toasts() {
   const { toasts, dismissToast } = useStore();
   return (
     <div className="pointer-events-none fixed right-4 bottom-4 z-[60] flex w-[min(380px,calc(100vw-32px))] flex-col gap-2" aria-live="polite">
       {toasts.map((t) => (
-        <div key={t.id} className="toast-in pointer-events-auto flex gap-3 rounded-[6px] bg-navy-900 px-4 py-3 text-white shadow-pop">
-          <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-brand-400" />
-          <div className="min-w-0 flex-1">
-            <p className="text-[13px] font-semibold">{t.title}</p>
-            {t.body && <p className="mt-0.5 text-[13px] text-white/70">{t.body}</p>}
-          </div>
-          {t.action && (
-            <button
-              onClick={() => {
-                t.action!.onClick();
-                dismissToast(t.id);
-              }}
-              className="-my-1 h-8 shrink-0 rounded-[4px] px-2 text-[13px] font-semibold text-brand-400 hover:bg-white/10"
-            >
-              {t.action.label}
-            </button>
-          )}
-          <button onClick={() => dismissToast(t.id)} aria-label="Dismiss" className="text-white/60 hover:text-white">
-            <X className="size-4" />
-          </button>
-        </div>
+        <ToastItem key={t.id} t={t} onDismiss={() => dismissToast(t.id)} />
       ))}
     </div>
   );
@@ -323,7 +420,7 @@ export function Select({
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="h-9 rounded-[4px] border border-line-strong bg-white px-2.5 text-[13px] text-ink hover:border-ink-3 focus:border-brand-600 focus:outline-none"
+        className="h-9 rounded-[4px] border border-line-strong bg-white px-2.5 text-[13px] text-ink hover:border-ink-3 focus:border-brand-600 max-sm:h-11 max-sm:text-[16px]"
       >
         {options.map((o) => (
           <option key={o.value} value={o.value}>

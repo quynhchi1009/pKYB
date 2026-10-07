@@ -33,7 +33,7 @@ export function SearchPage() {
         <div className="mb-4 flex items-center gap-3 rounded-[6px] border border-brand-300 bg-brand-50 px-4 py-3 text-[13px] text-brand-800">
           <Radar className="size-4 shrink-0" />
           <span>
-            Find the company you want to monitor, then choose <span className="font-semibold">Monitor</span> in its row.
+            Find the company you want to monitor, then choose <span className="font-semibold">Create pKYB monitor</span> in its row.
           </span>
         </div>
       )}
@@ -51,7 +51,7 @@ export function SearchPage() {
         <div className="mt-4 grid gap-3 sm:grid-cols-[220px_minmax(0,1fr)_auto] sm:items-end">
           <label className="flex flex-col gap-1">
             <span className="text-[12px] font-medium text-ink-2">Jurisdiction</span>
-            <select value={jur} onChange={(e) => setJur(e.target.value)} className="h-10 rounded-[4px] border border-line-strong bg-white px-2.5 text-[14px] focus:border-brand-600 focus:outline-none">
+            <select value={jur} onChange={(e) => setJur(e.target.value)} className="h-10 rounded-[4px] border border-line-strong bg-white px-2.5 text-[14px] focus:border-brand-600 max-sm:h-11 max-sm:text-[16px]">
               <option value="all">All jurisdictions</option>
               {JURISDICTIONS.map((j) => (
                 <option key={j.code} value={j.code}>
@@ -62,7 +62,7 @@ export function SearchPage() {
           </label>
           <label className="flex flex-col gap-1">
             <span className="text-[12px] font-medium text-ink-2">Business Name / Registration No.</span>
-            <input value={draft} onChange={(e) => setDraft(e.target.value)} className="h-10 rounded-[4px] border border-line-strong px-3 text-[14px] focus:border-brand-600 focus:outline-none" />
+            <input value={draft} onChange={(e) => setDraft(e.target.value)} className="h-10 rounded-[4px] border border-line-strong px-3 text-[14px] focus:border-brand-600 max-sm:h-11 max-sm:text-[16px]" />
           </label>
           <Button variant="primary" type="submit" className="h-10 px-6">
             Search
@@ -81,6 +81,7 @@ export function SearchPage() {
             {[["all", results.length] as [string, number], ...groups].map(([code, n]) => (
               <button
                 key={code}
+                aria-pressed={filter === code}
                 onClick={() => setFilter(code)}
                 className={cx(
                   "flex h-9 shrink-0 items-center justify-between gap-3 rounded-[4px] px-3 text-left text-[13px]",
@@ -111,8 +112,8 @@ export function SearchPage() {
                         <span className="size-1.5 rounded-full bg-brand-600" /> Monitoring
                       </Link>
                     ) : (
-                      <Button size="sm" variant={fromPkyb ? "primary" : "secondary"} onClick={() => setCreating(c)}>
-                        <Radar className="size-3.5" /> Monitor
+                      <Button size="sm" variant="secondary" onClick={() => setCreating(c)}>
+                        <Radar className="size-3.5" /> Create pKYB monitor
                       </Button>
                     )}
                     <Link to={`/report/${c.id}`} className="inline-flex h-8 items-center px-2 text-[13px] font-semibold text-brand-700">
@@ -156,8 +157,8 @@ export function SearchPage() {
                             <span className="size-1.5 rounded-full bg-brand-600" /> Monitoring
                           </Link>
                         ) : (
-                          <Button size="sm" variant={fromPkyb ? "primary" : "secondary"} onClick={() => setCreating(c)}>
-                            <Radar className="size-3.5" /> Monitor
+                          <Button size="sm" variant="secondary" onClick={() => setCreating(c)}>
+                            <Radar className="size-3.5" /> Create pKYB monitor
                           </Button>
                         )}
                         <Link to={`/report/${c.id}`} className="inline-flex h-8 items-center px-2 text-[13px] font-semibold text-brand-700 hover:underline">

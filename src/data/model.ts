@@ -88,11 +88,25 @@ export const jurisdictionByCode = Object.fromEntries(JURISDICTIONS.map((j) => [j
   Jurisdiction
 >;
 
+// Credit pricing. The KYB Basic price is not confirmed yet, so it renders as "xx credits" until
+// `kybBasicCredits` is set (see PRODUCT.md, "Unresolved"). Every price in the UI reads from here.
+export const PRICING = {
+  /** Per company, per year of monitoring. */
+  monitorCredits: 10,
+  kybBasicCredits: null as number | null,
+};
+export const creditsLabel = (n: number | null) => (n === null ? "xx credits" : `${n} ${n === 1 ? "credit" : "credits"}`);
+/** "10 + xx credits" until the KYB Basic price is known, then a single sum. */
+export const totalTodayLabel = () =>
+  PRICING.kybBasicCredits === null ? `${PRICING.monitorCredits} + xx credits` : creditsLabel(PRICING.monitorCredits + PRICING.kybBasicCredits);
+
 export type ChangeEvent = {
   id: string;
   monitorId: string;
   date: string; // ISO date
   categories: Category[];
+  /** Severity under the client's mapping on the day the change was detected. The live mapping can differ later. */
+  detectedSeverity: Severity;
   reviewed: boolean;
   /** Set when a review happens in this Portal session; seeded history carries no reviewer. */
   reviewedBy?: string;
@@ -218,11 +232,13 @@ function buildEvents(monitorId: string, created: Date, end: Date, r: () => numbe
     const cats = new Set<Category>();
     while (cats.size < n) cats.add(WEIGHTED[Math.floor(r() * WEIGHTED.length)]);
     const age = (end.getTime() - date.getTime()) / 86400000;
+    const categories = CATEGORIES.filter((c) => cats.has(c));
     events.push({
       id: `${monitorId}-e${i}`,
       monitorId,
       date: iso(date),
-      categories: CATEGORIES.filter((c) => cats.has(c)),
+      categories,
+      detectedSeverity: worstSeverity(categories, DEMO_ORG_SEVERITY),
       reviewed: age > 14 || r() < 0.3,
     });
   }
@@ -262,7 +278,8 @@ export function generateMonitors(): Monitor[] {
     const events = status === "inactive" ? [] : buildEvents(id, created, end, r, hot);
     if (id === "m0001") {
       // Silver Pine Traders carries a recent, unreviewed ownership + status change for the walkthrough.
-      events.unshift({ id: `${id}-hot`, monitorId: id, date: iso(addDays(TODAY, -1)), categories: ["Ownership", "Status"], reviewed: false });
+      const hot: Category[] = ["Ownership", "Status"];
+      events.unshift({ id: `${id}-hot`, monitorId: id, date: iso(addDays(TODAY, -1)), categories: hot, detectedSeverity: worstSeverity(hot, DEMO_ORG_SEVERITY), reviewed: false });
     }
     list.push({
       id,

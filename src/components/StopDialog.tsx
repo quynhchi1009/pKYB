@@ -26,7 +26,7 @@ export function StopDialog({ targets, onClose, onDone }: { targets: Array<{ id: 
       title={single ? `Stop monitoring ${targets[0]?.name}?` : `Stop monitoring ${nf.format(targets.length)} companies?`}
       footer={
         <>
-          <Button variant="ghost" onClick={onClose} autoFocus>
+          <Button variant="ghost" onClick={onClose} data-autofocus="">
             Cancel
           </Button>
           <Button variant="danger" onClick={confirm}>
@@ -47,8 +47,8 @@ export function StopDialog({ targets, onClose, onDone }: { targets: Array<{ id: 
           </ul>
         )}
         <p>
-          We'll stop checking {single ? "this company's" : "these companies'"} registry record. {single ? "Its" : "Their"} history stays available under Order
-          history. You can start a new pKYB order for {single ? "it" : "them"} at any time.
+          We'll stop checking {single ? "this company's" : "these companies'"} registry record. {single ? "Its" : "Their"} change history and baseline report stay
+          available under Order history. Monitoring {single ? "it" : "them"} again means creating a new monitor, with a new baseline report.
         </p>
         {unreviewed > 0 && (
           <p className="font-medium text-ink">

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ArrowRight, BellRing, FileCheck2, Radar } from "lucide-react";
-import { SEARCH_COMPANIES, jurisdictionByCode } from "../data/model";
+import { PRICING, SEARCH_COMPANIES, jurisdictionByCode, type Company } from "../data/model";
 import { useStore } from "../state/store";
 import { CreateMonitorDialog } from "../components/CreateMonitorDialog";
 import { Button, Flag, NewTag, cx } from "../components/ui";
@@ -16,8 +16,23 @@ const REPORTS = [
 const ADDONS = [{ id: "aml", name: "AML Report", desc: "Sanctions, PEP and adverse media screening for the company" }];
 
 export function ChooseReport() {
-  const { id = "c-tencent" } = useParams();
-  const company = SEARCH_COMPANIES.find((c) => c.id === id) ?? SEARCH_COMPANIES[0];
+  const { id } = useParams();
+  const company = SEARCH_COMPANIES.find((c) => c.id === id);
+  if (!company) {
+    return (
+      <div className="mx-auto max-w-[640px] px-4 py-24 text-center">
+        <p className="text-[16px] font-semibold">We couldn't find that company</p>
+        <p className="mt-1 text-[14px] text-ink-2">The link may be out of date. Search for the company to choose a report.</p>
+        <Link to="/search" className="mt-4 inline-block font-semibold text-brand-700 hover:underline">
+          Search for a company
+        </Link>
+      </div>
+    );
+  }
+  return <ReportPage company={company} />;
+}
+
+function ReportPage({ company }: { company: Company }) {
   const j = jurisdictionByCode[company.jurisdiction];
   const { monitors } = useStore();
   const monitor = monitors.find((m) => m.regNo === company.regNo && m.status === "active");
@@ -47,8 +62,8 @@ export function ChooseReport() {
           <Flag code={company.jurisdiction} className="h-4 w-6 shrink-0" />
         </div>
         {company.localName && <p className="mt-0.5 text-[16px] text-ink-2">{company.localName}</p>}
-        <p className="mt-1 text-[12px] tracking-[0.02em] text-ink-3 uppercase">
-          {j.regLabel} <span className="tnum normal-case">{company.regNo}</span>
+        <p className="mt-1 text-[13px] text-ink-3">
+          {j.regLabel} <span className="tnum">{company.regNo}</span>
         </p>
         </div>
         {monitor ? (
@@ -60,10 +75,10 @@ export function ChooseReport() {
           </Link>
         ) : (
           <div className="flex flex-col items-end gap-1 max-sm:items-start">
-            <Button variant="primary" onClick={() => setCreating(true)}>
-              <Radar className="size-4" /> Create Perpetual KYB
+            <Button variant="secondary" onClick={() => setCreating(true)}>
+              <Radar className="size-4" /> Create pKYB monitor
             </Button>
-            <span className="text-[12px] text-ink-3">10 credits / year · KYB Basic baseline required</span>
+            <span className="text-[12px] text-ink-3">{PRICING.monitorCredits} credits / year · KYB Basic baseline required</span>
           </div>
         )}
       </header>
@@ -72,7 +87,7 @@ export function ChooseReport() {
         <div className="flex flex-col gap-8">
           <section aria-labelledby="kyb-h">
             <div className="mb-3 flex items-baseline justify-between">
-              <h2 id="kyb-h" className="text-[16px] font-semibold">
+              <h2 id="kyb-h" tabIndex={-1} className="text-[16px] font-semibold focus:outline-none">
                 Know Your Business (KYB) Reports
               </h2>
               <div className="flex gap-4 text-[13px]">
@@ -200,7 +215,7 @@ export function ChooseReport() {
                   </ol>
                   <div className="mt-4 flex items-baseline justify-between border-t border-line pt-3 text-[13px]">
                     <span className="text-ink-2">Monitor</span>
-                    <span className="font-semibold tnum">10 credits / year</span>
+                    <span className="font-semibold tnum">{PRICING.monitorCredits} credits / year</span>
                   </div>
                   <Button variant="link" className="mt-3" onClick={() => setCreating(true)}>
                     Create pKYB monitor <ArrowRight className="size-4" />

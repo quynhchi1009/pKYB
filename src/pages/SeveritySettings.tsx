@@ -1,68 +1,120 @@
-import { useMemo, useState } from "react";
-import { Bell, Check, ChevronDown, RotateCcw } from "lucide-react";
-import { CATEGORIES, CATEGORY_LABEL, DEFAULT_SEVERITY, SEVERITIES, SEVERITY_LABEL, type Category, type Severity, type SeverityMap } from "../data/model";
+import { useEffect, useMemo, useState } from "react";
+import { Bell, ChevronDown, RotateCcw } from "lucide-react";
+import { CATEGORIES, CATEGORY_LABEL, DEFAULT_SEVERITY, SEVERITIES, SEVERITY_LABEL, worstSeverity, type Severity, type SeverityMap } from "../data/model";
 import { buildRow } from "../data/queue";
 import { useStore, type NotifyPrefs } from "../state/store";
-import { Button, CATEGORY_ICON, SEV_STYLE, cx, nf } from "../components/ui";
+import { Button, CATEGORY_ICON, SEV_STYLE, cx, formatDate, nf } from "../components/ui";
 
 const CHANNELS: Array<{ key: keyof NotifyPrefs; title: string; desc: string }> = [
   { key: "inApp", title: "In-app alerts", desc: "Receive alerts inside the app for selected severities." },
   { key: "daily", title: "Daily email digest", desc: "Receive a daily summary for selected severities." },
   { key: "weekly", title: "Weekly email digest", desc: "Receive a weekly summary for selected severities." },
 ];
+const TIERS_HIGH_FIRST: Severity[] = ["high", "medium", "low"];
+const plural = (n: number, one: string, many: string) => `${nf.format(n)} ${n === 1 ? one : many}`;
 
 export function SeveritySettings() {
-  const { severity, setSeverity, resetSeverity, prefs, savePrefs, toast, monitors } = useStore();
-  // How many active companies would show a different severity in Monitoring under a new mapping.
-  const impact = (next: SeverityMap) => {
-    let n = 0;
-    for (const m of monitors) if (m.status === "active" && m.events.length && buildRow(m, severity).latestSev !== buildRow(m, next).latestSev) n++;
-    return n;
-  };
-  const change = (c: Category, s: Severity) => {
-    const prev = severity[c];
-    if (prev === s) return;
-    const moved = impact({ ...severity, [c]: s });
-    setSeverity(c, s);
-    toast({
-      title: `${CATEGORY_LABEL[c]} is now ${SEVERITY_LABEL[s]}`,
-      body: moved ? `${nf.format(moved)} ${moved === 1 ? "company changes" : "companies change"} severity in Monitoring.` : "No company changes severity right now.",
-      action: { label: "Undo", onClick: () => setSeverity(c, prev) },
-    });
-  };
+  const { severity, saveSeverity, severityChange, prefs, savePrefs, toast, monitors } = useStore();
+  // Both halves of the page share one save model: edit freely, see the impact, then save together.
+  const [draftMap, setDraftMap] = useState<SeverityMap>(severity);
   const [draft, setDraft] = useState<NotifyPrefs>(prefs);
-  const dirty = JSON.stringify(draft) !== JSON.stringify(prefs);
+  // Follow the saved values when they change elsewhere (an Undo from a toast, for instance).
+  useEffect(() => setDraftMap(severity), [severity]);
+  useEffect(() => setDraft(prefs), [prefs]);
+
+  const changed = CATEGORIES.filter((c) => draftMap[c] !== severity[c]);
+  const prefChanges = CHANNELS.reduce((n, ch) => n + SEVERITIES.filter((s) => draft[ch.key][s] !== prefs[ch.key][s]).length, 0);
+  const pending = changed.length + prefChanges;
+  const mappingChanged = changed.length > 0;
+
+  // What saving would do, before it does it: companies whose headline severity moves, and in-app alert volume.
+  const preview = useMemo(() => {
+    if (!pending) return null;
+    let companies = 0;
+    let before = 0;
+    let after = 0;
+    for (const m of monitors) {
+      if (m.status !== "active") continue;
+      if (mappingChanged && m.events.length && buildRow(m, severity).latestSev !== buildRow(m, draftMap).latestSev) companies++;
+      for (const e of m.events) {
+        if (e.reviewed) continue;
+        if (prefs.inApp[worstSeverity(e.categories, severity)]) before++;
+        if (draft.inApp[worstSeverity(e.categories, draftMap)]) after++;
+      }
+    }
+    return { companies, before, after };
+  }, [monitors, severity, draftMap, prefs, draft, pending, mappingChanged]);
+
   const tierCounts = useMemo(() => {
     const c: Record<Severity, number> = { high: 0, medium: 0, low: 0 };
-    CATEGORIES.forEach((k) => c[severity[k]]++);
+    CATEGORIES.forEach((k) => c[draftMap[k]]++);
     return c;
-  }, [severity]);
+  }, [draftMap]);
   const customised = CATEGORIES.some((c) => severity[c] !== DEFAULT_SEVERITY[c]);
-  const summary = (k: keyof NotifyPrefs) => {
-    const on = (["high", "medium", "low"] as Severity[]).filter((s) => draft[k][s]).map((s) => SEVERITY_LABEL[s]);
-    return on.length ? on.join(", ") : "Off";
+  const draftIsDefault = CATEGORIES.every((c) => draftMap[c] === DEFAULT_SEVERITY[c]);
+
+  const discard = () => {
+    setDraftMap(severity);
+    setDraft(prefs);
   };
+  const save = () => {
+    const prevMap = severity;
+    const prevPrefs = prefs;
+    const first = changed[0];
+    const summary = changed.length === 1 ? `${CATEGORY_LABEL[first]}: ${SEVERITY_LABEL[severity[first]]} → ${SEVERITY_LABEL[draftMap[first]]}` : `${changed.length} categories changed`;
+    const prefsChanged = prefChanges > 0;
+    if (mappingChanged) saveSeverity(draftMap, summary);
+    if (prefsChanged) savePrefs(draft);
+    const moved = preview?.companies ?? 0;
+    toast({
+      title:
+        mappingChanged && prefsChanged
+          ? "Changes saved"
+          : mappingChanged
+            ? changed.length === 1
+              ? `${CATEGORY_LABEL[first]} is now ${SEVERITY_LABEL[draftMap[first]]}`
+              : `${changed.length} severity changes saved`
+            : "Notification preferences saved",
+      body: mappingChanged ? (moved ? `${plural(moved, "company changes", "companies change")} severity in Monitoring.` : "No company changes severity right now.") : undefined,
+      action: {
+        label: "Undo",
+        onClick: () => {
+          if (mappingChanged) saveSeverity(prevMap, "Restored the previous mapping");
+          if (prefsChanged) savePrefs(prevPrefs);
+        },
+      },
+    });
+  };
+
+  const details: string[] = [];
+  if (preview) {
+    if (mappingChanged) details.push(`${plural(preview.companies, "company changes", "companies change")} severity`);
+    if (preview.before !== preview.after) details.push(`in-app alerts ${nf.format(preview.before)} → ${nf.format(preview.after)}`);
+    if (!details.length) details.push("notification preferences change");
+  }
 
   return (
     <div className="mx-auto max-w-[1280px] px-4 pt-6 pb-16 lg:px-8">
       <header className="max-w-[72ch]">
         <h1 className="text-[26px] leading-tight font-semibold tracking-[-0.015em]">Severity & Notification Settings</h1>
         <p className="mt-1 text-[14px] text-ink-2">
-          Map each change category to a severity tier. This mapping drives colour-coding across the monitoring table, heatmap and activity feed.
+          Map each change category to a severity tier. This mapping drives colour-coding across the monitoring table, heatmap and change feed. Changes apply when you save.
         </p>
       </header>
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_380px]">
         <section aria-labelledby="map-h">
           <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
-            <div>
+            <div className="max-w-[60ch]">
               <h2 id="map-h" className="text-[18px] font-semibold">
                 Category Severity Mapping
               </h2>
-              <p className="mt-0.5 text-[13px] text-ink-2">Applies to all your monitors. When one change touches several categories, it takes the most severe tier. Changes apply immediately and can be undone.</p>
+              <p className="mt-0.5 text-[13px] text-ink-2">
+                Applies to all your monitors. When one change touches several categories, it takes the most severe tier. Earlier changes keep the severity they had when detected, shown as “was Low”.
+              </p>
             </div>
             <div className="flex items-center gap-1.5">
-              {(["high", "medium", "low"] as Severity[]).map((s) => (
+              {TIERS_HIGH_FIRST.map((s) => (
                 <span key={s} className={cx("inline-flex h-7 items-center gap-1.5 rounded-full border px-2.5 text-[12px]", SEV_STYLE[s].bg, SEV_STYLE[s].line, SEV_STYLE[s].text)}>
                   <span className="font-semibold tnum">{tierCounts[s]}</span> {SEVERITY_LABEL[s]}
                 </span>
@@ -78,57 +130,55 @@ export function SeveritySettings() {
             <ul className="divide-y divide-line">
               {CATEGORIES.map((c) => {
                 const Icon = CATEGORY_ICON[c];
-                const cur = severity[c];
+                const cur = draftMap[c];
+                const unsaved = cur !== severity[c];
                 return (
                   <li key={c} className="grid grid-cols-[minmax(0,1fr)_minmax(124px,200px)] items-center gap-4 px-5 py-3">
                     <span className="flex min-w-0 items-start gap-3">
-                      <Icon className="mt-0.5 size-[18px] shrink-0 text-brand-700" />
+                      <Icon className="mt-0.5 size-[18px] shrink-0 text-brand-700" aria-hidden />
                       <span className="min-w-0">
                         <span className="block text-[14px] font-medium">{CATEGORY_LABEL[c]}</span>
-                        {cur !== DEFAULT_SEVERITY[c] && <span className="block text-[11px] text-ink-3">Default: Medium</span>}
+                        {unsaved ? (
+                          <span className="block text-[11px] font-medium text-ink">Unsaved · was {SEVERITY_LABEL[severity[c]]}</span>
+                        ) : (
+                          cur !== DEFAULT_SEVERITY[c] && <span className="block text-[11px] text-ink-3">Default: Medium</span>
+                        )}
                       </span>
                     </span>
                     <span className="relative w-full">
                       <select
                         aria-label={`${CATEGORY_LABEL[c]} severity`}
                         value={cur}
-                        onChange={(e) => change(c, e.target.value as Severity)}
+                        onChange={(e) => setDraftMap((d) => ({ ...d, [c]: e.target.value as Severity }))}
                         className={cx(
-                          "h-9 w-full cursor-pointer appearance-none rounded-[4px] border bg-no-repeat pr-9 pl-3 text-[14px] font-semibold focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600",
+                          "h-9 w-full cursor-pointer appearance-none rounded-[4px] border bg-no-repeat pr-9 pl-3 text-[14px] font-semibold max-sm:h-11 max-sm:text-[16px]",
                           SEV_STYLE[cur].bg,
                           SEV_STYLE[cur].line,
                           SEV_STYLE[cur].text,
                         )}
                       >
-                        {SEVERITIES.map((s) => (
+                        {TIERS_HIGH_FIRST.map((s) => (
                           <option key={s} value={s} className="bg-white text-ink">
                             {SEVERITY_LABEL[s]}
                           </option>
                         ))}
                       </select>
-                      <ChevronDown className={cx("pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2", SEV_STYLE[cur].text)} />
+                      <ChevronDown className={cx("pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2", SEV_STYLE[cur].text)} aria-hidden />
                     </span>
                   </li>
                 );
               })}
             </ul>
             <div className="flex items-center justify-between gap-3 border-t border-line bg-canvas px-5 py-3">
-              <span className="text-[12px] text-ink-3">{customised ? "Your team has customised this mapping." : "Every category is at the default, Medium."}</span>
-              <Button
-                variant="ghost"
-                size="sm"
-                disabled={!customised}
-                onClick={() => {
-                  const before = { ...severity };
-                  const moved = impact(DEFAULT_SEVERITY);
-                  resetSeverity();
-                  toast({
-                    title: "Severity reset to defaults",
-                    body: `Every category is now Medium. ${nf.format(moved)} ${moved === 1 ? "company changes" : "companies change"} severity.`,
-                    action: { label: "Undo", onClick: () => CATEGORIES.forEach((k) => setSeverity(k, before[k])) },
-                  });
-                }}
-              >
+              <span className="text-[12px] text-ink-3">
+                {customised ? "Your team has customised this mapping." : "Every category is at the default, Medium."}
+                {severityChange && (
+                  <span className="block">
+                    Last change: {severityChange.summary} · by {severityChange.by.toLowerCase()} · {formatDate(severityChange.at)}
+                  </span>
+                )}
+              </span>
+              <Button variant="ghost" size="sm" disabled={draftIsDefault} onClick={() => setDraftMap(DEFAULT_SEVERITY)}>
                 <RotateCcw className="size-3.5" /> Reset to defaults
               </Button>
             </div>
@@ -137,7 +187,7 @@ export function SeveritySettings() {
 
         <section aria-labelledby="notif-h" className="self-start rounded-[6px] border border-line bg-white lg:sticky lg:top-[80px]">
           <div className="flex items-center gap-2 border-b border-line px-5 py-4">
-            <Bell className="size-5 text-brand-700" />
+            <Bell className="size-5 text-brand-700" aria-hidden />
             <h2 id="notif-h" className="text-[18px] font-semibold">
               Notifications
             </h2>
@@ -149,19 +199,20 @@ export function SeveritySettings() {
                 <p className="text-[14px] font-semibold">{ch.title}</p>
                 <p className="text-[13px] text-ink-2">{ch.desc}</p>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  {(["low", "medium", "high"] as Severity[]).map((s) => {
+                  {TIERS_HIGH_FIRST.map((s) => {
                     const on = draft[ch.key][s];
                     return (
                       <label
                         key={s}
                         className={cx(
-                          "inline-flex h-8 cursor-pointer items-center gap-2 rounded-[4px] border px-3 text-[13px] transition-colors select-none",
+                          "inline-flex h-8 cursor-pointer items-center gap-2 rounded-[4px] border px-3 text-[13px] transition-colors select-none max-sm:h-11",
                           on ? cx(SEV_STYLE[s].bg, SEV_STYLE[s].line, SEV_STYLE[s].text, "font-semibold") : "border-line-strong text-ink-3 hover:border-ink-3",
                         )}
                       >
                         <input
                           type="checkbox"
                           checked={on}
+                          aria-label={`${ch.title}, ${SEVERITY_LABEL[s]}`}
                           onChange={(e) => setDraft((d) => ({ ...d, [ch.key]: { ...d[ch.key], [s]: e.target.checked } }))}
                           className={cx("size-3.5", s === "high" ? "accent-high" : s === "medium" ? "accent-medium" : "accent-low")}
                         />
@@ -173,35 +224,27 @@ export function SeveritySettings() {
               </fieldset>
             ))}
           </div>
-          <div className="border-t border-line bg-canvas px-5 py-4">
-            <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1 text-[13px]">
-              {CHANNELS.map((ch) => (
-                <div key={ch.key} className="contents">
-                  <dt className="text-ink-3">{ch.title.replace(" email digest", " email").replace(" alerts", "")}</dt>
-                  <dd className="font-medium">{summary(ch.key)}</dd>
-                </div>
-              ))}
-            </dl>
-            {dirty ? (
-              <Button
-                variant="primary"
-                className="mt-4 w-full"
-                onClick={() => {
-                  savePrefs(draft);
-                  toast({ title: "Notification preferences saved" });
-                }}
-              >
-                Save notification preferences
-              </Button>
-            ) : (
-              <p className="mt-4 flex h-9 items-center justify-center gap-1.5 text-[13px] font-semibold text-brand-700">
-                <Check className="size-4" /> Preferences saved
-              </p>
-            )}
-          </div>
         </section>
       </div>
 
+      {preview && (
+        <div role="region" aria-label="Unsaved changes" className="sticky bottom-4 z-20 mt-8 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-[6px] bg-navy-900 px-4 py-3 text-[13px] text-white shadow-pop">
+          <p className="min-w-0 flex-1 max-sm:basis-full" aria-live="polite">
+            <span className="font-semibold tnum">
+              {nf.format(pending)} unsaved {pending === 1 ? "change" : "changes"}
+            </span>
+            <span className="text-white/75"> · {details.join(" · ")}</span>
+          </p>
+          <span className="ml-auto flex items-center gap-2 max-sm:w-full max-sm:justify-end">
+            <button onClick={discard} className="inline-flex h-9 items-center rounded-[4px] px-3 font-semibold text-white/85 hover:bg-white/10 hover:text-white max-sm:h-11">
+              Discard
+            </button>
+            <button onClick={save} className="inline-flex h-9 items-center rounded-[4px] bg-white px-4 font-semibold text-navy-900 hover:bg-brand-50 max-sm:h-11">
+              Save changes
+            </button>
+          </span>
+        </div>
+      )}
     </div>
   );
 }

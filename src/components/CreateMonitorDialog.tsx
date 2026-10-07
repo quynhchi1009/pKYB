@@ -1,14 +1,16 @@
 import type { ReactNode } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { ArrowRight, BellRing, CircleAlert, CircleCheck, FileCheck2, Radar, SlidersHorizontal, X } from "lucide-react";
-import { CATEGORIES, DEFAULT_SEVERITY, PKYB_UNSUPPORTED, TODAY, iso, jurisdictionByCode, type Company, type Severity } from "../data/model";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { ArrowDown, ArrowRight, BellRing, CircleAlert, CircleCheck, FileCheck2, Radar, SlidersHorizontal, X } from "lucide-react";
+import { CATEGORIES, DEFAULT_SEVERITY, PKYB_UNSUPPORTED, PRICING, TODAY, creditsLabel, iso, jurisdictionByCode, totalTodayLabel, type Company, type Severity } from "../data/model";
 import { useStore } from "../state/store";
 import { Button, CategoryChip, Dialog, Flag, SeverityPill, cx, formatDate } from "./ui";
 
+// Tiers lead with High, as Monitoring does. The copy describes the tier as the client's own intent,
+// because the client decides what each tier means.
 const TIERS: Array<{ level: Severity; desc: string }> = [
-  { level: "low", desc: "Keep for your records." },
-  { level: "medium", desc: "Review when you can." },
-  { level: "high", desc: "Act now, usually with a fresh KYB report." },
+  { level: "high", desc: "Changes you want to act on first." },
+  { level: "medium", desc: "Changes to review when you can." },
+  { level: "low", desc: "Changes to keep on record." },
 ];
 
 const STEPS: Array<{ when: string; what: string; icon: typeof Radar }> = [
@@ -25,6 +27,7 @@ const STEPS: Array<{ when: string; what: string; icon: typeof Radar }> = [
 export function CreateMonitorDialog({ company, onClose }: { company: Company | null; onClose: () => void }) {
   const { createMonitor, toast, monitors, severity } = useStore();
   const navigate = useNavigate();
+  const loc = useLocation();
   const customised = CATEGORIES.some((c) => severity[c] !== DEFAULT_SEVERITY[c]);
   const tierCount = (lv: Severity) => CATEGORIES.filter((c) => severity[c] === lv).length;
   const j = company ? jurisdictionByCode[company.jurisdiction] : null;
@@ -43,6 +46,16 @@ export function CreateMonitorDialog({ company, onClose }: { company: Company | n
   const go = (to: string) => {
     onClose();
     navigate(to);
+  };
+  // The report list this dialog offers as the alternative may be the page it was opened from.
+  const reportsHere = !!company && loc.pathname === `/report/${company.id}`;
+  const showReports = () => {
+    onClose();
+    window.requestAnimationFrame(() => {
+      const h = document.getElementById("kyb-h");
+      h?.scrollIntoView({ behavior: "smooth", block: "start" });
+      h?.focus({ preventScroll: true });
+    });
   };
 
   return (
@@ -169,7 +182,7 @@ export function CreateMonitorDialog({ company, onClose }: { company: Company | n
                       Your order
                     </h3>
                     <dl className="flex flex-col gap-3 text-[13px]">
-                      <Line label="pKYB monitor" sub={`Starts ${formatDate(iso(TODAY))} · runs until you stop it`} value="10 credits / year" />
+                      <Line label="pKYB monitor" sub={`Starts ${formatDate(iso(TODAY))} · runs until you stop it`} value={`${PRICING.monitorCredits} credits / year`} />
                       <Line
                         label={
                           <span className="flex flex-wrap items-center gap-2">
@@ -178,9 +191,12 @@ export function CreateMonitorDialog({ company, onClose }: { company: Company | n
                           </span>
                         }
                         sub="Attached to this monitor as your baseline and downloaded when monitoring starts. Every later change is compared against it."
-                        value="xx credits"
+                        value={creditsLabel(PRICING.kybBasicCredits)}
                       />
                     </dl>
+                    <p className="mt-3 max-w-[52ch] text-[12px] text-ink-2">
+                      The baseline is charged once, today. Fresh KYB Basic reports you request later are charged separately.
+                    </p>
                   </section>
                 </div>
               )}
@@ -190,23 +206,30 @@ export function CreateMonitorDialog({ company, onClose }: { company: Company | n
               {ordering && (
                 <p className="flex shrink-0 items-baseline gap-2 whitespace-nowrap">
                   <span className="text-[13px] text-ink-2">Total today</span>
-                  <span className="text-[18px] font-semibold tracking-[-0.01em] tnum text-ink">10 + xx credits</span>
+                  <span className="text-[18px] font-semibold tracking-[-0.01em] tnum text-ink">{totalTodayLabel()}</span>
                 </p>
               )}
               <div className="flex flex-col-reverse gap-2 sm:ml-auto sm:flex-row sm:items-center">
-                <Button variant="ghost" onClick={onClose}>
+                {/* An order spends credits, so Enter on open must not place it: Cancel takes focus first. */}
+                <Button variant="ghost" onClick={onClose} data-autofocus={ordering ? "" : undefined}>
                   Cancel
                 </Button>
                 {existing ? (
-                  <Button variant="primary" autoFocus onClick={() => go(`/pkyb/monitoring/${existing.id}`)}>
+                  <Button variant="primary" data-autofocus="" onClick={() => go(`/pkyb/monitoring/${existing.id}`)}>
                     Open existing monitor <ArrowRight className="size-4" />
                   </Button>
                 ) : unsupported ? (
-                  <Button variant="primary" autoFocus onClick={() => go(`/report/${company.id}`)}>
-                    Choose a one-off KYB report <ArrowRight className="size-4" />
-                  </Button>
+                  reportsHere ? (
+                    <Button variant="primary" data-autofocus="" onClick={showReports}>
+                      Choose a report on this page <ArrowDown className="size-4" />
+                    </Button>
+                  ) : (
+                    <Button variant="primary" data-autofocus="" onClick={() => go(`/report/${company.id}`)}>
+                      Choose a one-off KYB report <ArrowRight className="size-4" />
+                    </Button>
+                  )
                 ) : (
-                  <Button variant="primary" autoFocus onClick={confirm}>
+                  <Button variant="primary" onClick={confirm}>
                     Confirm & start monitoring <ArrowRight className="size-4" />
                   </Button>
                 )}

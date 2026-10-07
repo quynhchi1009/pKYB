@@ -296,17 +296,22 @@ Buttons are compact and decisive.
 - **Triage chips:** 32px round chips in the same severity tints, showing a count and label. They are filter buttons.
 - **Category chip:** 4px radius, white, hairline border, ink-2 12px text, a 14px green line icon for the category, and a trailing severity dot that follows the user's mapping. Icons: Identity user, Address map-pin, BusinessActivity briefcase, Officers users, Ownership pie-chart, Capital landmark, Status circle-check, AnnualReturn calendar, Other ellipsis.
 - **Status filter chips:** round, white with a line-strong border. Selected is a navy-800 fill with white text.
+- **Triage chips as filters:** they carry `aria-pressed`. Pressed shows a check in place of the dot and a 1px inset ring in the chip's own colour; pressing again clears the filter. They are the only severity filter on Active monitors.
+- **Severity annotation:** severity is a lens the client can re-aim, so each change keeps the severity it had when detected. Where today's mapping reads differently, the pill is followed by "was Low" in 11px ink-3. The pill always shows today's value.
+- **Status badge:** Active is a mint tint, Stopped a wash tint with a solid dot, Inactive white with a hollow dot. Amber is never used for a status, only for Medium severity.
 
 ### Panels and tables
 - **Corner style:** 6px.
 - **Background:** white on canvas, with a 1px hairline border and no shadow.
 - **Internal padding:** 20px, 24px at lg.
 - **Tables:** 13px cells, 12px semibold ink-2 headers, hairline row dividers. Rows highlight in canvas on hover and in mint wash when selected. The whole row is clickable. Columns that support sorting show a down arrow when active.
-- **Bulk selection:** when rows are selected, a navy-900 bar appears above the table with the selected count, a destructive action and "Clear selection".
+- **Bulk selection:** when rows are selected, a navy-900 bar appears above the table with the selected count, a visible "Clear selection", the review action and a ⋯ menu holding the destructive action. Row selectors are real checkboxes (`role="checkbox"`, 24px).
+- **Pending-changes bar:** Severity & Notification Settings has one save model. Edits stay drafts until saved. A sticky navy-900 bar at the foot of the page states the count, how many companies change severity and the in-app alert volume before and after, with a ghost Discard and a white Save changes. Saving shows a toast with Undo, and the mapping footer records who changed it last and when.
+- **Status notice:** Stopped and Inactive company pages lead with a white panel (hairline-strong border, no tint) that says what the status means and offers "Create pKYB monitor". Inactive never claims checks, a baseline or a cost. Activity and change-log panels render only when the company has changes.
 
 ### Inputs and fields
 - **Style:** 36px tall (40px on the Search hero), 4px radius, white with a 1px line-strong border, 13px ink text, ink-3 placeholder. A 12px medium ink-2 label sits above.
-- **Hover / focus:** the border darkens to ink-3 on hover and turns brand-600 on focus, with no glow. Checkboxes use the native control with a brand-700 accent.
+- **Hover / focus:** the border darkens to ink-3 on hover and turns brand-600 on focus, with no glow, and the global 2px brand-600 focus outline still shows: inputs never suppress it. Checkboxes use the native control with a brand-700 accent. On phones inputs and selects are 44px tall and 16px, so iOS does not zoom them.
 
 ### Navigation
 - **Top bar:** navy gradient, logo ("Asia" in brand-400, "Verify" in white, 17px bold), product title at 16px semibold, and 36px icon buttons in white at 85%. Hover is a 10% white overlay.
@@ -316,7 +321,8 @@ Buttons are compact and decisive.
 ### Menus, dialogs and toasts
 - **⋯ menu:** a 32px ghost icon trigger opens a 200px, 6px-radius white menu with the pop shadow. It is rendered in a portal so tables never clip it. Items are 13px, with wash on hover and focus, and danger items are high-red text.
 - **Dialog:** a native modal, 8px radius, dialog shadow, navy-950 backdrop at 55%. The header has an 18px title and a close button above a hairline. The body is padded 20px by 24px. The footer sits on canvas, right-aligned, with a ghost Cancel before the confirming button. It enters over 220ms (8px rise, 0.985 scale) on the out-expo curve.
-- **Toast:** navy-900, 6px radius, pop shadow, brand-400 check icon, 13px semibold title with a 70% white body, bottom-right, up to 380px wide. It enters over 260ms with a 10px rise.
+- **Toast:** navy-900, 6px radius, pop shadow, brand-400 check icon, 13px semibold title with a 70% white body, bottom-right, up to 380px wide. It enters over 260ms with a 10px rise. Its timer pauses while the pointer or keyboard focus is on it, so Undo is never taken away mid-reach.
+- **Credit-spending confirm:** ordering a monitor or a fresh KYB Basic report states the price before the click (on the button and in the dialog) and focuses Cancel first, so Enter on open never spends credits. Until the KYB Basic price is confirmed it reads "xx credits", from one place in `data/model.ts`.
 
 **The Confirm Before Destroy Rule.** "Stop monitoring" is never a visible row or header button. A single company's stop lives in its ⋯ menu as a red item. Bulk stop lives in the navy selection bar. Both open a confirm dialog that names the company or count, explains what stays (history under Order history), and confirms with the danger button, with Cancel focused first.
 
@@ -336,6 +342,9 @@ Buttons are compact and decisive.
 - **Do** write cadence copy as "Last checked" and "Checks run automatically".
 - **Do** use tabular figures for every number and date.
 - **Do** keep panels flat with 1px hairline borders, and keep shadows for elements that float.
+- **Do** show the price before any action that spends credits, and focus Cancel first in its confirm.
+- **Do** keep every interactive control at least 24px, and give days with changes in a heatmap a keyboard path (one tab stop, arrow keys).
+- **Do** give one count one meaning: the bell, the chips, the heatmap and the feed all count unreviewed changes, and the bell's link opens exactly the set it counted.
 
 ### Don't:
 - **Don't** give categories their own colours or rainbow badges.
@@ -344,3 +353,6 @@ Buttons are compact and decisive.
 - **Don't** promise a check cadence: no "checks every N days", no countdowns, no next-check dates.
 - **Don't** add shadows to panels or cards at rest, or use radii larger than 8px.
 - **Don't** introduce a second typeface. Noto Sans with Noto Sans SC covers every role.
+- **Don't** use amber for anything but Medium severity, including the Inactive status.
+- **Don't** animate layout properties such as `width`; the sidebar collapses without a transition.
+- **Don't** apply an org-wide severity change without showing its impact first.
