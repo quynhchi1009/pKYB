@@ -331,6 +331,73 @@ function threeOf<T>(r: () => number, list: readonly T[]): [T, T, T] {
   return [a, b, pickFrom(r, rest)];
 }
 
+const COMPANY_TYPE: Record<string, string> = {
+  CN: "Limited liability company",
+  HK: "Private company limited by shares",
+  SG: "Private company limited by shares",
+  AU: "Australian proprietary company",
+  NZ: "Limited company",
+  JP: "Kabushiki kaisha",
+  TH: "Private limited company",
+  MY: "Private limited company",
+  TW: "Company limited by shares",
+};
+
+/** The registry record a KYB Basic report shows. Demo values, derived from the monitor id so a report reads the same on every visit. */
+export type ReportFacts = {
+  reportNo: string;
+  generated: string;
+  status: string;
+  companyType: string;
+  incorporated: string;
+  address: string;
+  activity: string;
+  capital: string;
+  directors: Array<{ name: string; role: string; appointed: string }>;
+  shareholders: Array<{ name: string; kind: "Individual" | "Corporate"; pct: number }>;
+  branches: string[];
+  history: Array<{ date: string; field: string; detail: string }>;
+};
+
+export function reportFacts(m: Pick<Monitor, "id" | "jurisdiction" | "createdAt">): ReportFacts {
+  const r = mulberry32(hashSeed(m.id + "report"));
+  const generated = m.createdAt;
+  const base = new Date(generated + "T00:00:00");
+  const daysBefore = (min: number, max: number) => iso(addDays(base, -Math.floor(min + r() * (max - min))));
+  const incorporated = daysBefore(3 * 365, 18 * 365);
+  const [d1, d2, d3] = threeOf(r, PEOPLE);
+  const holdco = `${pickFrom(r, A)} ${pickFrom(r, ["Holdings", "Capital", "Ventures"])} Ltd`;
+  const major = 50 + Math.floor(r() * 4) * 5;
+  const city = CITY[m.jurisdiction] ?? "";
+  const [oldStreet, street] = twoOf(r, STREETS);
+  const branchCount = Math.floor(r() * 3);
+  return {
+    reportNo: String(1_000_000_000 + Math.floor(r() * 8_999_999_999)),
+    generated,
+    status: m.jurisdiction === "HK" || m.jurisdiction === "SG" ? "Live" : "Registered",
+    companyType: COMPANY_TYPE[m.jurisdiction] ?? "Private company",
+    incorporated,
+    address: `${street}, ${city}`,
+    activity: pickFrom(r, ACTIVITIES),
+    capital: `${CURRENCY[m.jurisdiction] ?? "USD"} ${nfDemo.format((1 + Math.floor(r() * 9)) * 1_000_000)}`,
+    directors: [
+      { name: d1, role: "Director", appointed: incorporated },
+      { name: d2, role: "Director", appointed: daysBefore(400, 1400) },
+      { name: d3, role: "Company secretary", appointed: daysBefore(120, 900) },
+    ],
+    shareholders: [
+      { name: d1, kind: "Individual", pct: major },
+      { name: holdco, kind: "Corporate", pct: 100 - major },
+    ],
+    branches: Array.from({ length: branchCount }, () => `${pickFrom(r, STREETS)}, ${city}`),
+    history: [
+      { date: daysBefore(30, 200), field: "Annual return", detail: "Annual return filed" },
+      { date: daysBefore(210, 700), field: "Registered address", detail: `Moved from ${oldStreet}` },
+      { date: daysBefore(720, 1400), field: "Directors", detail: `${d2} appointed` },
+    ].sort((a, b) => (a.date < b.date ? 1 : -1)),
+  };
+}
+
 function buildEvents(monitorId: string, created: Date, end: Date, r: () => number, density: number): ChangeEvent[] {
   const events: ChangeEvent[] = [];
   const span = Math.max(1, Math.round((end.getTime() - created.getTime()) / 86400000));

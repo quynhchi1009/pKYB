@@ -345,6 +345,15 @@ A review is a decision, not a tick, because the change log is the client's audit
 
 **The Confirm Before Destroy Rule.** "Stop monitoring" is never a visible row or header button. A single company's stop lives in its ⋯ menu as a red item. Bulk stop lives in the navy selection bar. Both open a confirm dialog that names the company or count, leads with any unreviewed changes (and how many are High), explains what stays (history under Order history) and that no further monitoring credits are charged, and confirms with the danger button, with Cancel focused first.
 
+### Report viewer (KYB Basic baseline)
+Confirming a new monitor lands on `/reports/:monitorId`, the KYB Basic report the monitor was ordered with, rebuilt from the Portal's View Report Figma.
+- **Header:** the company name and local name at 24px, separated by an ink-3 bar, with the flag after them. Below that, the registry label in uppercase 13px ink-2. On the right, a two-line meta ("pKYB baseline report" / "Monitoring since …") and the page's one primary, **View pKYB**, a link to `/pkyb/monitoring/:id`. Below lg it stacks, and on phones the button is full width.
+- **Toolbar:** "View report:" with a navy-900 report chip, then the pager ("Page N of 3", first/prev/next/last), share and download icon buttons, and the EN / OG language toggle (`aria-pressed`).
+- **Section rail:** 272px, canvas at 70%, sticky under the top bar. "Jump to section", "Share recommendation" and "Add-ons" headings are uppercase 12px ink-3, matching the Portal's existing viewer. The active section is brand-50 with a 2px brand-700 marker, like the sidebar's sub-nav. Below lg the rail becomes a "Jump to section" select.
+- **Section heading:** a brand-50 band, 18px brand-800, with a 2px brand-700 rule underneath.
+- **Cover sheet:** printed-document art, so it keeps its own wash (mint to sky) and a slate façade band (#c3d3db → #7f98a7) under a vertical REPORT. These colours stay on the cover and never reach the UI.
+- **Report content:** facts are hairline `dl` lists, and tables follow the Stacked Rows rule. Historical Changes ends with "Changes after <date> are tracked by your pKYB monitor · View pKYB". The monitor page's baseline panel links back with "View".
+
 ### Signature: unreviewed marker and heatmap
 - **Unreviewed dot:** an 8px navy-900 dot before the company name, with the name in semibold instead of medium. It means "has unreviewed changes" and stays separate from severity, so it is never tinted.
 - **Heatmap:** an SVG grid with weeks as columns and Monday at the top. Cells are 12–13px with a 3px gap and 2px corners. Month labels and Mon/Wed/Fri labels are 9–10px ink-3. Hovering shows a navy-900 tooltip, and the selected day gets a 1.5px navy-900 stroke. The portfolio High-severity ramp is four steps: wash for none, then #f6cfcb, #e9928a and high-cell, with a matching inline legend. The grid opens scrolled to the most recent weeks. Below md, the portfolio heatmap in the triage band collapses behind a "Show unreviewed High changes per day" toggle, so the table starts within the first screen.

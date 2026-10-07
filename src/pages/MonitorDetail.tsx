@@ -539,9 +539,14 @@ export function MonitorDetail() {
                     <p className="text-[12px] text-ink-3">{baselineReady ? `Generated ${formatDate(m.createdAt)}` : "Generating…"}</p>
                   </div>
                   {baselineReady && (
-                    <button onClick={downloadBaseline} className="-mr-2 inline-flex h-8 items-center px-2 text-[13px] font-semibold text-brand-700 hover:underline">
-                      Download
-                    </button>
+                    <div className="-mr-2 flex items-center">
+                      <Link to={`/reports/${m.id}`} className="inline-flex h-8 items-center px-2 text-[13px] font-semibold text-brand-700 hover:underline">
+                        View
+                      </Link>
+                      <button onClick={downloadBaseline} className="inline-flex h-8 items-center px-2 text-[13px] font-semibold text-brand-700 hover:underline">
+                        Download
+                      </button>
+                    </div>
                   )}
                 </div>
               </div>

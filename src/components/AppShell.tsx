@@ -33,6 +33,7 @@ function Logo() {
 
 function titleFor(path: string) {
   if (path.startsWith("/search")) return "Search";
+  if (path.startsWith("/reports/")) return "View Report";
   if (path.startsWith("/report")) return "Choose report";
   return "Perpetual KYB (pKYB)";
 }

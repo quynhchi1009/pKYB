@@ -10,6 +10,7 @@ import { SeveritySettings } from "./pages/SeveritySettings";
 import { ChooseReport } from "./pages/ChooseReport";
 import { SearchPage } from "./pages/SearchPage";
 import { Placeholder } from "./pages/Placeholder";
+import { ViewReport } from "./pages/ViewReport";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -24,6 +25,7 @@ createRoot(document.getElementById("root")!).render(
             <Route path="/pkyb/settings" element={<SeveritySettings />} />
             <Route path="/search" element={<SearchPage />} />
             <Route path="/report/:id" element={<ChooseReport />} />
+            <Route path="/reports/:id" element={<ViewReport />} />
             <Route path="*" element={<Placeholder />} />
           </Routes>
         </AppShell>

@@ -40,8 +40,9 @@ export function CreateMonitorDialog({ company, onClose }: { company: Company | n
     if (!company || unsupported) return;
     const m = createMonitor(company);
     onClose();
-    toast({ title: "Monitoring started", body: `Your KYB Basic baseline report for ${company.name} is being generated.` });
-    navigate(`/pkyb/monitoring/${m.id}?new=1`);
+    toast({ title: "Monitoring started", body: `This KYB Basic report is the baseline for ${company.name}. Later changes are compared against it.` });
+    // Land on the baseline report itself; "View pKYB" on that page opens the monitor.
+    navigate(`/reports/${m.id}`);
   };
   const go = (to: string) => {
     onClose();
