@@ -89,7 +89,7 @@ export function MonitorDetail() {
   if (!m) {
     return (
       <div className="mx-auto max-w-[720px] px-4 py-20 text-center">
-        <p className="text-[16px] font-semibold">This monitor doesn't exist</p>
+        <h1 className="text-[16px] font-semibold">This monitor doesn't exist</h1>
         <Link to="/pkyb/monitoring" className="mt-2 inline-block text-brand-700 hover:underline">
           Back to Monitoring
         </Link>

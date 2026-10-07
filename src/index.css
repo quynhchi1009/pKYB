@@ -1,14 +1,19 @@
 @import "tailwindcss";
-@import "@fontsource/noto-sans/400.css";
-@import "@fontsource/noto-sans/500.css";
-@import "@fontsource/noto-sans/600.css";
-@import "@fontsource/noto-sans/700.css";
+@import "@fontsource/open-sans/400.css";
+@import "@fontsource/open-sans/500.css";
+@import "@fontsource/open-sans/600.css";
+@import "@fontsource/open-sans/700.css";
+@import "@fontsource/roboto/500.css";
+@import "@fontsource/roboto/600.css";
+@import "@fontsource/roboto/700.css";
 @import "@fontsource/noto-sans-sc/chinese-simplified-400.css";
 @import "@fontsource/noto-sans-sc/chinese-simplified-600.css";
 
 /* AsiaVerify Portal tokens, sampled from the pKYB Figma frames. */
 @theme {
-  --font-sans: "Noto Sans", "Noto Sans SC", ui-sans-serif, system-ui, sans-serif;
+  /* Open Sans for running text and UI; Roboto for every heading (h1–h6). Noto Sans SC covers Chinese names in both. */
+  --font-sans: "Open Sans", "Noto Sans SC", ui-sans-serif, system-ui, sans-serif;
+  --font-heading: "Roboto", "Noto Sans SC", ui-sans-serif, system-ui, sans-serif;
 
   --color-navy-950: #0b1016;
   --color-navy-900: #111a24;
@@ -67,6 +72,14 @@
     font-family: var(--font-sans);
     font-size: 14px;
     line-height: 1.5;
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-heading);
   }
   ::selection {
     background: var(--color-brand-100);

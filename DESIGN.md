@@ -36,51 +36,51 @@ colors:
   low-cell: "#a9b4bd"
 typography:
   display:
-    fontFamily: "Noto Sans, Noto Sans SC, ui-sans-serif, system-ui, sans-serif"
+    fontFamily: "Open Sans, Noto Sans SC, ui-sans-serif, system-ui, sans-serif"
     fontSize: "44px"
     fontWeight: 600
     lineHeight: 1
     letterSpacing: "-0.03em"
     fontFeature: "tnum"
   headline:
-    fontFamily: "Noto Sans, Noto Sans SC, ui-sans-serif, system-ui, sans-serif"
+    fontFamily: "Roboto, Noto Sans SC, ui-sans-serif, system-ui, sans-serif"
     fontSize: "26px"
     fontWeight: 600
     lineHeight: 1.25
     letterSpacing: "-0.015em"
   lead-title:
-    fontFamily: "Noto Sans, Noto Sans SC, ui-sans-serif, system-ui, sans-serif"
+    fontFamily: "Roboto, Noto Sans SC, ui-sans-serif, system-ui, sans-serif"
     fontSize: "20px"
     fontWeight: 600
     lineHeight: 1.375
     letterSpacing: "-0.01em"
   title:
-    fontFamily: "Noto Sans, Noto Sans SC, ui-sans-serif, system-ui, sans-serif"
+    fontFamily: "Roboto, Noto Sans SC, ui-sans-serif, system-ui, sans-serif"
     fontSize: "18px"
     fontWeight: 600
     lineHeight: 1.375
   heading:
-    fontFamily: "Noto Sans, Noto Sans SC, ui-sans-serif, system-ui, sans-serif"
+    fontFamily: "Roboto, Noto Sans SC, ui-sans-serif, system-ui, sans-serif"
     fontSize: "16px"
     fontWeight: 600
     lineHeight: 1.4
   body:
-    fontFamily: "Noto Sans, Noto Sans SC, ui-sans-serif, system-ui, sans-serif"
+    fontFamily: "Open Sans, Noto Sans SC, ui-sans-serif, system-ui, sans-serif"
     fontSize: "14px"
     fontWeight: 400
     lineHeight: 1.5
   body-dense:
-    fontFamily: "Noto Sans, Noto Sans SC, ui-sans-serif, system-ui, sans-serif"
+    fontFamily: "Open Sans, Noto Sans SC, ui-sans-serif, system-ui, sans-serif"
     fontSize: "13px"
     fontWeight: 400
     lineHeight: 1.5
   label:
-    fontFamily: "Noto Sans, Noto Sans SC, ui-sans-serif, system-ui, sans-serif"
+    fontFamily: "Open Sans, Noto Sans SC, ui-sans-serif, system-ui, sans-serif"
     fontSize: "12px"
     fontWeight: 600
     lineHeight: 1.5
   micro:
-    fontFamily: "Noto Sans, Noto Sans SC, ui-sans-serif, system-ui, sans-serif"
+    fontFamily: "Open Sans, Noto Sans SC, ui-sans-serif, system-ui, sans-serif"
     fontSize: "11px"
     fontWeight: 600
     lineHeight: 1.4
@@ -201,7 +201,7 @@ Severity is the only status colour. The nine change categories are told apart by
 - Severity is a three-step scale (High red, Medium amber, Low slate). Each step has text, background, border and cell tints.
 - Category identity is a green line icon inside a neutral chip.
 - Hairline borders and small radii (4px controls, 6px panels), and flat surfaces at rest.
-- Noto Sans throughout, with Noto Sans SC for Chinese names, and tabular figures for every count and date.
+- Roboto for every heading (h1–h6), Open Sans for all other text, Noto Sans SC as the fallback for Chinese names in both, and tabular figures for every count and date.
 
 ## Colors
 
@@ -239,16 +239,16 @@ The palette is a dark navy frame, one green action colour, a cool grey ink and l
 
 ## Typography
 
-**Display Font:** Noto Sans (with Noto Sans SC, ui-sans-serif, system-ui)
-**Body Font:** Noto Sans (with Noto Sans SC, ui-sans-serif, system-ui)
+**Heading Font:** Roboto (with Noto Sans SC, ui-sans-serif, system-ui), applied to every h1–h6 through `--font-heading`
+**Body Font:** Open Sans (with Noto Sans SC, ui-sans-serif, system-ui), everything that is not a heading, through `--font-sans`
 
-**Character:** A single humanist sans in four weights (400, 500, 600, 700) that sets Latin and Simplified Chinese company names with equal weight. Hierarchy comes from size and semibold weight, not from a second family.
+**Character:** Roboto's tighter, more engineered forms carry headings; Open Sans's open humanist shapes carry tables, controls and prose in four weights (400, 500, 600, 700). Noto Sans SC sets Simplified Chinese company names in either role. The family is chosen by element, not by size: a large number set in a `span` (the Display count) stays Open Sans.
 
 ### Hierarchy
-- **Display** (600, 44px, line-height 1, -0.03em, tabular): the triage headline count only ("133 companies with unreviewed changes").
-- **Headline** (600, 26px, tight leading, -0.015em): the page h1. Report pages use 24px and the Search heading 22px, at -0.01em.
-- **Lead title** (600, 20px, snug leading, -0.01em): the lead change headline on a company page.
-- **Title** (600, 18px, snug leading): dialog titles, section headings, result counts.
+- **Display** (Open Sans 600, 44px, line-height 1, -0.03em, tabular): the triage headline count only ("133 companies with unreviewed changes").
+- **Headline** (Roboto 600, 26px, tight leading, -0.015em): the page h1. Report pages use 24px and the Search heading 22px, at -0.01em.
+- **Lead title** (Roboto 600, 20px, snug leading, -0.01em): the lead change headline on a company page.
+- **Title** (Roboto 600, 18px, snug leading): dialog titles, section headings, result counts.
 - **Body** (400, 14px, 1.5): page intros, dialog prose, buttons and tabs. Prose is capped at 62–64ch.
 - **Body dense** (400, 13px): table cells, filter controls, menus, toasts, panel labels (as 600 in ink-2).
 - **Label** (600, 12px): table headers and select labels (500 in ink-2), meta lines and timestamps (400 in ink-3). Use 11px only for chip counts, the New tag and legend text.
@@ -382,7 +382,7 @@ Confirming a new monitor lands on `/reports/:monitorId`, the KYB Basic report th
 - **Don't** place a visible "Stop" or "Delete" link inline in a table row.
 - **Don't** promise a check cadence: no "checks every N days", no countdowns, no next-check dates.
 - **Don't** add shadows to panels or cards at rest, or use radii larger than 8px.
-- **Don't** introduce a second typeface. Noto Sans with Noto Sans SC covers every role.
+- **Don't** introduce a third typeface, or set a heading in Open Sans or body text in Roboto. Headings (h1–h6) are Roboto; everything else is Open Sans.
 - **Don't** use amber for anything but Medium severity, including the Inactive status.
 - **Don't** animate layout properties such as `width`; the sidebar collapses without a transition.
 - **Don't** apply an org-wide severity change without showing its impact first.

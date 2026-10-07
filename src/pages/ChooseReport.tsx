@@ -21,7 +21,7 @@ export function ChooseReport() {
   if (!company) {
     return (
       <div className="mx-auto max-w-[640px] px-4 py-24 text-center">
-        <p className="text-[16px] font-semibold">We couldn't find that company</p>
+        <h1 className="text-[16px] font-semibold">We couldn't find that company</h1>
         <p className="mt-1 text-[14px] text-ink-2">The link may be out of date. Search for the company to choose a report.</p>
         <Link to="/search" className="mt-4 inline-block font-semibold text-brand-700 hover:underline">
           Search for a company
