@@ -44,7 +44,7 @@
   --color-interactive-inverse: var(--color-navy-800);
 
   /* background */
-  --color-background-elevated: #fdfdfd;
+  --color-background-elevated: #fcfcfc;
   --color-background-demoted: #292929;
   --color-background-accent: #f8f7f4;
   --color-background-neutral: rgb(165 165 165 / 0.2);
@@ -79,7 +79,7 @@
   /* base */
   --color-base-light: #ffffff;
   --color-base-dark: #1b1c1e;
-  --color-base-contrast: #f7f7f7;
+  --color-base-contrast: #f8f8f8;
 
   /* chrome: the navy Portal shell (top bar, sidebar, Create-monitor side panel) and its content.
      navy-* are the primitive stops of the shell gradient. */

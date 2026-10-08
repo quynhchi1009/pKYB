@@ -6,5 +6,29 @@
       "maxFindings": 5,
       "maxChars": 8000
     }
+  },
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "low-contrast",
+        "value": "*",
+        "files": [
+          "docs/tokens/template.html"
+        ],
+        "createdAt": "2026-10-08T02:37:21.060Z",
+        "reason": "Claude measured: lowest page text is #6b6b6b on #f7f7f7 at 4.69:1; swatch captions sit on known white or navy grounds at 5:1+. Detector cannot see JS-rendered swatch backgrounds."
+      },
+      {
+        "rule": "cramped-padding",
+        "value": "*",
+        "files": [
+          "docs/tokens/template.html"
+        ],
+        "createdAt": "2026-10-08T02:38:26.313Z",
+        "reason": "Claude: compact inline tags (New/Adjusted, contrast chips) at 10.5-11px text use 2px 7px padding, matching the Portal's own New tag in DESIGN.md."
+      }
+    ]
   }
 }

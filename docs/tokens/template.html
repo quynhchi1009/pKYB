@@ -1,0 +1,415 @@
+<title>AsiaVerify Colour Tokens</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Roboto:wght@500;600;700&display=swap">
+<style>
+/* Layout: the brand sheet's own grammar. Lowercase group headings over swatch grids, four tabs: semantic, raw light, raw dark, dark mode plan. */
+:root {
+  --page: #f7f7f7;
+  --card: #ffffff;
+  --ink: #1b1c1e;
+  --ink-2: #444444;
+  --ink-3: #6b6b6b;
+  --hair: #e3e3e3;
+  --swatch-edge: rgb(14 15 12 / 0.12);
+  --accent: #00735f;
+  --accent-soft: #e5f1e8;
+  --accent-ink: #004d3f;
+  --warn-soft: #fff6e8;
+  --warn-ink: #9a6200;
+  --neg-soft: #ffefef;
+  --neg-ink: #95231e;
+  --quiet-soft: #f1f1f1;
+  --focus: #00735f;
+  /* The dark raw palette always sits on its own dark board, as on the brand sheet. */
+  --board: #111111;
+  --board-ink: #ececec;
+  --board-ink-2: #c5c5c5;
+  --board-ink-3: #979797;
+  --board-hair: rgb(255 255 255 / 0.1);
+  --board-edge: rgb(255 255 255 / 0.14);
+  --board-tag: rgb(255 255 255 / 0.08);
+  --font-head: "Roboto", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Open Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --page: #0b1016; --card: #111a24; --ink: #f2f4f5; --ink-2: #c9d0d6; --ink-3: #9aa5af; --hair: #22303f;
+    --swatch-edge: rgb(255 255 255 / 0.14); --accent: #2fbf87; --accent-soft: rgb(47 191 135 / 0.14); --accent-ink: #7fdcb6;
+    --warn-soft: rgb(255 170 82 / 0.14); --warn-ink: #ffc98f; --neg-soft: rgb(218 103 103 / 0.16); --neg-ink: #f9c4bf;
+    --quiet-soft: rgb(255 255 255 / 0.07); --focus: #2fbf87; --board: #060a0e; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --page: #0b1016; --card: #111a24; --ink: #f2f4f5; --ink-2: #c9d0d6; --ink-3: #9aa5af; --hair: #22303f;
+  --swatch-edge: rgb(255 255 255 / 0.14); --accent: #2fbf87; --accent-soft: rgb(47 191 135 / 0.14); --accent-ink: #7fdcb6;
+  --warn-soft: rgb(255 170 82 / 0.14); --warn-ink: #ffc98f; --neg-soft: rgb(218 103 103 / 0.16); --neg-ink: #f9c4bf;
+  --quiet-soft: rgb(255 255 255 / 0.07); --focus: #2fbf87; --board: #060a0e; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--page); color: var(--ink); font-family: var(--font-body); font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+h1, h2, h3 { font-family: var(--font-head); text-wrap: balance; margin: 0; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
+::selection { background: var(--accent-soft); }
+
+.wrap { max-width: 1240px; margin: 0 auto; padding-inline: 24px; padding-block: 40px 72px; }
+@media (max-width: 600px) { .wrap { padding-inline: 16px; padding-block: 24px 48px; } }
+
+.top { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 20px 32px; padding-bottom: 20px; }
+.top h1 { font-size: 30px; font-weight: 600; letter-spacing: -0.015em; line-height: 1.15; }
+.top p { margin: 8px 0 0; max-width: 64ch; color: var(--ink-2); }
+.top code { font-family: var(--font-mono); font-size: 12.5px; color: var(--ink); background: var(--accent-soft); padding: 2px 6px; border-radius: 3px; }
+.tally { display: flex; flex-wrap: wrap; gap: 12px 24px; font-variant-numeric: tabular-nums; }
+.tally div { display: grid; gap: 2px; }
+.tally b { font-family: var(--font-head); font-size: 24px; font-weight: 600; line-height: 1; }
+.tally span { font-size: 12px; color: var(--ink-3); }
+
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--hair); overflow-x: auto; scrollbar-width: none; }
+.tabs button { flex: none; font: 600 14px var(--font-body); color: var(--ink-2); background: none; border: 0; border-bottom: 2px solid transparent; padding: 10px 12px 9px; cursor: pointer; }
+.tabs button:hover { color: var(--ink); }
+.tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+.intro { margin: 16px 0 0; max-width: 78ch; color: var(--ink-2); font-size: 13.5px; }
+.intro strong { color: var(--ink); }
+
+.tools { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; padding-block: 12px; margin-top: 8px; background: var(--page); border-bottom: 1px solid var(--hair); }
+.seg { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--hair); border-radius: 4px; overflow: hidden; background: var(--card); }
+.seg button { font: 600 13px var(--font-body); color: var(--ink-2); background: none; border: 0; padding: 7px 12px; cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--hair); }
+.seg button[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent-ink); }
+.search { flex: 1 1 220px; max-width: 320px; }
+.search input { width: 100%; font: 13px var(--font-body); color: var(--ink); background: var(--card); border: 1px solid #626262; border-radius: 4px; padding: 7px 10px; }
+.search input::placeholder { color: var(--ink-3); }
+.jump { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 13px; }
+.jump a { color: var(--ink-2); text-decoration: none; }
+.jump a:hover { color: var(--accent-ink); text-decoration: underline; text-underline-offset: 3px; }
+@media (max-width: 600px) { .tools { position: static; } .search { max-width: none; } }
+
+section.group { padding-top: 40px; scroll-margin-top: 64px; }
+.group header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; margin-bottom: 18px; }
+.group h2 { font-size: 26px; font-weight: 700; letter-spacing: -0.01em; }
+.group header p { margin: 0; color: var(--ink-3); font-size: 13px; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(196px, 1fr)); gap: 28px 20px; }
+@media (max-width: 480px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 12px; } }
+@media (max-width: 360px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+
+.tok { display: grid; align-content: start; gap: 2px; min-width: 0; }
+.sw { position: relative; height: 72px; border-radius: 4px; box-shadow: inset 0 0 0 1px var(--swatch-edge); cursor: pointer; border: 0; padding: 0; width: 100%; overflow: hidden; }
+.sw .layer { position: absolute; inset: 0; }
+.sw .copied { position: absolute; left: 8px; bottom: 6px; font: 600 11px var(--font-body); padding: 2px 6px; border-radius: 3px; background: #111a24; color: #fff; opacity: 0; transition: opacity 160ms ease-out; }
+.sw.done .copied { opacity: 1; }
+.sw .on { position: absolute; right: 6px; bottom: 5px; font: 600 10px var(--font-body); letter-spacing: 0.02em; color: rgb(255 255 255 / 0.8); }
+.sw .on.light { color: #444; }
+.name { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; margin-top: 8px; font-family: var(--font-head); font-weight: 700; font-size: 14px; overflow-wrap: anywhere; }
+.tag { font: 600 10.5px var(--font-body); letter-spacing: 0.02em; padding: 2px 7px; border-radius: 3px; white-space: nowrap; }
+.tag.new, .tag.add { background: var(--accent-soft); color: var(--accent-ink); }
+.tag.adjusted, .tag.fixed, .tag.adjust { background: var(--warn-soft); color: var(--warn-ink); }
+.tag.dup { background: var(--neg-soft); color: var(--neg-ink); }
+.tag.unused, .tag.same, .tag.sheet { background: var(--quiet-soft); color: var(--ink-2); }
+.vals { font-size: 12.5px; color: var(--ink-2); font-variant-numeric: tabular-nums; display: grid; }
+.vals span { overflow-wrap: anywhere; }
+.vals .code { font-family: var(--font-mono); font-size: 11.5px; color: var(--ink-3); }
+.was { font-size: 12px; color: var(--warn-ink); }
+.desc { margin: 6px 0 0; font-size: 12px; line-height: 1.45; color: var(--ink-3); }
+.users { margin: 6px 0 0; font-size: 11.5px; line-height: 1.45; color: var(--ink-2); overflow-wrap: anywhere; }
+.users b { font-weight: 600; color: var(--ink-3); }
+.cr { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 4px; }
+.cr span { font-size: 11px; font-variant-numeric: tabular-nums; color: var(--ink-2); border: 1px solid var(--hair); border-radius: 3px; padding: 2px 7px; line-height: 1.4; }
+.empty { padding: 48px 0; color: var(--ink-3); }
+
+/* Dark raw palette board */
+.board { background: var(--board); color: var(--board-ink); border-radius: 8px; padding-inline: 24px; padding-block: 8px 32px; margin-top: 24px; }
+.board .group h2 { color: var(--board-ink); }
+.board .group header p, .board .desc, .board .users b { color: var(--board-ink-3); }
+.board .vals, .board .users { color: var(--board-ink-2); }
+.board .sw { box-shadow: inset 0 0 0 1px var(--board-edge); }
+.board .tag.unused, .board .tag.sheet, .board .tag.same { background: var(--board-tag); color: var(--board-ink-2); }
+@media (max-width: 600px) { .board { padding-inline: 14px; margin-inline: -8px; } }
+
+/* Dark mode plan tables */
+.tablewrap { overflow-x: auto; border: 1px solid var(--hair); border-radius: 6px; background: var(--card); }
+table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 760px; }
+th { text-align: left; font-size: 12px; font-weight: 600; color: var(--ink-2); padding: 10px 12px; border-bottom: 1px solid var(--hair); white-space: nowrap; }
+td { padding: 10px 12px; border-bottom: 1px solid var(--hair); vertical-align: top; }
+tr:last-child td { border-bottom: 0; }
+td.tk b { font-family: var(--font-head); font-weight: 700; }
+td.tk span { display: block; font-family: var(--font-mono); font-size: 11.5px; color: var(--ink-3); }
+.chip { display: inline-flex; align-items: center; gap: 8px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.chip i { position: relative; width: 28px; height: 20px; border-radius: 3px; box-shadow: inset 0 0 0 1px var(--swatch-edge); overflow: hidden; flex: none; }
+.chip i span { position: absolute; inset: 0; }
+.chip small { display: block; font-size: 11.5px; color: var(--ink-3); white-space: normal; }
+td.note { color: var(--ink-2); font-size: 12.5px; max-width: 34ch; }
+td.mono { font-family: var(--font-mono); font-size: 12px; color: var(--ink-2); white-space: nowrap; }
+.chip .pct { font-size: 11.5px; color: var(--ink-3); border: 1px solid var(--hair); border-radius: 3px; padding: 1px 6px; }
+h2.coll { font-size: 15px; font-weight: 600; color: var(--ink-2); margin-top: 32px; padding-bottom: 8px; border-bottom: 1px solid var(--hair); }
+td.crs { font-size: 12px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 14px; font-size: 12.5px; color: var(--ink-2); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+
+footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--hair); font-size: 12.5px; color: var(--ink-3); max-width: 84ch; }
+footer code { font-family: var(--font-mono); font-size: 11.5px; }
+@media (prefers-reduced-motion: reduce) { .sw .copied { transition: none; } }
+</style>
+
+<div class="wrap">
+  <div class="top">
+    <div>
+      <h1>AsiaVerify Colour Tokens</h1>
+      <p>The shared colour system for AsiaVerify products, in the format of the AsiaVerify colour sheets. Semantic tokens say what a colour is for; the raw palettes name the colours they point at; the Figma tab lists the variables with both modes. In code, <code>content.main</code> is <code>--color-content-main</code>; in Figma it is <code>content/main</code>. Click a swatch to copy it.</p>
+    </div>
+    <div class="tally" id="tally" aria-live="polite"></div>
+  </div>
+
+  <div class="tabs" role="tablist" aria-label="Views">
+    <button type="button" role="tab" id="tab-semantic" data-view="semantic" aria-selected="true">Semantic tokens</button>
+    <button type="button" role="tab" id="tab-raw-light" data-view="raw-light" aria-selected="false">Raw palette · light</button>
+    <button type="button" role="tab" id="tab-raw-dark" data-view="raw-dark" aria-selected="false">Raw palette · dark</button>
+    <button type="button" role="tab" id="tab-dark-mode" data-view="dark-mode" aria-selected="false">Dark mode plan</button>
+    <button type="button" role="tab" id="tab-figma" data-view="figma" aria-selected="false">Figma variables</button>
+  </div>
+  <p class="intro" id="intro"></p>
+
+  <div class="tools">
+    <div class="seg" role="group" aria-label="Show" id="seg"></div>
+    <label class="search"><span hidden>Search</span><input id="q" type="search" placeholder="Search name, hex or usage" autocomplete="off"></label>
+    <nav class="jump" id="jump" aria-label="Groups"></nav>
+  </div>
+
+  <main id="view"></main>
+
+  <footer>
+    Contrast ratios are WCAG 2.2 and computed from the values, so they can't drift from the hex. Text needs 4.5:1; UI edges and meaningful fills need 3:1. Translucent colours are shown over the surface they sit on. Names of new raw colours are proposals in the sheet's naming style. Source of truth: <code>src/index.css</code>, until the tokens move to a shared package. Regenerate with <code>python3 docs/tokens/build.py</code>.
+  </footer>
+</div>
+
+<script>
+const DATA = /*__DATA__*/[];
+const RAW = /*__RAW__*/{};
+const DARK = /*__DARK__*/[];
+const FIGMA = /*__FIGMA__*/{};
+const D_PANEL = "/*__PANEL__*/";
+
+const VIEWS = {
+  "semantic": {
+    intro: "What each colour is for, in every AsiaVerify product. These are the names the code and Figma use. <strong>New</strong> tokens fill roles the brand sheet doesn't cover; <strong>Adjusted</strong> ones differ from the sheet to pass contrast or to match Figma. The severity group is a pKYB product layer, built from the sentiment tokens.",
+    filters: [["all", "All"], ["new", "New"], ["adjusted", "Adjusted"]],
+    tally: () => { const all = DATA.flatMap(g => g.items); return [[all.length, "tokens"], [all.filter(t => t.status === "brand").length, "brand sheet"], [all.filter(t => t.status === "new").length, "new"], [all.filter(t => t.status === "adjusted").length, "adjusted"]]; },
+  },
+  "raw-light": {
+    intro: "The light-mode primitives, grouped like your raw sheet. <strong>Used by</strong> lists the semantic tokens that point at each colour. <strong>Label fixed</strong> means the sheet's hex, rgb or painted swatch disagree; the hex shown is the one to keep.",
+    filters: [["all", "All"], ["new", "New"], ["fixed", "Label fixed"], ["unused", "Unused"]],
+    tally: () => rawTally("light"),
+  },
+  "raw-dark": {
+    intro: "The dark value of every Color Styles step, named after the dark sheet where it has one. Figma holds the dark sheet's painted swatches, not its hex labels, so these follow Figma. <strong>New</strong> colours fill gaps the dark mode plan needs.",
+    filters: [["all", "All"], ["new", "New"], ["adjust", "Adjusted"], ["unused", "Unused"]],
+    tally: () => rawTally("dark"),
+  },
+  "dark-mode": {
+    intro: "Each semantic token's dark value: the dark side of the Color Styles step it aliases. Panels are #1C1C1B (neutral/0) and the page is #202020 (neutral/200), as in Figma. <strong>Adjust</strong> means the step exists but its value has to change; <strong>Add</strong> means a new step. One rule changes in dark mode: base.light turns dark, so text on filled buttons, chips and toasts flips from white to near-black.",
+    filters: [["all", "All"], ["adjust", "Adjust"], ["add", "Add"], ["sheet", "From Figma / dark sheet"], ["same", "No change"]],
+    tally: () => { const all = DARK.flatMap(g => g.items); const n = s => all.filter(t => t.status === s).length; return [[n("adjust"), "adjust"], [n("add"), "add"], [n("sheet"), "from dark sheet"], [n("same"), "no change"]]; },
+  },
+};
+VIEWS["figma"] = {
+  intro: "Two collections for your Variables panel, each with a <strong>Light Mode</strong> and a <strong>Dark Mode</strong> column. <strong>Color Styles</strong> is the palette: each step holds both values, so it switches with the mode. <strong>Tokens</strong> is the semantic layer: each token aliases one step, and Figma resolves it for the frame's mode. Step status: <strong>In Figma</strong> unchanged, <strong>Adjust</strong> change the value, <strong>Confirm</strong> from the brand sheets (not visible in your screenshot, so check it), <strong>Add</strong> a new step. The same table is in docs/tokens/figma-variables.csv.",
+  filters: [["all", "All"], ["new", "Add"], ["adjust", "Adjust"], ["sheet", "Confirm"], ["figma", "In Figma"]],
+  tally: () => { const all = FIGMA.styles.flatMap(g => g.items); const n = s => all.filter(t => t.status === s).length; return [[all.length, "Color Styles steps"], [FIGMA.tokens.flatMap(g => g.items).length, "tokens"], [n("new"), "steps to add"], [n("adjust"), "to adjust"]]; },
+};
+const LABELS = { new: "New", adjusted: "Adjusted", fixed: "Label fixed", dup: "Duplicate", unused: "Unused", add: "Add", adjust: "Adjust", sheet: "From Figma / dark sheet", same: "No change" };
+const STEP_LABELS = { figma: ["In Figma", "same"], adjust: ["Adjust", "adjust"], sheet: ["Confirm", "fixed"], new: ["Add", "add"] };
+
+let view = "semantic", filter = "all", query = "";
+const $ = id => document.getElementById(id);
+
+function rawTally(mode) {
+  const all = RAW[mode].flatMap(g => g.items);
+  return [[all.length, "colours"], [all.filter(t => t.source === "new").length, "new"], [all.filter(t => t.source === "fixed").length, "labels fixed"], [all.filter(t => !t.users.length).length, "unused"]];
+}
+function isLight(css) {
+  const m = css.startsWith("#") && css.match(/[\da-f]{2}/gi);
+  if (!m) return false;
+  const [r, g, b] = m.slice(0, 3).map(h => parseInt(h, 16));
+  return 0.299 * r + 0.587 * g + 0.114 * b > 150;
+}
+function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;"); }
+function matches(fields) { const q = query.trim().toLowerCase(); return !q || fields.some(f => String(f).toLowerCase().includes(q)); }
+
+function swatch(css, alpha, ground, copyText, onLabel) {
+  const b = document.createElement("button");
+  b.type = "button"; b.className = "sw"; b.title = "Copy " + copyText; b.setAttribute("aria-label", "Copy " + copyText);
+  b.innerHTML = `<span class="layer" style="background:${alpha ? ground : "transparent"}"></span><span class="layer" style="background:${css}"></span>${alpha && onLabel ? `<span class="on${isLight(ground) ? " light" : ""}">${onLabel}</span>` : ""}<span class="copied" aria-hidden="true">Copied</span>`;
+  b.addEventListener("click", () => {
+    const ok = () => { b.classList.add("done"); setTimeout(() => b.classList.remove("done"), 1200); };
+    try { navigator.clipboard.writeText(copyText).then(ok, ok); } catch (e) { ok(); }
+  });
+  return b;
+}
+
+function groupSection(id, title, blurb) {
+  const sec = document.createElement("section");
+  sec.className = "group"; sec.id = id;
+  sec.innerHTML = `<header><h2>${esc(title)}</h2>${blurb ? `<p>${esc(blurb)}</p>` : ""}</header>`;
+  const a = document.createElement("a"); a.href = "#" + id; a.textContent = title; $("jump").appendChild(a);
+  return sec;
+}
+
+function renderSemantic(root) {
+  let shown = 0;
+  for (const g of DATA) {
+    const items = g.items.filter(t => (filter === "all" || t.status === filter) && matches([g.group + "." + t.name, t.name, t.code, t.hex, t.rgb, t.desc]));
+    if (!items.length) continue;
+    shown += items.length;
+    const sec = groupSection("s-" + g.group, g.group, g.blurb);
+    const grid = document.createElement("div"); grid.className = "grid";
+    for (const t of items) {
+      const el = document.createElement("article"); el.className = "tok";
+      el.appendChild(swatch(t.css, t.alpha, g.ground, `var(--color-${t.code})`, g.ground === "#ffffff" ? "on white" : "on navy"));
+      el.insertAdjacentHTML("beforeend", `
+        <div class="name">${esc(t.name)}${t.status !== "brand" ? `<span class="tag ${t.status}">${LABELS[t.status]}</span>` : ""}</div>
+        <div class="vals"><span>${t.hex}</span><span>${t.rgb}</span><span>${t.hsl}</span><span class="code">--color-${t.code}</span></div>
+        ${t.was ? `<div class="was">Brand sheet: ${t.was}</div>` : ""}
+        <p class="desc">${esc(t.desc)}</p>
+        ${t.checks.length ? `<div class="cr">${t.checks.map(c => `<span>${c}</span>`).join("")}</div>` : ""}`);
+      grid.appendChild(el);
+    }
+    sec.appendChild(grid); root.appendChild(sec);
+  }
+  return shown;
+}
+
+function renderRaw(root, mode) {
+  let shown = 0;
+  const host = mode === "dark" ? Object.assign(document.createElement("div"), { className: "board" }) : root;
+  const ground = mode === "dark" ? D_PANEL : "#ffffff";
+  for (const g of RAW[mode]) {
+    const items = g.items.filter(t => {
+      const state = !t.users.length ? "unused" : t.source;
+      return (filter === "all" || (filter !== "unused" && t.source === filter) || (filter === "unused" && state === "unused")) && matches([t.name, t.hex, t.rgb, t.note, ...t.users]);
+    });
+    if (!items.length) continue;
+    shown += items.length;
+    const sec = groupSection(mode[0] + "-" + g.group, g.group, "");
+    const grid = document.createElement("div"); grid.className = "grid";
+    for (const t of items) {
+      const el = document.createElement("article"); el.className = "tok";
+      el.appendChild(swatch(t.css, t.alpha, ground, t.hex, mode === "dark" ? "on lead" : "on white"));
+      const tags = [t.source !== "brand" ? `<span class="tag ${t.source}">${LABELS[t.source]}</span>` : "", !t.users.length ? `<span class="tag unused">Unused</span>` : ""].join("");
+      el.insertAdjacentHTML("beforeend", `
+        <div class="name">${esc(t.name)}${tags}</div>
+        <div class="vals"><span>${t.hex}</span><span>${t.rgb}</span><span>${t.hsl}</span></div>
+        ${t.users.length ? `<p class="users"><b>Used by</b> ${t.users.map(esc).join(", ")}</p>` : ""}
+        ${t.note ? `<p class="desc">${esc(t.note)}</p>` : ""}`);
+      grid.appendChild(el);
+    }
+    sec.appendChild(grid); host.appendChild(sec);
+  }
+  if (host !== root && shown) root.appendChild(host);
+  return shown;
+}
+
+function chip(v, ground, sub) {
+  return `<span class="chip"><i><span style="background:${v.alpha ? ground : "transparent"}"></span><span style="background:${v.css}"></span></i><span>${v.hex}${sub ? `<small>${esc(sub)}</small>` : ""}</span></span>`;
+}
+
+function renderDark(root) {
+  let shown = 0;
+  const legend = document.createElement("div"); legend.className = "legend";
+  legend.innerHTML = ["adjust", "add", "sheet", "same"].map(s => `<span><span class="tag ${s}">${LABELS[s]}</span></span>`).join("");
+  for (const g of DARK) {
+    const items = g.items.filter(t => (filter === "all" || t.status === filter) && matches([g.group + "." + t.name, t.code, t.light.hex, t.dark.hex, t.dark.name, t.note]));
+    if (!items.length) continue;
+    shown += items.length;
+    const sec = groupSection("d-" + g.group, g.group, "");
+    sec.insertAdjacentHTML("beforeend", `<div class="tablewrap"><table>
+      <thead><tr><th scope="col">Token</th><th scope="col">Step</th><th scope="col">Light</th><th scope="col">Dark</th><th scope="col">Status</th><th scope="col">Contrast in dark</th><th scope="col">Why</th></tr></thead>
+      <tbody>${items.map(t => `<tr>
+        <td class="tk"><b>${esc(t.name)}</b><span>--color-${t.code}</span></td>
+        <td class="mono">${t.step}</td>
+        <td>${chip(t.light, "#ffffff")}</td>
+        <td>${chip(t.dark, D_PANEL, t.dark.name)}</td>
+        <td><span class="tag ${t.status}">${LABELS[t.status]}</span></td>
+        <td class="crs">${t.checks.length ? t.checks.join("<br>") : "—"}</td>
+        <td class="note">${esc(t.note) || ""}</td></tr>`).join("")}</tbody></table></div>`);
+    root.appendChild(sec);
+  }
+  if (shown) root.prepend(legend);
+  return shown;
+}
+
+function figChip(v, ground) {
+  const [hex, pct] = v.fig.split(" · ");
+  return `<span class="chip"><i><span style="background:${v.alpha ? ground : "transparent"}"></span><span style="background:${v.css}"></span></i><span>${hex}</span>${pct ? `<span class="pct">${pct}</span>` : ""}</span>`;
+}
+
+function renderFigma(root) {
+  let shown = 0;
+  const head = document.createElement("h2"); head.className = "coll"; head.textContent = "Collection: Color Styles";
+  root.appendChild(head);
+  for (const g of FIGMA.styles) {
+    const items = g.items.filter(t => (filter === "all" || t.status === filter) && matches([g.group + "/" + t.name, t.light.hex, t.dark.hex, t.note, ...t.users]));
+    if (!items.length) continue;
+    shown += items.length;
+    const sec = groupSection("f-" + g.group.replace(/\W+/g, "-"), g.group, "");
+    sec.insertAdjacentHTML("beforeend", `<div class="tablewrap"><table>
+      <thead><tr><th scope="col">Name</th><th scope="col">Light Mode</th><th scope="col">Dark Mode</th><th scope="col">Status</th><th scope="col">Aliased by</th><th scope="col">Note</th></tr></thead>
+      <tbody>${items.map(t => `<tr>
+        <td class="tk"><b>${esc(t.name)}</b></td>
+        <td>${figChip(t.light, "#ffffff")}</td>
+        <td>${figChip(t.dark, D_PANEL)}</td>
+        <td><span class="tag ${STEP_LABELS[t.status][1]}">${STEP_LABELS[t.status][0]}</span></td>
+        <td class="note">${t.users.length ? t.users.map(esc).join(", ") : "—"}</td>
+        <td class="note">${esc(t.note)}</td></tr>`).join("")}</tbody></table></div>`);
+    root.appendChild(sec);
+  }
+  if (filter === "all") {
+    const h2 = document.createElement("h2"); h2.className = "coll"; h2.textContent = "Collection: Tokens";
+    root.appendChild(h2);
+    for (const g of FIGMA.tokens) {
+      const items = g.items.filter(t => matches([g.group + "/" + t.name, t.alias, t.light.hex, t.dark.hex]));
+      if (!items.length) continue;
+      shown += items.length;
+      const sec = groupSection("t-" + g.group, g.group, "");
+      sec.insertAdjacentHTML("beforeend", `<div class="tablewrap"><table>
+        <thead><tr><th scope="col">Name</th><th scope="col">Alias</th><th scope="col">Light Mode</th><th scope="col">Dark Mode</th></tr></thead>
+        <tbody>${items.map(t => `<tr>
+          <td class="tk"><b>${esc(t.name)}</b><span>${esc(g.group)}/${esc(t.name)}</span></td>
+          <td class="mono">${t.alias}</td>
+          <td>${figChip(t.light, "#ffffff")}</td>
+          <td>${figChip(t.dark, D_PANEL)}</td></tr>`).join("")}</tbody></table></div>`);
+      root.appendChild(sec);
+    }
+  }
+  return shown;
+}
+
+function render() {
+  const root = $("view"); root.textContent = ""; $("jump").textContent = "";
+  const v = VIEWS[view];
+  $("tally").innerHTML = v.tally().map(([n, l]) => `<div><b>${n}</b><span>${l}</span></div>`).join("");
+  const shown = view === "semantic" ? renderSemantic(root) : view === "dark-mode" ? renderDark(root) : view === "figma" ? renderFigma(root) : renderRaw(root, view === "raw-light" ? "light" : "dark");
+  if (!shown) root.innerHTML = `<p class="empty">Nothing matches “${esc(query)}”${filter !== "all" ? " in this filter" : ""}. Try a hex value like 00735F or a word like border.</p>`;
+}
+
+function setView(next, push) {
+  if (!VIEWS[next]) next = "semantic";
+  view = next; filter = "all";
+  document.querySelectorAll(".tabs button").forEach(b => b.setAttribute("aria-selected", String(b.dataset.view === view)));
+  $("intro").innerHTML = VIEWS[view].intro;
+  const seg = $("seg"); seg.textContent = "";
+  for (const [key, label] of VIEWS[view].filters) {
+    const b = document.createElement("button");
+    b.type = "button"; b.id = "f-" + key; b.textContent = label; b.setAttribute("aria-pressed", String(key === "all"));
+    b.addEventListener("click", () => { filter = key; seg.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", String(x === b))); render(); });
+    seg.appendChild(b);
+  }
+  if (push) { try { history.replaceState(null, "", "#" + view); } catch (e) {} }
+  render();
+}
+
+document.querySelectorAll(".tabs button").forEach(b => b.addEventListener("click", () => setView(b.dataset.view, true)));
+$("q").addEventListener("input", e => { query = e.target.value; render(); });
+setView((location.hash || "").slice(1), false);
+</script>
