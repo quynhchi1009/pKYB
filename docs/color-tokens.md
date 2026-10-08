@@ -114,6 +114,15 @@ The navy AsiaVerify Portal shell shared by every product: top bar, sidebar and n
 | **control_hover** | `chrome-control-hover` | #FFFFFF1A | rgba(255, 255, 255, 0.1) | hsla(0, 0%, 100%, 0.1) | New | Hover fill of buttons on navy: icon buttons, toast actions, system-bar actions. | — |
 | **border** | `chrome-border` | #FFFFFF1F | rgba(255, 255, 255, 0.12) | hsla(0, 0%, 100%, 0.12) | New | Dividers and edges on navy: sidebar rules, sub-navigation lines and card outlines. | — |
 
+## chart
+
+A categorical pair for two-series charts, such as new vs reviewed. Validated for colour-vision deficiency; always pair it with a legend, direct labels or a table.
+
+| Token | Code | Hex | RGB | HSL | Status | Usage | Contrast |
+|---|---|---|---|---|---|---|---|
+| **new** | `chart-new` | #2F75B5 | rgb(47, 117, 181) | hsl(209, 59%, 45%) | New | The first series in a two-series chart, such as changes detected. A mid blue on the brand's blue hue. | 4.85:1 on white |
+| **reviewed** | `chart-reviewed` | #009A7E | rgb(0, 154, 126) | hsl(169, 100%, 30%) | New | The second series, such as changes reviewed. Alias of interactive.contrast in light mode. | 3.55:1 on white |
+
 ## severity
 
 Product layer: pKYB's client-defined High / Medium / Low tiers, built from the sentiment tokens. Other products add their own product tokens alongside, built the same way.
@@ -147,7 +156,7 @@ Product layer: pKYB's client-defined High / Medium / Low tiers, built from the s
 4. **Fix labels that don't match their swatch.** See the Label fixed notes in the raw palettes below.
 5. **Reword interactive.contrast:** on a light-mode primary surface it is only 1.64:1. It is the text-on-primary colour, and it turns dark in dark mode.
 
-Totals: 65 tokens. 23 from the brand sheet, 37 new, 5 adjusted.
+Totals: 67 tokens. 23 from the brand sheet, 39 new, 5 adjusted.
 
 # Figma variables
 
@@ -210,6 +219,7 @@ Two collections, both with a **Light Mode** and a **Dark Mode** column, as in yo
 | 300 | 8FCAA9 | 00BD9A · 35% | Add | border/accent | Edges of accent chips. |
 | 350 | 2FBF87 | 2FBF87 | Add | chrome/accent | Green on navy. Unchanged, because the shell stays navy. |
 | 400 | 009A7E | 1C1C1B | Adjust | interactive/contrast | Text on a primary fill. In dark the fill turns bright, so this turns dark. The sheet pairs it with billiard. |
+| 450 | 009A7E | 1FA676 | Add | chart/reviewed | chart/reviewed. A separate step from green/400, whose dark value is a text colour. |
 | 500 | 00735F | 00BD9A | Confirm | interactive/primary | Dark is billiard's label. The swatch paints #F0FFF1, which would make primary buttons nearly white. |
 | 600 | 1B813D | A3E363 | Confirm | sentiment/positive |  |
 | 700 | 397300 | A6D872 | Confirm | content/on_positive_elevated |  |
@@ -242,6 +252,7 @@ Two collections, both with a **Light Mode** and a **Dark Mode** column, as in yo
 | Name | Light Mode | Dark Mode | Status | Aliased by | Note |
 |---|---|---|---|---|---|
 | 100 | AFDBF5 | 013263 | Confirm | — |  |
+| 500 | 2F75B5 | 4F8FD0 | Add | chart/new | chart/new. Lighter in dark mode to stay inside the chart lightness band on the dark panel. |
 | 600 | 2A4A6A | 2A4A6A | Add | chrome/navy_600 | Navy shell. The shell stays navy in dark mode. |
 | 700 | 1F3954 | 1F3954 | Add | chrome/navy_700 |  |
 | 750 | 1B3147 | E1FEFF | Confirm | — |  |
@@ -344,6 +355,13 @@ Two collections, both with a **Light Mode** and a **Dark Mode** column, as in yo
 | control_hover | color/gray/700 | FFFFFF · 10% | FFFFFF · 10% |
 | border | color/gray/800 | FFFFFF · 12% | FFFFFF · 12% |
 
+### chart
+
+| Name | Alias | Light Mode | Dark Mode |
+|---|---|---|---|
+| new | color/blue/500 | 2F75B5 | 4F8FD0 |
+| reviewed | color/green/450 | 009A7E | 1FA676 |
+
 ### severity
 
 | Name | Alias | Light Mode | Dark Mode |
@@ -401,7 +419,7 @@ Primitive colours, named in the brand sheet's style. Names of new colours are pr
 | **granny apple** | #D6E9DA | rgb(214, 233, 218) | hsl(133, 30%, 88%) | New | interactive.accent_hover |  |
 | **vista mint** | #8FCAA9 | rgb(143, 202, 169) | hsl(146, 36%, 68%) | New | border.accent |  |
 | **shamrock** | #2FBF87 | rgb(47, 191, 135) | hsl(157, 61%, 47%) | New | chrome.accent |  |
-| **paolo veronese green** | #009A7E | rgb(0, 154, 126) | hsl(169, 100%, 30%) | Brand | interactive.contrast |  |
+| **paolo veronese green** | #009A7E | rgb(0, 154, 126) | hsl(169, 100%, 30%) | Brand | interactive.contrast, chart.reviewed |  |
 | **tropical rainforest** | #00735F | rgb(0, 115, 95) | hsl(170, 100%, 23%) | Brand | interactive.primary |  |
 | **zunda green** | #1B813D | rgb(27, 129, 61) | hsl(140, 65%, 31%) | Label fixed | sentiment.positive | Label says #73C322 (2.20:1 on white); rgb says #009A7E. #1B813D is the painted swatch. |
 | **enchanted forest** | #397300 | rgb(57, 115, 0) | hsl(90, 100%, 23%) | Label fixed | content.on_positive_elevated | rgb label says (81, 138, 23) = #518A17, which fails at 4.09:1. |
@@ -452,6 +470,7 @@ Primitive colours, named in the brand sheet's style. Names of new colours are pr
 | Name | Hex | RGB | HSL | Source | Used by | Note |
 |---|---|---|---|---|---|---|
 | **endless horizon** | #AFDBF5 | rgb(175, 219, 245) | hsl(202, 78%, 82%) | Brand | unused |  |
+| **mariner** | #2F75B5 | rgb(47, 117, 181) | hsl(209, 59%, 45%) | New | chart.new | Chart series blue, on the brand's blue hue. |
 | **san juan** | #2A4A6A | rgb(42, 74, 106) | hsl(210, 43%, 29%) | New | chrome.navy_600 |  |
 | **cloud burst** | #1F3954 | rgb(31, 57, 84) | hsl(211, 46%, 23%) | New | chrome.navy_700 | Close to blue whale. Aligning the two would cut one navy. |
 | **blue whale** | #1B3147 | rgb(27, 49, 71) | hsl(210, 45%, 19%) | Brand | unused |  |
@@ -515,6 +534,7 @@ The dark value of every Color Styles step, named after the dark sheet where it h
 | **new** | #00BD9A59 | rgba(0, 189, 154, 0.35) | hsla(169, 100%, 37%, 0.35) | New | green/300 | border.accent |
 | **new** | #2FBF87 | rgb(47, 191, 135) | hsl(157, 61%, 47%) | New | green/350 | chrome.accent |
 | **billiard** | #1C1C1B | rgb(28, 28, 27) | hsl(60, 2%, 11%) | Adjusted | green/400 | interactive.contrast |
+| **new** | #1FA676 | rgb(31, 166, 118) | hsl(159, 69%, 39%) | New | green/450 | chart.reviewed |
 | **billiard** | #00BD9A | rgb(0, 189, 154) | hsl(169, 100%, 37%) | Brand | green/500 | interactive.primary |
 | **last of lettuce** | #A3E363 | rgb(163, 227, 99) | hsl(90, 70%, 64%) | Brand | green/600 | sentiment.positive |
 | **last of lettuce** | #A6D872 | rgb(166, 216, 114) | hsl(89, 57%, 65%) | Brand | green/700 | content.on_positive_elevated |
@@ -547,6 +567,7 @@ The dark value of every Color Styles step, named after the dark sheet where it h
 | Name | Hex | RGB | HSL | Source | Steps | Used by |
 |---|---|---|---|---|---|---|
 | **seafarer** | #013263 | rgb(1, 50, 99) | hsl(210, 98%, 20%) | Brand | blue/100 | unused |
+| **new** | #4F8FD0 | rgb(79, 143, 208) | hsl(210, 58%, 56%) | New | blue/500 | chart.new |
 | **new** | #2A4A6A | rgb(42, 74, 106) | hsl(210, 43%, 29%) | New | blue/600 | chrome.navy_600 |
 | **new** | #1F3954 | rgb(31, 57, 84) | hsl(211, 46%, 23%) | New | blue/700 | chrome.navy_700 |
 | **ice desert** | #E1FEFF | rgb(225, 254, 255) | hsl(182, 100%, 94%) | Brand | blue/750 | unused |
@@ -570,7 +591,7 @@ Each semantic token's dark value. Panels are #1C1C1B (neutral/0) and the page is
 
 **Adjust (5):** content.tertiary, content.on_warning_elevated, interactive.contrast, background.overlay, severity.medium
 
-**Add (34):** interactive.accent_hover, interactive.selected, interactive.secondary, interactive.inverse, background.subtle, background.system, background.scrim, background.demoted, background.accent, sentiment.negative_hover, border.subtle, border.neutral, border.accent, border.negative, border.warning, chrome.navy_700, chrome.navy_900, chrome.navy_950, chrome.navy_600, chrome.accent, chrome.content_main, chrome.content_tertiary, chrome.hover, chrome.selected, chrome.control_hover, chrome.border, severity.high_line, severity.high_ramp_1, severity.high_ramp_2, severity.high_on_dark, severity.medium_line, severity.low_bg, severity.low_line, severity.low_cell
+**Add (36):** interactive.accent_hover, interactive.selected, interactive.secondary, interactive.inverse, background.subtle, background.system, background.scrim, background.demoted, background.accent, sentiment.negative_hover, border.subtle, border.neutral, border.accent, border.negative, border.warning, chrome.navy_700, chrome.navy_900, chrome.navy_950, chrome.navy_600, chrome.accent, chrome.content_main, chrome.content_tertiary, chrome.hover, chrome.selected, chrome.control_hover, chrome.border, chart.new, chart.reviewed, severity.high_line, severity.high_ramp_1, severity.high_ramp_2, severity.high_on_dark, severity.medium_line, severity.low_bg, severity.low_line, severity.low_cell
 
 ## content
 
@@ -656,6 +677,13 @@ Each semantic token's dark value. Panels are #1C1C1B (neutral/0) and the page is
 | **selected** | color/gray/600 | #FFFFFF12 | #FFFFFF12 | Add | — |  |
 | **control_hover** | color/gray/700 | #FFFFFF1A | #FFFFFF1A | Add | — |  |
 | **border** | color/gray/800 | #FFFFFF1F | #FFFFFF1F | Add | — |  |
+
+## chart
+
+| Token | Step | Light | Dark | Status | Contrast in dark | Note |
+|---|---|---|---|---|---|---|
+| **new** | color/blue/500 | #2F75B5 | #4F8FD0 | Add | — | chart/new. Lighter in dark mode to stay inside the chart lightness band on the dark panel. |
+| **reviewed** | color/green/450 | #009A7E | #1FA676 | Add | — | chart/reviewed. A separate step from green/400, whose dark value is a text colour. |
 
 ## severity
 

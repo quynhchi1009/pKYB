@@ -1,14 +1,10 @@
-import { PRICING, worstSeverity } from "../data/model";
+import { PRICING } from "../data/model";
 import { useStore } from "../state/store";
 import { Button, Dialog, nf } from "./ui";
 
 export function StopDialog({ targets, onClose, onDone }: { targets: Array<{ id: string; name: string }>; onClose: () => void; onDone?: () => void }) {
-  const { stopMonitors, toast, monitors, severity } = useStore();
+  const { stopMonitors, toast } = useStore();
   const single = targets.length === 1;
-  const ids = new Set(targets.map((t) => t.id));
-  const open = monitors.filter((m) => ids.has(m.id)).flatMap((m) => m.events.filter((e) => !e.reviewed));
-  const unreviewed = open.length;
-  const high = open.filter((e) => worstSeverity(e.categories, severity) === "high").length;
   const shown = targets.slice(0, 5);
 
   const confirm = () => {
@@ -48,17 +44,6 @@ export function StopDialog({ targets, onClose, onDone }: { targets: Array<{ id: 
             ))}
             {targets.length > shown.length && <li className="py-0.5 text-content-main">and {nf.format(targets.length - shown.length)} more</li>}
           </ul>
-        )}
-        {unreviewed > 0 && (
-          <p className="font-medium text-content-primary">
-            {nf.format(unreviewed)} {unreviewed === 1 ? "change is" : "changes are"} still unreviewed
-            {high > 0 && (
-              <>
-                , <span className="text-high">including {nf.format(high)} High</span>
-              </>
-            )}
-            . {unreviewed === 1 ? "It stays" : "They stay"} in the history, unreviewed.
-          </p>
         )}
         <p>
           We'll stop checking {single ? "this company's" : "these companies'"} registry record. {single ? "Its" : "Their"} change history and baseline report stay

@@ -51,7 +51,7 @@
   --color-background-overlay: rgb(14 15 12 / 0.12);
   /* new: hover rows, quiet fills, the Low severity chip. */
   --color-background-subtle: #f1f1f1;
-  /* new: system feedback inside the content area (toasts, tooltips, bulk and pending bars, unreviewed dot). */
+  /* new: system feedback inside the content area (toasts, tooltips, bulk and pending bars). */
   --color-background-system: var(--color-navy-900);
   /* new: behind dialogs and the mobile navigation drawer. */
   --color-background-scrim: rgb(11 16 22 / 0.55);
@@ -98,6 +98,11 @@
   --color-chrome-selected: rgb(255 255 255 / 0.07);
   --color-chrome-control-hover: rgb(255 255 255 / 0.1);
   --color-chrome-border: rgb(255 255 255 / 0.12);
+
+  /* chart: a categorical pair for two-series charts, validated for colour-vision deficiency and
+     contrast on white. Blue sits on the brand's blue hue; green is paolo veronese (interactive.contrast). */
+  --color-chart-new: #2f75b5;
+  --color-chart-reviewed: var(--color-interactive-contrast);
 
   /* Severity tiers: the product layer. Text always uses the on_*_elevated colour, so it passes
      on the tinted chip and on white alike. */

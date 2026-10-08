@@ -161,6 +161,17 @@ export function NewTag({ dark }: { dark?: boolean }) {
   );
 }
 
+/**
+ * Focus something once every modal dialog has closed. While a modal is open the rest of the page is inert,
+ * so focusing it earlier silently fails and focus falls to <body> when the dialog closes.
+ */
+export function focusAfterDialogs(target: () => HTMLElement | null | undefined, tries = 30) {
+  requestAnimationFrame(() => {
+    if (document.querySelector("dialog[open]") && tries > 0) focusAfterDialogs(target, tries - 1);
+    else target()?.focus();
+  });
+}
+
 export function Dialog({
   open,
   onClose,

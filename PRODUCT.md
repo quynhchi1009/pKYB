@@ -49,7 +49,7 @@ Two positioning questions are **open, not decided**:
 - **Announcements:** a modal or prompt on login, and "NEW" tags.
 - **Downstream action:** after a high-priority change, the client downloads a new KYB Basic report.
 - **Other views:** an activity feed (reverse-chronological change events) and a case board (New / Reviewing / Actioned / No action needed) are in the requirements. The case board is an open question.
-- **Review decisions:** reviewing a change records "No action needed" or "Actioned", with the reviewer, the date and an optional note. These map to the case board's end states, and there is no "Reviewing" state yet. The change log exports as CSV.
+- **Review decisions (off for now, decided 2026-10-08):** the Portal does not record reviews ("Mark reviewed", "Record your review"). At this stage pKYB's job is to lead the client to a fresh KYB Basic report, so each company page has that as its one primary action. "Needs attention" means a change detected in the last 30 days, not an unreviewed one. The review fields stay in the data model so recording "No action needed" / "Actioned" decisions can return later. The change log exports as CSV.
 - **Field-level diff (open):** the company page shows each changed field's baseline and current values, so the analyst can judge a change before buying a report. This assumes the change-detection API returns before and after values per field. The prototype uses demo values, and this must be confirmed with the API team.
 
 ## Capabilities and Constraints

@@ -95,6 +95,11 @@ export const PRICING = {
   monitorCredits: 10,
   kybBasicCredits: null as number | null,
 };
+/** The organisation's credit balance. Not available to the prototype yet, so it renders as "xx credits" like the price. */
+export const CREDIT_BALANCE: number | null = null;
+/** "Balance xx credits → xx credits after", so every purchase shows what it leaves. */
+export const balanceAfterLabel = (cost: number | null) =>
+  `${creditsLabel(CREDIT_BALANCE)} → ${creditsLabel(CREDIT_BALANCE === null || cost === null ? null : CREDIT_BALANCE - cost)} after`;
 export const creditsLabel = (n: number | null) => (n === null ? "xx credits" : `${n} ${n === 1 ? "credit" : "credits"}`);
 /** "10 + xx credits" until the KYB Basic price is known, then a single sum. */
 export const totalTodayLabel = () =>
@@ -160,6 +165,15 @@ export type Monitor = {
 export const TODAY = new Date("2026-10-06T09:00:00");
 export const iso = (d: Date) => d.toISOString().slice(0, 10);
 export const addDays = (d: Date, n: number) => new Date(d.getTime() + n * 86400000);
+
+/**
+ * Review decisions are switched off for now (the Portal's job at this stage is to lead to a KYB Basic report), so
+ * "needs attention" is a time window instead of a review state: a change is recent for 30 days after detection.
+ * The review fields on ChangeEvent stay in the model so recording reviews can come back without a data change.
+ */
+export const RECENT_DAYS = 30;
+export const RECENT_FROM = iso(addDays(TODAY, -RECENT_DAYS));
+export const isRecent = (e: { date: string }) => e.date >= RECENT_FROM;
 
 function mulberry32(seed: number) {
   return () => {
@@ -472,7 +486,8 @@ export function generateMonitors(): Monitor[] {
       jurisdiction: code,
       createdAt: iso(created),
       endedAt: ended ? iso(ended) : undefined,
-      lastChecked: iso(addDays(end, -Math.floor(r() * 5))),
+      // A check can't predate the change it detected, so the last check is never earlier than the newest detection.
+      lastChecked: [iso(addDays(end, -Math.floor(r() * 5))), events[0]?.date ?? ""].sort().at(-1)!,
       status,
       events,
     });

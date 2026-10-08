@@ -35,6 +35,7 @@ Color Styles,color/green,250,#D6E9DA,100%,#2A4231,100%,,Add
 Color Styles,color/green,300,#8FCAA9,100%,#00BD9A,35%,,Add
 Color Styles,color/green,350,#2FBF87,100%,#2FBF87,100%,,Add
 Color Styles,color/green,400,#009A7E,100%,#1C1C1B,100%,,Adjust
+Color Styles,color/green,450,#009A7E,100%,#1FA676,100%,,Add
 Color Styles,color/green,500,#00735F,100%,#00BD9A,100%,,Confirm
 Color Styles,color/green,600,#1B813D,100%,#A3E363,100%,,Confirm
 Color Styles,color/green,700,#397300,100%,#A6D872,100%,,Confirm
@@ -52,6 +53,7 @@ Color Styles,color/yellow,200,#EFD7A3,100%,#F4C430,40%,,Add
 Color Styles,color/yellow,500,#FFAA52,100%,#F4C430,100%,,In Figma
 Color Styles,color/yellow,600,#9A6200,100%,#FFDB58,100%,,Adjust
 Color Styles,color/blue,100,#AFDBF5,100%,#013263,100%,,Confirm
+Color Styles,color/blue,500,#2F75B5,100%,#4F8FD0,100%,,Add
 Color Styles,color/blue,600,#2A4A6A,100%,#2A4A6A,100%,,Add
 Color Styles,color/blue,700,#1F3954,100%,#1F3954,100%,,Add
 Color Styles,color/blue,750,#1B3147,100%,#E1FEFF,100%,,Confirm
@@ -111,6 +113,8 @@ Tokens,chrome,hover,#FFFFFF,5%,#FFFFFF,5%,color/gray/500,
 Tokens,chrome,selected,#FFFFFF,7%,#FFFFFF,7%,color/gray/600,
 Tokens,chrome,control_hover,#FFFFFF,10%,#FFFFFF,10%,color/gray/700,
 Tokens,chrome,border,#FFFFFF,12%,#FFFFFF,12%,color/gray/800,
+Tokens,chart,new,#2F75B5,100%,#4F8FD0,100%,color/blue/500,
+Tokens,chart,reviewed,#009A7E,100%,#1FA676,100%,color/green/450,
 Tokens,severity,high,#95231E,100%,#FFE5E2,100%,color/red/600,
 Tokens,severity,high_bg,#FFEFEF,100%,#3A0505,100%,color/red/100,
 Tokens,severity,high_line,#F2C4C0,100%,#FCBCB4,40%,color/red/250,

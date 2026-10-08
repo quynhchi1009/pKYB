@@ -19,7 +19,7 @@ import {
   X,
 } from "lucide-react";
 import { useStore } from "../state/store";
-import { CATEGORY_LABEL, SEVERITY_LABEL, SEVERITY_RANK, worstSeverity } from "../data/model";
+import { CATEGORY_LABEL, RECENT_DAYS, SEVERITY_LABEL, SEVERITY_RANK, isRecent, worstSeverity } from "../data/model";
 import { NewTag, SEV_STYLE, Toasts, cx, formatDate } from "./ui";
 
 function Logo() {
@@ -47,7 +47,7 @@ function NotificationBell() {
     for (const m of monitors) {
       if (m.status !== "active") continue;
       for (const e of m.events) {
-        if (e.reviewed) continue;
+        if (!isRecent(e)) continue;
         const sev = worstSeverity(e.categories, severity);
         if (!prefs.inApp[sev]) continue;
         out.push({ id: e.id, monitorId: m.id, name: m.name, date: e.date, sev, label: e.categories.map((c) => CATEGORY_LABEL[c]).join(", ") });
@@ -74,7 +74,7 @@ function NotificationBell() {
       <button
         ref={trigger}
         onClick={() => setOpen((o) => !o)}
-        aria-label={`pKYB alerts, ${items.length} unread`}
+        aria-label={`pKYB alerts, ${items.length} in the last ${RECENT_DAYS} days`}
         aria-expanded={open}
         className="relative grid size-9 place-items-center rounded-[4px] text-chrome-content-main hover:bg-chrome-control-hover hover:text-white"
       >
@@ -91,14 +91,14 @@ function NotificationBell() {
           <div className="absolute top-11 right-0 z-50 w-[min(380px,calc(100vw-24px))] overflow-hidden rounded-[6px] border border-border-subtle bg-white text-content-primary shadow-pop">
             <div className="flex items-baseline justify-between border-b border-border-subtle px-4 py-3">
               <p className="text-[14px] font-semibold">
-                pKYB alerts{items.length > 0 && <span className="font-normal text-content-main tnum"> · {items.length} unread</span>}
+                pKYB alerts{items.length > 0 && <span className="font-normal text-content-main tnum"> · last {RECENT_DAYS} days</span>}
               </p>
               <Link to="/pkyb/settings" onClick={() => setOpen(false)} className="text-[12px] text-content-link hover:underline">
                 Severity Settings
               </Link>
             </div>
             <ul className="max-h-[360px] overflow-y-auto">
-              {items.length === 0 && <li className="px-4 py-6 text-center text-[13px] text-content-main">No unread alerts at the severities you chose in Severity Settings.</li>}
+              {items.length === 0 && <li className="px-4 py-6 text-center text-[13px] text-content-main">No alerts in the last {RECENT_DAYS} days at the severities you chose in Severity Settings.</li>}
               {items.slice(0, 8).map((n) => (
                 <li key={n.id}>
                   <Link
@@ -120,13 +120,13 @@ function NotificationBell() {
                 </li>
               ))}
             </ul>
-            {/* The feed opens on the same set the bell counts: unreviewed changes at the severities you get alerts for. */}
+            {/* The feed opens on the same set the bell counts: recent changes at the severities you get alerts for. */}
             <Link
               to="/pkyb/monitoring?tab=feed&alerts=1"
               onClick={() => setOpen(false)}
               className="block px-4 py-2.5 text-center text-[13px] font-semibold text-interactive-primary hover:bg-interactive-accent"
             >
-              {items.length ? `See all ${items.length} unread alerts in the change feed` : "Open the change feed"}
+              {items.length ? `See all ${items.length} alerts in the change feed` : "Open the change feed"}
             </Link>
           </div>
         </>

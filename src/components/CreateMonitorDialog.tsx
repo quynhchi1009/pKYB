@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ArrowDown, ArrowRight, BellRing, CircleAlert, CircleCheck, FileCheck2, Radar, SlidersHorizontal, X } from "lucide-react";
-import { CATEGORIES, DEFAULT_SEVERITY, PKYB_UNSUPPORTED, PRICING, TODAY, creditsLabel, iso, jurisdictionByCode, totalTodayLabel, type Company, type Severity } from "../data/model";
+import { CATEGORIES, DEFAULT_SEVERITY, PKYB_UNSUPPORTED, PRICING, TODAY, balanceAfterLabel, creditsLabel, iso, jurisdictionByCode, totalTodayLabel, type Company, type Severity } from "../data/model";
 import { useStore } from "../state/store";
 import { Button, CategoryChip, Dialog, Flag, SeverityPill, cx, formatDate } from "./ui";
 
@@ -204,9 +204,14 @@ export function CreateMonitorDialog({ company, onClose }: { company: Company | n
 
             <footer className="flex flex-col gap-3 border-t border-border-subtle bg-white px-6 py-4 sm:flex-row sm:items-center">
               {ordering && (
-                <p className="flex shrink-0 items-baseline gap-2 whitespace-nowrap">
-                  <span className="text-[13px] text-content-main">Total today</span>
-                  <span className="text-[18px] font-semibold tracking-[-0.01em] tnum text-content-primary">{totalTodayLabel()}</span>
+                <p className="flex shrink-0 flex-col">
+                  <span className="flex items-baseline gap-2 whitespace-nowrap">
+                    <span className="text-[13px] text-content-main">Total today</span>
+                    <span className="text-[18px] font-semibold tracking-[-0.01em] tnum text-content-primary">{totalTodayLabel()}</span>
+                  </span>
+                  <span className="text-[12px] text-content-tertiary tnum">
+                    Balance {balanceAfterLabel(PRICING.kybBasicCredits === null ? null : PRICING.monitorCredits + PRICING.kybBasicCredits)}
+                  </span>
                 </p>
               )}
               <div className="flex flex-col-reverse gap-2 sm:ml-auto sm:flex-row sm:items-center">

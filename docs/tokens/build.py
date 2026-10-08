@@ -184,6 +184,14 @@ GROUPS = [
          "Dividers and edges on navy: sidebar rules, sub-navigation lines and card outlines.",
          []),
     ]),
+    ("chart", "A categorical pair for two-series charts, such as new vs reviewed. Validated for colour-vision deficiency; always pair it with a legend, direct labels or a table.", WHITE, [
+        ("new", "#2F75B5", "chart-new", "new",
+         "The first series in a two-series chart, such as changes detected. A mid blue on the brand's blue hue.",
+         [(WHITE, "white")]),
+        ("reviewed", "#009A7E", "chart-reviewed", "new",
+         "The second series, such as changes reviewed. Alias of interactive.contrast in light mode.",
+         [(WHITE, "white")]),
+    ]),
     ("severity", "Product layer: pKYB's client-defined High / Medium / Low tiers, built from the sentiment tokens. Other products add their own product tokens alongside, built the same way.", WHITE, [
         ("high", "#95231E", "high", "new", "High label text. Alias of content.on_negative_elevated.", []),
         ("high_bg", "#FFEFEF", "high-bg", "new", "High pill fill. Alias of sentiment.negative_elevated.", []),
@@ -277,6 +285,7 @@ RAW_LIGHT = [
     ]),
     ("blue", [
         ("endless horizon", "#AFDBF5", "brand", ""),
+        ("mariner", "#2F75B5", "new", "Chart series blue, on the brand's blue hue."),
         ("san juan", "#2A4A6A", "new", ""),
         ("cloud burst", "#1F3954", "new", "Close to blue whale. Aligning the two would cut one navy."),
         ("blue whale", "#1B3147", "brand", ""),
@@ -341,6 +350,7 @@ STEPS = [
         ("300", "#8FCAA9", "rgba(0,189,154,0.35)", "new", "", "Edges of accent chips."),
         ("350", "#2FBF87", "#2FBF87", "new", "", "Green on navy. Unchanged, because the shell stays navy."),
         ("400", "#009A7E", "#1C1C1B", "adjust", "billiard", "Text on a primary fill. In dark the fill turns bright, so this turns dark. The sheet pairs it with billiard."),
+        ("450", "#009A7E", "#1FA676", "new", "", "chart/reviewed. A separate step from green/400, whose dark value is a text colour."),
         ("500", "#00735F", "#00BD9A", "sheet", "billiard", "Dark is billiard's label. The swatch paints #F0FFF1, which would make primary buttons nearly white."),
         ("600", "#1B813D", "#A3E363", "sheet", "last of lettuce", ""),
         ("700", "#397300", "#A6D872", "sheet", "last of lettuce", ""),
@@ -364,6 +374,7 @@ STEPS = [
     ]),
     ("blue", [
         ("100", "#AFDBF5", "#013263", "sheet", "seafarer", ""),
+        ("500", "#2F75B5", "#4F8FD0", "new", "", "chart/new. Lighter in dark mode to stay inside the chart lightness band on the dark panel."),
         ("600", "#2A4A6A", "#2A4A6A", "new", "", "Navy shell. The shell stays navy in dark mode."),
         ("700", "#1F3954", "#1F3954", "new", "", ""),
         ("750", "#1B3147", "#E1FEFF", "sheet", "ice desert", ""),
@@ -430,6 +441,8 @@ TOKEN_STEP = {
     "chrome-selected": ("gray/600", ""),
     "chrome-control-hover": ("gray/700", ""),
     "chrome-border": ("gray/800", ""),
+    "chart-new": ("blue/500", ""),
+    "chart-reviewed": ("green/450", ""),
     "high": ("red/600", ""),
     "high-bg": ("red/100", ""),
     "high-line": ("red/250", ""),

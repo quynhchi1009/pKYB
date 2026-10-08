@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Bell, ChevronDown, RotateCcw } from "lucide-react";
-import { CATEGORIES, CATEGORY_LABEL, DEFAULT_SEVERITY, SEVERITIES, SEVERITY_LABEL, worstSeverity, type Severity, type SeverityMap } from "../data/model";
+import { CATEGORIES, CATEGORY_LABEL, DEFAULT_SEVERITY, SEVERITIES, SEVERITY_LABEL, isRecent, worstSeverity, type Severity, type SeverityMap } from "../data/model";
 import { buildRow } from "../data/queue";
 import { useStore, type NotifyPrefs } from "../state/store";
 import { Button, CATEGORY_ICON, SEV_STYLE, cx, formatDate, nf } from "../components/ui";
@@ -11,21 +11,58 @@ const CHANNELS: Array<{ key: keyof NotifyPrefs; title: string; desc: string }> =
   { key: "weekly", title: "Weekly email digest", desc: "Receive a weekly summary for selected severities." },
 ];
 const TIERS_HIGH_FIRST: Severity[] = ["high", "medium", "low"];
+const DRAFT_KEY = "pkyb.severity-draft";
+function readDraft(): { map: SeverityMap; prefs: NotifyPrefs } | null {
+  try {
+    const raw = sessionStorage.getItem(DRAFT_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+function writeDraft(value: { map: SeverityMap; prefs: NotifyPrefs } | null) {
+  try {
+    if (value) sessionStorage.setItem(DRAFT_KEY, JSON.stringify(value));
+    else sessionStorage.removeItem(DRAFT_KEY);
+  } catch {
+    /* Storage can be unavailable (private mode); the draft then lasts only while the page is open. */
+  }
+}
+
 const plural = (n: number, one: string, many: string) => `${nf.format(n)} ${n === 1 ? one : many}`;
 
 export function SeveritySettings() {
   const { severity, saveSeverity, severityChange, prefs, savePrefs, toast, monitors } = useStore();
   // Both halves of the page share one save model: edit freely, see the impact, then save together.
-  const [draftMap, setDraftMap] = useState<SeverityMap>(severity);
-  const [draft, setDraft] = useState<NotifyPrefs>(prefs);
-  // Follow the saved values when they change elsewhere (an Undo from a toast, for instance).
-  useEffect(() => setDraftMap(severity), [severity]);
-  useEffect(() => setDraft(prefs), [prefs]);
+  // Unsaved drafts are kept for the session, so leaving the page (to check a company, say) doesn't lose them.
+  const stored = readDraft();
+  const [draftMap, setDraftMap] = useState<SeverityMap>(stored?.map ?? severity);
+  const [draft, setDraft] = useState<NotifyPrefs>(stored?.prefs ?? prefs);
+  // Follow the saved values when they actually change (an Undo from a toast, for instance). Comparing with the last
+  // saved value, not "after first render", keeps a restored draft even when effects run twice in development.
+  const savedMap = useRef(severity);
+  const savedPrefs = useRef(prefs);
+  useEffect(() => {
+    if (savedMap.current !== severity) setDraftMap(severity);
+    savedMap.current = severity;
+  }, [severity]);
+  useEffect(() => {
+    if (savedPrefs.current !== prefs) setDraft(prefs);
+    savedPrefs.current = prefs;
+  }, [prefs]);
 
   const changed = CATEGORIES.filter((c) => draftMap[c] !== severity[c]);
   const prefChanges = CHANNELS.reduce((n, ch) => n + SEVERITIES.filter((s) => draft[ch.key][s] !== prefs[ch.key][s]).length, 0);
   const pending = changed.length + prefChanges;
   const mappingChanged = changed.length > 0;
+  useEffect(() => {
+    writeDraft(pending ? { map: draftMap, prefs: draft } : null);
+    if (!pending) return;
+    // Closing or reloading the tab with unsaved changes asks first.
+    const warn = (e: BeforeUnloadEvent) => e.preventDefault();
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [pending, draftMap, draft]);
 
   // What saving would do, before it does it: companies whose headline severity moves, and in-app alert volume.
   const preview = useMemo(() => {
@@ -37,7 +74,7 @@ export function SeveritySettings() {
       if (m.status !== "active") continue;
       if (mappingChanged && m.events.length && buildRow(m, severity).latestSev !== buildRow(m, draftMap).latestSev) companies++;
       for (const e of m.events) {
-        if (e.reviewed) continue;
+        if (!isRecent(e)) continue;
         if (prefs.inApp[worstSeverity(e.categories, severity)]) before++;
         if (draft.inApp[worstSeverity(e.categories, draftMap)]) after++;
       }
@@ -97,8 +134,9 @@ export function SeveritySettings() {
     <div className="mx-auto max-w-[1280px] px-4 pt-6 pb-16 lg:px-8">
       <header className="max-w-[72ch]">
         <h1 className="text-[26px] leading-tight font-semibold tracking-[-0.015em]">Severity Settings</h1>
-        <p className="mt-1 text-[14px] text-content-main">
-          Set a severity for each change category, and choose which severities notify you. Severity drives the colours in the monitoring table, heatmaps and change feed.
+        {/* 62ch, not 72: Open Sans runs narrower than its "0", so 72ch let lines reach ~88 characters. */}
+        <p className="mt-1 max-w-[62ch] text-[14px] text-content-main">
+          Set a severity for each change category, and choose which severities notify you. Severity drives the colours in the monitoring table, company heatmaps and change feed.
           Nothing changes until you save.
         </p>
       </header>

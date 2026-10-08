@@ -160,6 +160,15 @@ function ReportPage({ company }: { company: Company }) {
                 ))}
               </div>
             </div>
+            {report === "basic" && !monitor && (
+              <p className="mt-5 rounded-[4px] bg-interactive-accent px-3 py-2.5 text-[13px] text-content-main">
+                Planning to monitor this company too? A pKYB monitor starts with this same KYB Basic report as its baseline, so{" "}
+                <button onClick={() => setCreating(true)} className="font-semibold text-content-link underline-offset-3 hover:underline">
+                  create the monitor instead
+                </button>{" "}
+                and pay for the report once.
+              </p>
+            )}
             <div className="mt-5 grid grid-cols-2 gap-3">
               <Button variant="secondary">Add to cart</Button>
               <Button variant="primary">Generate report</Button>
@@ -189,13 +198,13 @@ function ReportPage({ company }: { company: Company }) {
                 </>
               ) : (
                 <>
-                  <p className="text-[13px] text-content-main">Perpetual KYB flags registry changes after today's check, so you don't have to re-run reports.</p>
+                  <p className="text-[13px] text-content-main">Perpetual KYB starts from a KYB Basic report generated today, then flags every registry change after it, so you don't have to re-run reports.</p>
                   <ol className="mt-4 flex flex-col gap-3">
                     <li className="flex gap-3">
                       <FileCheck2 className="mt-0.5 size-4 shrink-0 text-interactive-primary" />
                       <span className="text-[13px]">
                         <span className="font-semibold">KYB Basic baseline</span>
-                        <span className="block text-content-main">Required. Generated when you start.</span>
+                        <span className="block text-content-main">Required and included in the order, so you don't need to generate it separately.</span>
                       </span>
                     </li>
                     <li className="flex gap-3">

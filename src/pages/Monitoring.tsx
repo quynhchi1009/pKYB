@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowDown, ArrowRight, ArrowUpDown, Check, ChevronDown, ChevronLeft, ChevronRight, Download, Ellipsis, Plus, Search, Square, SquareCheck, SquareMinus, X } from "lucide-react";
+import { ArrowDown, ArrowRight, ArrowUpDown, Check, ChevronDown, ChevronLeft, ChevronRight, Download, Ellipsis, Keyboard, Plus, Search, Square, SquareCheck, SquareMinus, X } from "lucide-react";
 import {
   CATEGORIES,
   CATEGORY_LABEL,
@@ -9,10 +9,11 @@ import {
   SEVERITY_LABEL,
   SEVERITY_RANK,
   STATUS_COPY,
-  DECISION_LABEL,
+  RECENT_DAYS,
   TODAY,
   addDays,
   fieldChanges,
+  isRecent,
   iso,
   jurisdictionByCode,
   worstSeverity,
@@ -23,17 +24,17 @@ import {
   type Severity,
 } from "../data/model";
 import { useStore } from "../state/store";
-import { applyFilters, buildRow, describeFilters, filtersFromParams, type Filters, type Row } from "../data/queue";
-import { Heatmap } from "../components/Heatmap";
+import { applyFilters, buildRow, describeFilters, filtersFromParams, moreRecent, type Filters, type Row } from "../data/queue";
+import { QueueTrend } from "../components/QueueTrend";
 import { StopDialog } from "../components/StopDialog";
 import { CreateMonitorDialog } from "../components/CreateMonitorDialog";
-import { Button, CategoryChip, EventSeverity, Flag, Menu, SEV_STYLE, Select, SeverityPill, cx, formatDate, formatDateLong, nf } from "../components/ui";
-import { ReviewDialog, ReviewMenu, ReviewStatus } from "../components/Review";
+import { Button, CategoryChip, Dialog, EventSeverity, focusAfterDialogs, Flag, Menu, SEV_STYLE, Select, cx, formatDate, formatDateLong, nf } from "../components/ui";
+import { FieldDiff } from "../components/Review";
 import { downloadCsv } from "../data/csv";
 
 type Tab = "active" | "feed" | "history";
 type Update = (patch: Record<string, string | null>) => void;
-const FILTER_KEYS = ["q", "jur", "sev", "cat", "unrev", "sort", "day", "status", "rev", "alerts"];
+const FILTER_KEYS = ["q", "jur", "sev", "cat", "recent", "sort", "day", "status", "alerts"];
 const TABS: Array<[Tab, string, string]> = [
   ["active", "Active monitors", "Active"],
   ["feed", "Change feed", "Feed"],
@@ -41,7 +42,6 @@ const TABS: Array<[Tab, string, string]> = [
 ];
 
 const PAGE = 25;
-const HIGH_RAMP = ["var(--color-background-subtle)", "var(--color-high-ramp-1)", "var(--color-high-ramp-2)", "var(--color-high-cell)"];
 function useMedia(query: string) {
   const [match, setMatch] = useState(() => window.matchMedia(query).matches);
   useEffect(() => {
@@ -92,36 +92,19 @@ export function Monitoring() {
   const triage = useMemo(() => {
     const by: Record<Severity, number> = { high: 0, medium: 0, low: 0 };
     let companies = 0;
-    for (const r of rows) if (r.unreviewedSev) (by[r.unreviewedSev]++, companies++);
-    const heatSince = iso(addDays(TODAY, -26 * 7));
-    // Two counts of changes, each with one meaning: every unreviewed change, and the subset the bell counts as alerts.
-    let unreviewed = 0;
-    let alerts = 0;
-    let peak = 1;
-    // The heatmap shares the headline's lens: unreviewed High changes, so it lightens as the queue shrinks.
-    const highByDay = new Map<string, number>();
-    for (const r of rows)
-      for (const e of r.m.events) {
-        if (e.reviewed) continue;
-        const s = worstSeverity(e.categories, severity);
-        unreviewed++;
-        if (prefs.inApp[s]) alerts++;
-        if (s !== "high") continue;
-        const n = (highByDay.get(e.date) ?? 0) + 1;
-        highByDay.set(e.date, n);
-        if (e.date >= heatSince && n > peak) peak = n;
-      }
-    return { by, companies, unreviewed, alerts, highByDay, peak };
-  }, [rows, severity, prefs]);
-  // The ramp scales to the busiest day on screen, so it never saturates into one flat colour.
-  const rampStep = (n: number) => (n === 0 ? 0 : n <= triage.peak / 3 ? 1 : n <= (2 * triage.peak) / 3 ? 2 : 3);
+    for (const r of rows) if (r.recentSev) (by[r.recentSev]++, companies++);
+    // Companies are the headline unit; the change count lives on the Change feed tab, where changes are the unit.
+    let changes = 0;
+    for (const r of rows) changes += r.m.events.length;
+    return { by, companies, changes };
+  }, [rows]);
 
-  // Start at the most severe unreviewed company and walk down: the queue is every unreviewed company, High first.
+  // Start at the most severe recent company and walk down: the queue is every company that changed recently, High first.
   const firstSeverity = triage.by.high ? "High" : triage.by.medium ? "Medium" : triage.by.low ? "Low" : null;
-  const startReview = () => {
-    const list = applyFilters(rows, { q: "", jur: "all", sev: "all", cat: "all", unrev: true, sort: "severity" });
+  const startQueue = () => {
+    const list = applyFilters(rows, { q: "", jur: "all", sev: "all", cat: "all", recent: true, sort: "severity" });
     if (!list.length) return;
-    setQueue({ ids: list.map((r) => r.m.id), label: "Needs review", search: "unrev=1" });
+    setQueue({ ids: list.map((r) => r.m.id), label: "Recent changes", search: "recent=1" });
     navigate(`/pkyb/monitoring/${list[0].m.id}`);
   };
   const f = filtersFromParams(params);
@@ -150,21 +133,21 @@ export function Monitoring() {
       <section aria-label="Triage" className="mt-6 grid overflow-hidden rounded-[6px] border border-border-subtle bg-white lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1.4fr)]">
         <div className="flex flex-col justify-between gap-5 p-5 lg:p-6">
           <div>
-            <p className="text-[13px] font-semibold text-content-main">Needs review</p>
+            <p className="text-[13px] font-semibold text-content-main">Changed in the last {RECENT_DAYS} days</p>
             <p className="mt-1 flex items-baseline gap-2">
               <span className="text-[44px] leading-none font-semibold tracking-[-0.03em] tnum">{nf.format(triage.companies)}</span>
-              <span className="text-[14px] text-content-main">companies with unreviewed changes</span>
+              <span className="text-[14px] text-content-main">{triage.companies === 1 ? "company" : "companies"}</span>
             </p>
             {/* The chips are the severity filter for the table below: press one to narrow to it, press it again to clear. */}
-            <div role="group" aria-label="Filter companies by their most severe unreviewed change" className="mt-4 flex flex-wrap gap-2">
+            <div role="group" aria-label={`Filter companies by their most severe change in the last ${RECENT_DAYS} days`} className="mt-4 flex flex-wrap gap-2">
               {(["high", "medium", "low"] as Severity[]).map((s) => {
-                // A chip filters to companies whose most severe unreviewed change is this tier, so it sets both filters and clears both.
-                const pressed = tab === "active" && f.sev === s && f.unrev;
+                // A chip filters to companies whose most severe recent change is this tier, so it sets both filters and clears both.
+                const pressed = tab === "active" && f.sev === s && f.recent;
                 return (
                   <button
                     key={s}
                     aria-pressed={pressed}
-                    onClick={() => (pressed ? update({ sev: null, unrev: null }) : update({ tab: null, unrev: "1", sev: s }))}
+                    onClick={() => (pressed ? update({ sev: null, recent: null }) : update({ tab: null, recent: "1", sev: s }))}
                     className={cx(
                       "inline-flex h-8 items-center gap-2 rounded-full border px-3 text-[13px] transition-colors hover:brightness-[0.97] max-sm:h-10",
                       SEV_STYLE[s].bg,
@@ -182,66 +165,26 @@ export function Monitoring() {
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
-            <Button variant="primary" onClick={startReview} disabled={!firstSeverity}>
-              {firstSeverity ? `Review ${firstSeverity} first` : "Nothing to review"} {firstSeverity && <ArrowRight className="size-4" />}
+            <Button variant="primary" onClick={startQueue} disabled={!firstSeverity}>
+              {firstSeverity ? `Start with ${firstSeverity}` : `No changes in the last ${RECENT_DAYS} days`} {firstSeverity && <ArrowRight className="size-4" />}
             </Button>
-            <dl className="flex gap-x-6 text-[13px]">
-              <div>
-                <dt className="text-content-tertiary">Unreviewed changes</dt>
-                <dd className="font-semibold tnum">{nf.format(triage.unreviewed)}</dd>
-              </div>
-              <div>
-                <dt className="text-content-tertiary">Your in-app alerts</dt>
-                <dd>
-                  <Link to="/pkyb/monitoring?tab=feed&alerts=1" className="font-semibold text-content-link tnum hover:underline">
-                    {nf.format(triage.alerts)} unread
-                  </Link>
-                </dd>
-              </div>
-            </dl>
           </div>
         </div>
         {narrow && !showHeat ? (
           <button onClick={() => setShowHeat(true)} aria-expanded={false} className="flex h-11 items-center justify-between gap-2 border-t border-border-subtle bg-base-contrast/60 px-5 text-left text-[13px] font-semibold text-interactive-primary">
-            Show unreviewed High changes per day
+            Show changes detected per week
             <ChevronDown className="size-4" aria-hidden />
           </button>
         ) : (
-        <div className="border-t border-border-subtle bg-base-contrast/60 p-5 lg:border-t-0 lg:border-l lg:p-6">
-          <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
-            <p className="text-[13px] font-semibold text-content-main">Unreviewed High-severity changes per day · last 26 weeks</p>
-            <span className="flex items-center gap-1.5 text-[11px] text-content-tertiary">
-              None
-              {HIGH_RAMP.map((c) => (
-                <span key={c} className="size-2.5 rounded-[2px]" style={{ background: c }} />
-              ))}
-              <span className="tnum">{triage.peak}</span>
-            </span>
+          <div className="border-t border-border-subtle bg-white p-5 lg:border-t-0 lg:border-l lg:p-6">
+            <QueueTrend monitors={active} />
           </div>
-          <Heatmap
-            weeks={26}
-            size={13}
-            gap={3}
-            ariaLabel="Unreviewed High-severity changes per day across your portfolio"
-            selected={tab === "feed" && f.sev === "high" ? day : null}
-            onSelect={(d) => update(d ? { day: d, tab: "feed", sev: "high", rev: null, alerts: null } : { day: null })}
-            cell={(d) => {
-              const n = triage.highByDay.get(d) ?? 0;
-              return {
-                fill: HIGH_RAMP[rampStep(n)],
-                label: `${n === 0 ? "No" : n} unreviewed High-severity change${n === 1 ? "" : "s"} · ${formatDate(d)}`,
-                active: n > 0,
-              };
-            }}
-          />
-          <p className="mt-2 text-[12px] text-content-tertiary">Select a day to open its unreviewed High changes in the feed.</p>
-        </div>
         )}
       </section>
 
       <div role="tablist" aria-label="Monitoring views" onKeyDown={onTabKey} className="mt-8 flex gap-1 overflow-x-auto overflow-y-hidden border-b border-border-subtle">
         {TABS.map(([t, label, short]) => {
-          const n = t === "active" ? active.length : t === "history" ? monitors.length : null;
+          const n = t === "active" ? active.length : t === "history" ? monitors.length : triage.changes;
           return (
             <button
               key={t}
@@ -265,7 +208,7 @@ export function Monitoring() {
       </div>
 
       <div role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`}>
-        {tab === "active" && <ActiveTable rows={rows} f={f} update={update} page={Number(params.get("page") ?? 0)} search={params.toString()} />}
+        {tab === "active" && <ActiveTable rows={rows} f={f} update={update} page={Number(params.get("page") ?? 0)} per={PAGE_SIZES.includes(Number(params.get("per"))) ? Number(params.get("per")) : PAGE} search={params.toString()} />}
         {tab === "feed" && (
           <ChangeFeed
             rows={rows}
@@ -277,8 +220,6 @@ export function Monitoring() {
             setSev={(v) => update({ sev: v })}
             cat={f.cat}
             setCat={(v) => update({ cat: v })}
-            includeReviewed={params.get("rev") === "1"}
-            setIncludeReviewed={(v) => update({ rev: v ? "1" : null })}
             alertsOnly={params.get("alerts") === "1"}
             clearAlerts={() => update({ alerts: null })}
             search={params.toString()}
@@ -359,12 +300,50 @@ function FilterBar({
   );
 }
 
-function Pager({ page, setPage, total }: { page: number; setPage: (n: number) => void; total: number }) {
-  const pages = Math.max(1, Math.ceil(total / PAGE));
+const PAGE_SIZES = [25, 50, 100];
+
+function Pager({
+  page,
+  setPage,
+  total,
+  per = PAGE,
+  setPer,
+}: {
+  page: number;
+  setPage: (n: number) => void;
+  total: number;
+  per?: number;
+  /** When set, the pager also offers a page size and a page jump. */
+  setPer?: (n: number) => void;
+}) {
+  const pages = Math.max(1, Math.ceil(total / per));
   return (
-    <div className="flex items-center justify-end gap-3 px-4 py-3 text-[13px] text-content-main">
+    <div className="flex flex-wrap items-center justify-end gap-x-4 gap-y-2 px-4 py-3 text-[13px] text-content-main">
+      {setPer && (
+        <label className="flex items-center gap-2">
+          Rows
+          <select value={per} onChange={(e) => setPer(Number(e.target.value))} className="h-8 rounded-[4px] border border-interactive-secondary bg-white px-2 text-[13px] focus:border-interactive-primary max-sm:h-10">
+            {PAGE_SIZES.map((n) => (
+              <option key={n}>{n}</option>
+            ))}
+          </select>
+        </label>
+      )}
+      {setPer && pages > 1 && (
+        <label className="flex items-center gap-2">
+          Page
+          <select value={page} onChange={(e) => setPage(Number(e.target.value))} className="h-8 rounded-[4px] border border-interactive-secondary bg-white px-2 text-[13px] tnum focus:border-interactive-primary max-sm:h-10">
+            {Array.from({ length: pages }, (_, i) => (
+              <option key={i} value={i}>
+                {i + 1}
+              </option>
+            ))}
+          </select>
+          <span className="tnum">of {nf.format(pages)}</span>
+        </label>
+      )}
       <span className="tnum">
-        {total === 0 ? 0 : nf.format(page * PAGE + 1)}–{nf.format(Math.min(total, (page + 1) * PAGE))} of {nf.format(total)}
+        {total === 0 ? 0 : nf.format(page * per + 1)}–{nf.format(Math.min(total, (page + 1) * per))} of {nf.format(total)}
       </span>
       <div className="flex gap-1">
         <button aria-label="Previous page" disabled={page === 0} onClick={() => setPage(page - 1)} className="grid size-8 place-items-center rounded-[4px] border border-border-subtle hover:bg-background-subtle disabled:opacity-40">
@@ -378,44 +357,107 @@ function Pager({ page, setPage, total }: { page: number; setPage: (n: number) =>
   );
 }
 
-function ActiveTable({ rows, f, update, page, search }: { rows: Row[]; f: Filters; update: Update; page: number; search: string }) {
+/** "+2 more recent": the row shows one change, so say how many others landed in the same window. */
+function MoreRecent({ r }: { r: Row }) {
+  const n = moreRecent(r);
+  if (n <= 0) return null;
+  return <span className="text-[12px] text-content-tertiary tnum">+{n} more recent</span>;
+}
+
+function ActiveTable({ rows, f, update, page, per, search }: { rows: Row[]; f: Filters; update: Update; page: number; per: number; search: string }) {
   const navigate = useNavigate();
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [stopping, setStopping] = useState<Array<{ id: string; name: string }>>([]);
-  const [confirmReview, setConfirmReview] = useState(false);
-  const [rowReview, setRowReview] = useState<{ ids: string[]; name: string } | null>(null);
-  const { q, jur, sev, cat, unrev: onlyUnreviewed, sort } = f;
+  const { q, jur, sev, cat, recent: onlyRecent, sort } = f;
   const { setQueue, severity } = useStore();
   const setPage = (n: number) => update({ page: n ? String(n) : null });
   const setSort = (v: "severity" | "date") => update({ sort: v === "severity" ? null : v });
 
-  const filtered = useMemo(() => applyFilters(rows, f), [rows, q, jur, sev, cat, onlyUnreviewed, sort]);
-  // Opening a company from here remembers this list as the review queue.
+  const filtered = useMemo(() => applyFilters(rows, f, severity), [rows, q, jur, sev, cat, onlyRecent, sort, severity]);
+  // Opening a company from here remembers this list, so the company page can step through it.
   const remember = () => setQueue({ ids: filtered.map((r) => r.m.id), label: describeFilters(f), search });
   const open = (id: string) => {
     remember();
     navigate(`/pkyb/monitoring/${id}`);
   };
-  const pageRows = filtered.slice(page * PAGE, (page + 1) * PAGE);
-  const selectedUnreviewed = useMemo(
-    () => rows.filter((r) => selected.has(r.m.id)).flatMap((r) => r.m.events.filter((e) => !e.reviewed).map((e) => e.id)),
-    [rows, selected],
-  );
+  const pageRows = filtered.slice(page * per, (page + 1) * per);
+  const setPer = (n: number) => update({ per: n === PAGE ? null : String(n), page: null });
+  const tableRef = useRef<HTMLDivElement>(null);
+  const [showKeys, setShowKeys] = useState(false);
   const selectedMix = useMemo(() => {
     const mix: Record<Severity, number> = { high: 0, medium: 0, low: 0 };
-    for (const r of rows) if (selected.has(r.m.id)) for (const e of r.m.events) if (!e.reviewed) mix[worstSeverity(e.categories, severity)]++;
+    for (const r of rows) if (selected.has(r.m.id)) for (const e of r.m.events) if (isRecent(e)) mix[worstSeverity(e.categories, severity)]++;
     return mix;
   }, [rows, selected, severity]);
   const allOnPage = pageRows.length > 0 && pageRows.every((r) => selected.has(r.m.id));
   const someOnPage = pageRows.some((r) => selected.has(r.m.id));
-  const toggle = (id: string) =>
+  // Shift-click selects (or clears) every row between the last checkbox clicked and this one.
+  const anchor = useRef<string | null>(null);
+  const toggle = (id: string, range = false) => {
+    const ids = pageRows.map((r) => r.m.id);
+    const from = anchor.current ? ids.indexOf(anchor.current) : -1;
+    const to = ids.indexOf(id);
     setSelected((s) => {
       const n = new Set(s);
-      if (n.has(id)) n.delete(id);
-      else n.add(id);
+      const on = !n.has(id);
+      const span = range && from >= 0 && to >= 0 ? ids.slice(Math.min(from, to), Math.max(from, to) + 1) : [id];
+      span.forEach((x) => (on ? n.add(x) : n.delete(x)));
       return n;
     });
-  const filtersOn = q || jur !== "all" || sev !== "all" || cat !== "all" || onlyUnreviewed;
+    anchor.current = id;
+  };
+
+  // Keyboard: j/k move between rows, x selects, Enter opens, ? lists the keys.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey || e.altKey || e.defaultPrevented) return;
+      const t = e.target instanceof Element ? e.target : null;
+      if (t?.closest("input, textarea, select, [contenteditable], dialog, [role=menu]")) return;
+      if (e.key === "?") {
+        e.preventDefault();
+        setShowKeys(true);
+        return;
+      }
+      const links = Array.from(tableRef.current?.querySelectorAll<HTMLElement>("[data-row-link]") ?? []).filter((el) => el.offsetParent);
+      if (!links.length) return;
+      const cur = links.indexOf(document.activeElement as HTMLElement);
+      const row = cur >= 0 ? pageRows[cur] : undefined;
+      if (e.key === "j" || e.key === "k") {
+        e.preventDefault();
+        const next = cur < 0 ? 0 : Math.min(links.length - 1, Math.max(0, cur + (e.key === "j" ? 1 : -1)));
+        links[next].focus();
+        links[next].scrollIntoView({ block: "nearest" });
+      } else if (e.key === "x" && row) {
+        e.preventDefault();
+        toggle(row.m.id, e.shiftKey);
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  });
+
+  // After a bulk action the bar unmounts; focus returns to the select-all checkbox instead of falling to <body>.
+  const focusAfterBulk = () =>
+    focusAfterDialogs(() => tableRef.current?.querySelector<HTMLElement>("[data-select-all]") ?? tableRef.current?.querySelector<HTMLElement>("[data-row-link]"));
+
+  const exportActive = () =>
+    downloadCsv(
+      `pkyb-active-monitors-${iso(TODAY)}.csv`,
+      ["Company", "Registration no.", "Jurisdiction", `Changes, last ${RECENT_DAYS} days`, `Worst severity, last ${RECENT_DAYS} days`, "Shown change", "Shown change detected", "Newest change detected", "Last checked", "Monitoring since"],
+      filtered.map((r) => [
+        r.m.name,
+        r.m.regNo,
+        jurisdictionByCode[r.m.jurisdiction]?.name ?? r.m.jurisdiction,
+        String(r.recent),
+        r.recentSev ? SEVERITY_LABEL[r.recentSev] : "",
+        r.latest ? r.latest.categories.map((c) => CATEGORY_LABEL[c]).join(" + ") : "",
+        r.latest?.date ?? "",
+        r.newest ?? "",
+        r.m.lastChecked,
+        r.m.createdAt,
+      ]),
+    );
+  const filtersOn = q || jur !== "all" || sev !== "all" || cat !== "all" || onlyRecent;
 
   return (
     <>
@@ -431,12 +473,12 @@ function ActiveTable({ rows, f, update, page, search }: { rows: Row[]; f: Filter
           </span>
         )}
         <label className="flex h-9 cursor-pointer items-center gap-2 rounded-[4px] border border-interactive-secondary bg-white px-3 text-[13px] select-none max-sm:h-11">
-          <input type="checkbox" checked={onlyUnreviewed} onChange={(e) => update({ unrev: e.target.checked ? "1" : null })} className="size-4 accent-interactive-primary" />
-          Unreviewed only
+          <input type="checkbox" checked={onlyRecent} onChange={(e) => update({ recent: e.target.checked ? "1" : null })} className="size-4 accent-interactive-primary" />
+          Changed in last {RECENT_DAYS} days
         </label>
         {filtersOn && (
           <button
-            onClick={() => update({ q: null, jur: null, sev: null, cat: null, unrev: null })}
+            onClick={() => update({ q: null, jur: null, sev: null, cat: null, recent: null })}
             className="inline-flex h-9 items-center gap-1 px-1 text-[13px] font-semibold text-content-link hover:underline max-sm:h-11"
           >
             <X className="size-3.5" /> Clear filters
@@ -444,7 +486,11 @@ function ActiveTable({ rows, f, update, page, search }: { rows: Row[]; f: Filter
         )}
       </FilterBar>
 
-      <div className="rounded-[6px] border border-border-subtle bg-white">
+      <p className="sr-only" aria-live="polite">
+        {`${nf.format(filtered.length)} ${filtered.length === 1 ? "company" : "companies"}`}
+        {selected.size > 0 && `, ${nf.format(selected.size)} selected${selectedMix.high ? `, including ${nf.format(selectedMix.high)} High` : ""}`}
+      </p>
+      <div ref={tableRef} className="rounded-[6px] border border-border-subtle bg-white">
         {selected.size > 0 && (
           <div className="sticky top-14 z-10 flex flex-wrap items-center gap-x-3 gap-y-2 rounded-t-[5px] border-b border-border-subtle bg-background-system px-4 py-2 text-[13px] text-white">
             <span className="font-semibold tnum">{nf.format(selected.size)} selected</span>
@@ -459,25 +505,16 @@ function ActiveTable({ rows, f, update, page, search }: { rows: Row[]; f: Filter
               </button>
             )}
             <span className="ml-auto flex items-center gap-1">
-              <button onClick={() => setSelected(new Set())} className="inline-flex h-8 items-center rounded-[4px] px-2 font-semibold text-chrome-content-main hover:bg-chrome-control-hover hover:text-white max-sm:h-10">
+              <button onClick={() => (setSelected(new Set()), focusAfterBulk())} className="inline-flex h-8 items-center rounded-[4px] px-2 font-semibold text-chrome-content-main hover:bg-chrome-control-hover hover:text-white max-sm:h-10">
                 Clear selection
               </button>
+              {/* Stopping is the only bulk action, so it sits on the bar rather than behind a one-item menu. It still confirms first. */}
               <button
-                disabled={selectedUnreviewed.length === 0}
-                onClick={() => setConfirmReview(true)}
-                className="inline-flex h-8 items-center gap-1.5 rounded-[4px] bg-white px-3 font-semibold text-content-primary hover:bg-interactive-accent disabled:opacity-50 max-sm:h-10"
+                onClick={() => setStopping(rows.filter((r) => selected.has(r.m.id)).map((r) => ({ id: r.m.id, name: r.m.name })))}
+                className="inline-flex h-8 items-center rounded-[4px] bg-white px-3 font-semibold text-content-primary hover:bg-interactive-accent max-sm:h-10"
               >
-                <Check className="size-4" />
-                {selectedUnreviewed.length ? `Review ${nf.format(selectedUnreviewed.length)} changes…` : "Nothing to review"}
+                Stop monitoring {nf.format(selected.size)}…
               </button>
-              <Menu
-                label="More bulk actions"
-                trigger={<Ellipsis className="size-4" />}
-                triggerClassName="grid size-8 place-items-center rounded-[4px] text-chrome-content-main hover:bg-chrome-control-hover hover:text-white max-sm:size-10"
-                items={[
-                  { label: `Stop monitoring ${nf.format(selected.size)}`, danger: true, onSelect: () => setStopping(rows.filter((r) => selected.has(r.m.id)).map((r) => ({ id: r.m.id, name: r.m.name }))) },
-                ]}
-              />
             </span>
           </div>
         )}
@@ -487,16 +524,15 @@ function ActiveTable({ rows, f, update, page, search }: { rows: Row[]; f: Filter
             const isSel = selected.has(r.m.id);
             return (
               <li key={r.m.id} className={cx("flex gap-3 px-4 py-3.5", isSel && "bg-interactive-selected")}>
-                <button role="checkbox" aria-checked={isSel} aria-label={`Select ${r.m.name}`} onClick={() => toggle(r.m.id)} className="-mx-3 -my-2.5 grid size-11 shrink-0 place-items-center text-content-tertiary">
+                <button role="checkbox" aria-checked={isSel} aria-label={`Select ${r.m.name}`} onClick={(e) => toggle(r.m.id, e.shiftKey)} className="-mx-3 -my-2.5 grid size-11 shrink-0 place-items-center text-content-tertiary">
                   {isSel ? <SquareCheck className="size-4 text-interactive-primary" aria-hidden /> : <Square className="size-4" aria-hidden />}
                 </button>
-                <Link to={`/pkyb/monitoring/${r.m.id}`} onClick={remember} className="min-w-0 flex-1">
+                <Link to={`/pkyb/monitoring/${r.m.id}`} onClick={remember} data-row-link="" className="min-w-0 flex-1">
                   <span className="flex items-center gap-2">
-                    {r.unreviewed > 0 && <span className="size-2 shrink-0 rounded-full bg-background-system" aria-label={`${r.unreviewed} unreviewed changes`} />}
-                    <span className={cx("truncate text-[14px] text-content-primary", r.unreviewed > 0 ? "font-semibold" : "font-medium")}>{r.m.name}</span>
+                    <span className={cx("truncate text-[14px] text-content-primary", r.recent > 0 ? "font-semibold" : "font-medium")}>{r.m.name}</span>
                   </span>
                   <span className="mt-0.5 flex items-center gap-1.5 text-[12px] text-content-tertiary">
-                    <Flag code={j.code} /> {j.name} · <span className="tnum">{r.latest ? `Detected ${formatDate(r.latest.date)}` : `Checked ${formatDate(r.m.lastChecked)}`}</span>
+                    <Flag code={j.code} /> {j.name} · <span className="tnum">{r.latest ? `Detected ${formatDate(r.latest.date)}${r.newest && r.newest > r.latest.date ? ` · newest ${formatDate(r.newest)}` : ""}` : `Checked ${formatDate(r.m.lastChecked)}`}</span>
                   </span>
                   {r.latest && r.latestSev ? (
                     <span className="mt-2 flex flex-wrap items-center gap-1.5">
@@ -504,6 +540,7 @@ function ActiveTable({ rows, f, update, page, search }: { rows: Row[]; f: Filter
                       {r.latest.categories.map((c) => (
                         <CategoryChip key={c} category={c} />
                       ))}
+                      <MoreRecent r={r} />
                     </span>
                   ) : (
                     <span className="mt-2 block text-[12px] text-content-tertiary">No changes since baseline</span>
@@ -512,12 +549,7 @@ function ActiveTable({ rows, f, update, page, search }: { rows: Row[]; f: Filter
                 <Menu
                   label={`More actions for ${r.m.name}`}
                   trigger={<Ellipsis className="size-4" />}
-                  items={[
-                    ...(r.unreviewed
-                      ? [{ label: `Review ${r.unreviewed} ${r.unreviewed === 1 ? "change" : "changes"}…`, onSelect: () => setRowReview({ ids: r.m.events.filter((e) => !e.reviewed).map((e) => e.id), name: r.m.name }) }]
-                      : []),
-                    { label: "Stop monitoring", danger: true, onSelect: () => setStopping([{ id: r.m.id, name: r.m.name }]) },
-                  ]}
+                  items={[{ label: "Stop monitoring", danger: true, onSelect: () => setStopping([{ id: r.m.id, name: r.m.name }]) }]}
                 />
               </li>
             );
@@ -539,6 +571,7 @@ function ActiveTable({ rows, f, update, page, search }: { rows: Row[]; f: Filter
                     role="checkbox"
                     aria-checked={allOnPage ? true : someOnPage ? "mixed" : false}
                     aria-label="Select all companies on this page"
+                    data-select-all=""
                     onClick={() =>
                       setSelected((s) => {
                         const n = new Set(s);
@@ -559,7 +592,7 @@ function ActiveTable({ rows, f, update, page, search }: { rows: Row[]; f: Filter
                   </button>
                 </th>
                 <th className="px-3 py-1.5 font-semibold" aria-sort={sort === "date" ? "descending" : "none"}>
-                  <button onClick={() => setSort("date")} title="Sort by date detected, newest first" className={cx("inline-flex h-6 items-center gap-1", sort === "date" && "text-content-primary")}>
+                  <button onClick={() => setSort("date")} title="Sort by each company’s newest detected change" className={cx("inline-flex h-6 items-center gap-1", sort === "date" && "text-content-primary")}>
                     Detected {sort === "date" ? <ArrowDown className="size-3.5" aria-hidden /> : <ArrowUpDown className="size-3.5 text-content-tertiary" aria-hidden />}
                   </button>
                 </th>
@@ -575,16 +608,15 @@ function ActiveTable({ rows, f, update, page, search }: { rows: Row[]; f: Filter
                 return (
                   <tr key={r.m.id} onClick={() => open(r.m.id)} className="group cursor-pointer align-top [&>td]:transition-colors">
                     <td className={cx("sticky left-0 z-[1] py-3 pl-3", fill)} onClick={(e) => e.stopPropagation()}>
-                      <button role="checkbox" aria-checked={isSel} aria-label={`Select ${r.m.name}`} onClick={() => toggle(r.m.id)} className="grid size-6 place-items-center text-content-tertiary hover:text-content-primary">
+                      <button role="checkbox" aria-checked={isSel} aria-label={`Select ${r.m.name}`} onClick={(e) => toggle(r.m.id, e.shiftKey)} className="grid size-6 place-items-center text-content-tertiary hover:text-content-primary">
                         {isSel ? <SquareCheck className="size-4 text-interactive-primary" aria-hidden /> : <Square className="size-4" aria-hidden />}
                       </button>
                     </td>
                     <td className={cx("sticky left-10 z-[1] max-w-[300px] min-w-[220px] px-3 py-3 shadow-[inset_-1px_0_0_var(--color-border-subtle)]", fill)}>
                       <span className="flex items-center gap-2">
-                        {r.unreviewed > 0 && <span className="size-2 shrink-0 rounded-full bg-background-system" title={`${r.unreviewed} unreviewed`} aria-label={`${r.unreviewed} unreviewed changes`} />}
-                        <span className={cx("truncate text-[14px] text-content-primary", r.unreviewed > 0 ? "font-semibold" : "font-medium")}>{r.m.name}</span>
+                        <span className={cx("truncate text-[14px] text-content-primary", r.recent > 0 ? "font-semibold" : "font-medium")}>{r.m.name}</span>
                       </span>
-                      <span className={cx("block text-[12px] text-content-tertiary tnum", r.unreviewed > 0 && "pl-4")}>
+                      <span className="block text-[12px] text-content-tertiary tnum">
                         {r.m.regNo} · Checked {formatDate(r.m.lastChecked)}
                       </span>
                     </td>
@@ -600,26 +632,25 @@ function ActiveTable({ rows, f, update, page, search }: { rows: Row[]; f: Filter
                           {r.latest.categories.map((c) => (
                             <CategoryChip key={c} category={c} />
                           ))}
+                          <MoreRecent r={r} />
                         </span>
                       ) : (
                         <span className="text-content-tertiary">No changes since baseline</span>
                       )}
                     </td>
-                    <td className={cx("px-3 py-3.5 whitespace-nowrap text-content-main tnum", fill)}>{r.latest ? formatDate(r.latest.date) : "—"}</td>
+                    <td className={cx("px-3 py-3.5 whitespace-nowrap text-content-main tnum", fill)}>
+                      {r.latest ? formatDate(r.latest.date) : "—"}
+                      {r.newest && r.latest && r.newest > r.latest.date && <span className="block text-[12px] text-content-tertiary">Newest {formatDate(r.newest)}</span>}
+                    </td>
                     <td className={cx("py-2.5 pr-3", fill)} onClick={(e) => e.stopPropagation()}>
                       <span className="flex items-center justify-end gap-1">
-                        <Link to={`/pkyb/monitoring/${r.m.id}`} onClick={remember} className="inline-flex h-8 items-center px-2 text-[13px] font-semibold text-content-link hover:underline">
-                          {r.unreviewed > 0 ? "Review" : "View"}
+                        <Link to={`/pkyb/monitoring/${r.m.id}`} onClick={remember} data-row-link="" aria-label={`View ${r.m.name}`} className="inline-flex h-8 items-center px-2 text-[13px] font-semibold text-content-link hover:underline">
+                          View
                         </Link>
                         <Menu
                           label={`More actions for ${r.m.name}`}
                           trigger={<Ellipsis className="size-4" />}
-                          items={[
-                            ...(r.unreviewed
-                              ? [{ label: `Review ${r.unreviewed} ${r.unreviewed === 1 ? "change" : "changes"}…`, onSelect: () => setRowReview({ ids: r.m.events.filter((e) => !e.reviewed).map((e) => e.id), name: r.m.name }) }]
-                              : []),
-                            { label: "Stop monitoring", danger: true, onSelect: () => setStopping([{ id: r.m.id, name: r.m.name }]) },
-                          ]}
+                          items={[{ label: "Stop monitoring", danger: true, onSelect: () => setStopping([{ id: r.m.id, name: r.m.name }]) }]}
                         />
                       </span>
                     </td>
@@ -637,45 +668,38 @@ function ActiveTable({ rows, f, update, page, search }: { rows: Row[]; f: Filter
             </tbody>
           </table>
         </div>
-        <div className="border-t border-border-subtle">
-          <Pager page={page} setPage={setPage} total={filtered.length} />
+        <div className="flex flex-wrap items-center justify-between border-t border-border-subtle">
+          <span className="flex items-center gap-1 pl-2">
+            {filtered.length > 0 && (
+              <Button variant="ghost" size="sm" onClick={exportActive}>
+                <Download className="size-3.5" /> Export {nf.format(filtered.length)} as CSV
+              </Button>
+            )}
+            <Button variant="ghost" size="sm" onClick={() => setShowKeys(true)} className="max-md:hidden">
+              <Keyboard className="size-3.5" /> Shortcuts
+            </Button>
+          </span>
+          <Pager page={page} setPage={setPage} total={filtered.length} per={per} setPer={setPer} />
         </div>
       </div>
-      <StopDialog targets={stopping} onClose={() => setStopping([])} onDone={() => setSelected(new Set())} />
-      <ReviewDialog
-        eventIds={confirmReview ? selectedUnreviewed : []}
-        title={`Review ${nf.format(selectedUnreviewed.length)} ${selectedUnreviewed.length === 1 ? "change" : "changes"}`}
-        onClose={() => setConfirmReview(false)}
-        onDone={() => setSelected(new Set())}
-      >
-        <p>
-          Across {nf.format(selected.size)} {selected.size === 1 ? "company" : "companies"}.
-          {selectedMix.high > 0 && (
-            <>
-              {" "}
-              <span className="font-semibold text-high">
-                {nf.format(selectedMix.high)} {selectedMix.high === 1 ? "is" : "are"} High severity
-              </span>
-              , so review {selectedMix.high === 1 ? "it" : "them"} one by one unless a single decision fits all of them.
-            </>
-          )}
-        </p>
-        <div className="flex flex-wrap gap-3">
-          {(["high", "medium", "low"] as Severity[]).map((lv) =>
-            selectedMix[lv] ? (
-              <span key={lv} className="inline-flex items-center gap-1.5 text-[13px]">
-                <SeverityPill level={lv} size="sm" /> <span className="tnum">{nf.format(selectedMix[lv])}</span>
-              </span>
-            ) : null,
-          )}
-        </div>
-      </ReviewDialog>
-      <ReviewDialog
-        eventIds={rowReview?.ids ?? []}
-        title={`Review ${rowReview?.ids.length === 1 ? "change" : `${nf.format(rowReview?.ids.length ?? 0)} changes`} for ${rowReview?.name ?? ""}`}
-        body={rowReview?.name}
-        onClose={() => setRowReview(null)}
-      />
+      <Dialog open={showKeys} onClose={() => setShowKeys(false)} width={420} labelledBy="keys-title" title="Keyboard shortcuts" footer={<Button variant="ghost" onClick={() => setShowKeys(false)} data-autofocus="">Close</Button>}>
+        <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-2.5 text-[13px] text-content-main">
+          {[
+            ["j / k", "Next / previous company"],
+            ["Enter", "Open the company"],
+            ["x", "Select the company (Shift+x or Shift-click selects a range)"],
+            ["?", "Show these shortcuts"],
+          ].map(([k, v]) => (
+            <Fragment key={k}>
+              <dt>
+                <kbd className="rounded-[3px] border border-border-neutral bg-background-subtle px-1.5 py-0.5 font-sans text-[12px] font-semibold text-content-primary">{k}</kbd>
+              </dt>
+              <dd>{v}</dd>
+            </Fragment>
+          ))}
+        </dl>
+      </Dialog>
+      <StopDialog targets={stopping} onClose={() => setStopping([])} onDone={() => (setSelected(new Set()), focusAfterBulk())} />
     </>
   );
 }
@@ -692,8 +716,6 @@ function ChangeFeed({
   setSev,
   cat,
   setCat,
-  includeReviewed,
-  setIncludeReviewed,
   alertsOnly,
   clearAlerts,
   search,
@@ -707,22 +729,18 @@ function ChangeFeed({
   setSev: (v: "all" | Severity) => void;
   cat: string;
   setCat: (v: string) => void;
-  includeReviewed: boolean;
-  setIncludeReviewed: (v: boolean) => void;
-  /** Only unreviewed changes at the severities the analyst gets in-app alerts for: exactly what the bell counts. */
+  /** Only recent changes at the severities the analyst gets in-app alerts for: exactly what the bell counts. */
   alertsOnly: boolean;
   clearAlerts: () => void;
   search: string;
 }) {
   const { severity, prefs } = useStore();
   const [page, setPage] = useState(0);
-  // The feed opens on the work still to do. Reviewed changes are one toggle away.
-  const showReviewed = includeReviewed && !alertsOnly;
   const events = useMemo(() => {
     const out: Array<{ e: ChangeEvent; m: Monitor; s: Severity }> = [];
     for (const r of rows)
       for (const e of r.m.events) {
-        if (!showReviewed && e.reviewed) continue;
+        if (alertsOnly && !isRecent(e)) continue;
         if (day && e.date !== day) continue;
         if (jur !== "all" && r.m.jurisdiction !== jur) continue;
         if (cat !== "all" && !e.categories.includes(cat as never)) continue;
@@ -732,18 +750,16 @@ function ChangeFeed({
         out.push({ e, m: r.m, s });
       }
     return out.sort((a, b) => (a.e.date === b.e.date ? SEVERITY_RANK[b.s] - SEVERITY_RANK[a.s] : a.e.date < b.e.date ? 1 : -1));
-  }, [rows, day, jur, sev, cat, severity, showReviewed, alertsOnly, prefs]);
-  useEffect(() => setPage(0), [day, jur, sev, cat, showReviewed, alertsOnly]);
+  }, [rows, day, jur, sev, cat, severity, alertsOnly, prefs]);
+  useEffect(() => setPage(0), [day, jur, sev, cat, alertsOnly]);
   const { setQueue } = useStore();
-  const [reviewAll, setReviewAll] = useState(false);
   const rememberFeed = () =>
     setQueue({ ids: [...new Set(events.map((x) => x.m.id))], label: day ? `Change feed · ${formatDate(day)}` : "Change feed", search });
-  const unreviewedHere = useMemo(() => events.filter((x) => !x.e.reviewed).map((x) => x.e.id), [events]);
   const slice = events.slice(page * PAGE, (page + 1) * PAGE);
   const exportFeed = () =>
     downloadCsv(
       `pkyb-change-feed-${iso(TODAY)}.csv`,
-      ["Detected", "Company", "Registration no.", "Jurisdiction", "Categories", "Severity now", "Severity when detected", "Fields changed", "Review", "Reviewed by", "Reviewed on", "Note"],
+      ["Detected", "Company", "Registration no.", "Jurisdiction", "Categories", "Severity now", "Severity when detected", "Fields changed"],
       events.map(({ e, m, s }) => [
         e.date,
         m.name,
@@ -753,10 +769,6 @@ function ChangeFeed({
         SEVERITY_LABEL[s],
         SEVERITY_LABEL[e.detectedSeverity],
         fieldChanges(e, m).map((fc) => `${fc.field}: ${fc.before} → ${fc.after}`).join("; "),
-        e.reviewed ? (e.decision ? DECISION_LABEL[e.decision] : "Reviewed") : "Unreviewed",
-        e.reviewedBy ?? "",
-        e.reviewedAt ?? "",
-        e.note ?? "",
       ]),
     );
   const groups: Array<[string, typeof slice]> = [];
@@ -769,14 +781,10 @@ function ChangeFeed({
   return (
     <>
       <FilterBar jur={jur} setJur={setJur} sev={sev} setSev={setSev} cat={cat} setCat={setCat}>
-        <label className={cx("flex h-9 items-center gap-2 rounded-[4px] border border-interactive-secondary bg-white px-3 text-[13px] select-none max-sm:h-11", alertsOnly ? "cursor-not-allowed opacity-50" : "cursor-pointer")}>
-          <input type="checkbox" checked={showReviewed} disabled={alertsOnly} onChange={(e) => setIncludeReviewed(e.target.checked)} className="size-4 accent-interactive-primary" />
-          Include reviewed
-        </label>
         {alertsOnly && (
           <span className="inline-flex h-9 items-center gap-2 rounded-full border border-border-accent bg-interactive-accent pr-1.5 pl-3 text-[13px] font-semibold text-interactive-control">
             Your in-app alerts
-            <button aria-label="Show all unreviewed changes" onClick={clearAlerts} className="grid size-6 place-items-center rounded-full hover:bg-interactive-accent-hover">
+            <button aria-label="Show all changes" onClick={clearAlerts} className="grid size-6 place-items-center rounded-full hover:bg-interactive-accent-hover">
               <X className="size-3.5" />
             </button>
           </span>
@@ -791,26 +799,17 @@ function ChangeFeed({
         )}
       </FilterBar>
       <div className="rounded-[6px] border border-border-subtle bg-white">
-        {/* Acting on the whole result sits with the result, not among the filters. */}
         {events.length > 0 && (
-          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-t-[6px] border-b border-border-subtle px-4 py-2.5">
-            <p className="text-[13px] text-content-main">
-              <span className="font-semibold text-content-primary tnum">{nf.format(events.length)}</span> {events.length === 1 ? "change" : "changes"}
-              {unreviewedHere.length !== events.length && <span className="tnum"> · {nf.format(unreviewedHere.length)} unreviewed</span>}
-            </p>
-            {unreviewedHere.length > 1 && (day || jur !== "all" || sev !== "all" || cat !== "all" || alertsOnly) && (
-              <Button variant="secondary" size="sm" onClick={() => setReviewAll(true)}>
-                <Check className="size-3.5" /> Review all {nf.format(unreviewedHere.length)}…
-              </Button>
-            )}
-          </div>
+          <p className="rounded-t-[6px] border-b border-border-subtle px-4 py-2.5 text-[13px] text-content-main">
+            <span className="font-semibold text-content-primary tnum">{nf.format(events.length)}</span> {events.length === 1 ? "change" : "changes"}
+          </p>
         )}
         {groups.map(([date, items]) => (
           <section key={date} aria-label={formatDateLong(date)}>
             <h2 className="sticky top-14 z-[1] border-b border-border-subtle bg-base-contrast px-4 py-2 text-[12px] font-semibold text-content-main">{formatDateLong(date)}</h2>
             <ul className="divide-y divide-border-subtle">
               {items.map(({ e, m }) => (
-                <li key={e.id} className="relative grid gap-2 px-4 py-3 hover:bg-base-contrast sm:grid-cols-[104px_minmax(0,1fr)_auto] sm:items-center sm:gap-4">
+                <li key={e.id} className="relative grid gap-2 px-4 py-3 hover:bg-base-contrast sm:grid-cols-[104px_minmax(0,1fr)] sm:items-center sm:gap-4">
                     <span>
                       <EventSeverity event={e} size="sm" />
                     </span>
@@ -821,7 +820,7 @@ function ChangeFeed({
                           to={`/pkyb/monitoring/${m.id}`}
                           onClick={rememberFeed}
                           title={m.name}
-                          className={cx("truncate text-[14px] hover:underline after:absolute after:inset-0", e.reviewed ? "font-medium text-content-main" : "font-semibold text-content-primary")}
+                          className="truncate text-[14px] font-semibold text-content-primary hover:underline after:absolute after:inset-0"
                         >
                           {m.name}
                         </Link>
@@ -831,14 +830,8 @@ function ChangeFeed({
                           <CategoryChip key={c} category={c} />
                         ))}
                       </span>
+                      <FieldDiff event={e} monitor={m} className="mt-2" />
                     </span>
-                    {e.reviewed ? (
-                      <span className="relative z-[1]">
-                        <ReviewStatus event={e} />
-                      </span>
-                    ) : (
-                      <ReviewMenu event={e} name={m.name} />
-                    )}
                 </li>
               ))}
             </ul>
@@ -846,13 +839,13 @@ function ChangeFeed({
         ))}
         {events.length === 0 && (
           <div className="px-4 py-14 text-center">
-            <p className="text-[14px] font-semibold">{showReviewed || day || jur !== "all" || sev !== "all" || cat !== "all" || alertsOnly ? "No changes match" : "No unreviewed changes"}</p>
+            <p className="text-[14px] font-semibold">{day || jur !== "all" || sev !== "all" || cat !== "all" || alertsOnly ? "No changes match" : "No changes yet"}</p>
             <p className="mt-1 text-[13px] text-content-main">
               {day
                 ? "Nothing was detected on this day for these filters."
-                : showReviewed || jur !== "all" || sev !== "all" || cat !== "all" || alertsOnly
+                : jur !== "all" || sev !== "all" || cat !== "all" || alertsOnly
                   ? "Adjust the filters to see more of the feed."
-                  : "Everything detected so far has been reviewed. Include reviewed to see the full history."}
+                  : "Registry changes across your monitored companies will be listed here as they're detected."}
             </p>
           </div>
         )}
@@ -867,13 +860,6 @@ function ChangeFeed({
           <Pager page={page} setPage={setPage} total={events.length} />
         </div>
       </div>
-      <ReviewDialog
-        eventIds={reviewAll ? unreviewedHere : []}
-        title={`Review ${nf.format(unreviewedHere.length)} changes`}
-        onClose={() => setReviewAll(false)}
-      >
-        <p>Every unreviewed change matching these filters, across {nf.format(new Set(events.filter((x) => !x.e.reviewed).map((x) => x.m.id)).size)} companies.</p>
-      </ReviewDialog>
     </>
   );
 }

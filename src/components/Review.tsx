@@ -1,8 +1,8 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
-import { ChevronDown } from "lucide-react";
-import { DECISION_HINT, DECISION_LABEL, type ChangeEvent, type ReviewDecision } from "../data/model";
+import { ArrowRight, ChevronDown } from "lucide-react";
+import { DECISION_HINT, DECISION_LABEL, SEVERITY_RANK, fieldChanges, worstSeverity, type ChangeEvent, type Monitor, type ReviewDecision } from "../data/model";
 import { useStore } from "../state/store";
-import { Button, Dialog, Menu, cx, formatDate } from "./ui";
+import { Button, Dialog, EventSeverity, Menu, cx, formatDate } from "./ui";
 
 const DECISIONS: ReviewDecision[] = ["no-action", "actioned"];
 
@@ -17,6 +17,57 @@ export const focusReviewed = (eventId: string, fallback?: HTMLElement | null) =>
     const target = document.getElementById(`rev-${eventId}`) ?? (fallback?.isConnected ? fallback : null);
     target?.focus();
   });
+
+/**
+ * What changed in the registry, field by field: "Shareholders  A 40% · B 60% → A 20% · B 60% · C 20%".
+ * Shown wherever a change can be reviewed and kept after review, so the change log records what was judged.
+ */
+export function FieldDiff({ event, monitor, className }: { event: ChangeEvent; monitor: Pick<Monitor, "name" | "jurisdiction">; className?: string }) {
+  const fields = fieldChanges(event, monitor);
+  return (
+    <ul className={cx("flex flex-col gap-1 text-[13px] leading-snug", className)}>
+      {fields.map((f) => (
+        <li key={f.category} className="min-w-0 text-content-main">
+          <span className="font-semibold text-content-primary">{f.field}</span> <span>{f.before}</span>
+          <ArrowRight className="mx-1 inline size-3.5 -translate-y-px text-content-tertiary" aria-hidden />
+          <span className="sr-only">changed to </span>
+          <span className="font-medium text-content-primary">{f.after}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+export type Evidence = { event: ChangeEvent; monitor: Monitor };
+
+/** The changes a review covers, most severe first, so a decision is never recorded blind. Lists the first 8 and counts the rest. */
+function EvidenceList({ items }: { items: Evidence[] }) {
+  const { severity } = useStore();
+  const sorted = [...items].sort((a, b) => SEVERITY_RANK[worstSeverity(b.event.categories, severity)] - SEVERITY_RANK[worstSeverity(a.event.categories, severity)]);
+  const shown = sorted.slice(0, 8);
+  const companies = new Set(items.map((x) => x.monitor.id)).size;
+  return (
+    <section aria-label="What changed" className="rounded-[6px] border border-border-subtle">
+      <ul className="max-h-[38vh] divide-y divide-border-subtle overflow-y-auto">
+        {shown.map(({ event, monitor }) => (
+          <li key={event.id} className="flex flex-col gap-1.5 px-3 py-2.5">
+            <span className="flex flex-wrap items-center gap-2 text-[12px] text-content-tertiary">
+              <EventSeverity event={event} size="sm" />
+              {companies > 1 && <span className="font-semibold text-content-primary">{monitor.name}</span>}
+              <span className="tnum">Detected {formatDate(event.date)}</span>
+            </span>
+            <FieldDiff event={event} monitor={monitor} />
+          </li>
+        ))}
+      </ul>
+      {sorted.length > shown.length && (
+        <p className="border-t border-border-subtle px-3 py-2 text-[12px] text-content-tertiary">
+          and {sorted.length - shown.length} more {sorted.length - shown.length === 1 ? "change" : "changes"}, less severe
+        </p>
+      )}
+    </section>
+  );
+}
 
 /** The two decisions as a radio pair with their meaning spelled out, plus an optional note. Shared by the lead card and the dialog. */
 export function DecisionFields({
@@ -81,6 +132,7 @@ export function ReviewDialog({
   onDone,
   defaultDecision = null,
   body,
+  evidence,
 }: {
   eventIds: string[];
   title: string;
@@ -90,6 +142,8 @@ export function ReviewDialog({
   defaultDecision?: ReviewDecision | null;
   /** Toast body, usually the company name. */
   body?: string;
+  /** The changes being reviewed, shown above the decision. */
+  evidence?: Evidence[];
 }) {
   const { reviewWithUndo } = useStore();
   const open = eventIds.length > 0;
@@ -127,6 +181,7 @@ export function ReviewDialog({
     >
       <div className="flex flex-col gap-4 text-[14px] text-content-main">
         {children}
+        {evidence && evidence.length > 0 && <EvidenceList items={evidence} />}
         <DecisionFields decision={decision} setDecision={setDecision} note={note} setNote={setNote} />
         <p className="text-[12px] text-content-tertiary">Your name, today's date and this decision are recorded in each company's change log.</p>
       </div>
@@ -135,8 +190,9 @@ export function ReviewDialog({
 }
 
 /** Inline review for one change in a list: pick the decision straight from the menu, or open the dialog to add a note. */
-export function ReviewMenu({ event, name, compact }: { event: ChangeEvent; name: string; compact?: boolean }) {
+export function ReviewMenu({ event, monitor, compact }: { event: ChangeEvent; monitor: Monitor; compact?: boolean }) {
   const { reviewWithUndo } = useStore();
+  const name = monitor.name;
   const [withNote, setWithNote] = useState(false);
   const wrap = useRef<HTMLSpanElement>(null);
   // The neighbouring row's trigger, found before this row can disappear from the list.
@@ -173,6 +229,7 @@ export function ReviewMenu({ event, name, compact }: { event: ChangeEvent; name:
         eventIds={withNote ? [event.id] : []}
         title={`Review change for ${name}`}
         body={name}
+        evidence={[{ event, monitor }]}
         onClose={() => setWithNote(false)}
         onDone={() => focusReviewed(event.id, neighbour())}
       />
