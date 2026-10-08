@@ -113,12 +113,12 @@ export function Heatmap({
           onMouseLeave={() => setHover(null)}
         >
           {monthMarks.map((m) => (
-            <text key={m.col} x={left + m.col * step} y={11} className="fill-ink-3" fontSize={10}>
+            <text key={m.col} x={left + m.col * step} y={11} className="fill-content-tertiary" fontSize={10}>
               {m.label}
             </text>
           ))}
           {["Mon", "Wed", "Fri"].map((d, i) => (
-            <text key={d} x={0} y={top + i * 2 * step + size - 2} className="fill-ink-3" fontSize={9}>
+            <text key={d} x={0} y={top + i * 2 * step + size - 2} className="fill-content-tertiary" fontSize={9}>
               {d}
             </text>
           ))}
@@ -138,7 +138,7 @@ export function Heatmap({
                 height={size}
                 rx={2}
                 fill={c.fill}
-                stroke={isSel ? "var(--color-navy-900)" : "transparent"}
+                stroke={isSel ? "var(--color-background-system)" : "transparent"}
                 strokeWidth={isSel ? 1.5 : 0}
                 style={{ cursor: interactive ? "pointer" : "default" }}
                 className={interactive ? "focus-visible:outline-none" : undefined}
@@ -162,7 +162,7 @@ export function Heatmap({
               height={size + 5}
               rx={3.5}
               fill="none"
-              stroke="var(--color-brand-600)"
+              stroke="var(--color-interactive-primary)"
               strokeWidth={2}
               pointerEvents="none"
             />
@@ -176,7 +176,7 @@ export function Heatmap({
       )}
       {hover && (
         <div
-          className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-full rounded-[4px] bg-navy-900 px-2 py-1 text-[12px] whitespace-nowrap text-white shadow-pop"
+          className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-full rounded-[4px] bg-background-system px-2 py-1 text-[12px] whitespace-nowrap text-white shadow-pop"
           style={{ left: hover.x, top: hover.y - 6 }}
         >
           {hover.label}

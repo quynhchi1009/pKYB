@@ -64,11 +64,11 @@ export const Button = forwardRef<HTMLButtonElement, BtnProps>(function Button(
           : size === "md"
             ? "h-9 px-4 text-[14px] max-sm:h-11"
             : "h-8 px-3 text-[13px] max-sm:h-10",
-        variant === "primary" && "bg-brand-700 text-white hover:bg-brand-800 active:bg-navy-800",
-        variant === "secondary" && "border border-brand-700 bg-white text-brand-700 hover:bg-brand-50",
-        variant === "ghost" && "text-ink-2 hover:bg-wash hover:text-ink",
-        variant === "danger" && "bg-high text-white hover:bg-high-hover",
-        variant === "link" && "min-h-8 text-brand-700 underline-offset-4 hover:underline",
+        variant === "primary" && "bg-interactive-primary text-white hover:bg-interactive-control active:bg-interactive-inverse",
+        variant === "secondary" && "border border-interactive-primary bg-white text-interactive-primary hover:bg-interactive-accent",
+        variant === "ghost" && "text-content-main hover:bg-background-subtle hover:text-content-primary",
+        variant === "danger" && "bg-sentiment-negative text-white hover:bg-sentiment-negative-hover",
+        variant === "link" && "min-h-8 text-content-link underline-offset-4 hover:underline",
         className,
       )}
       {...rest}
@@ -108,7 +108,7 @@ export function EventSeverity({ event, size = "md" }: { event: ChangeEvent; size
       {was !== now && (
         <>
           <span className="sr-only">Detected as {SEVERITY_LABEL[was]}.</span>
-          <span aria-hidden className="text-[11px] whitespace-nowrap text-ink-3">
+          <span aria-hidden className="text-[11px] whitespace-nowrap text-content-tertiary">
             was {SEVERITY_LABEL[was]}
           </span>
         </>
@@ -123,10 +123,10 @@ export function CategoryChip({ category, showSeverity = true }: { category: Cate
   const sev = severity[category];
   return (
     <span
-      className={cx("inline-flex h-6 items-center gap-1.5 rounded-[4px] border border-line px-2 text-[12px] text-ink-2", showSeverity ? "bg-white" : "bg-wash")}
+      className={cx("inline-flex h-6 items-center gap-1.5 rounded-[4px] border border-border-subtle px-2 text-[12px] text-content-main", showSeverity ? "bg-white" : "bg-background-subtle")}
       title={showSeverity ? `${CATEGORY_LABEL[category]} · ${SEVERITY_LABEL[sev]} severity` : undefined}
     >
-      <Icon className={cx("size-3.5", showSeverity ? "text-brand-700" : "text-ink-3")} strokeWidth={2} aria-hidden />
+      <Icon className={cx("size-3.5", showSeverity ? "text-interactive-primary" : "text-content-tertiary")} strokeWidth={2} aria-hidden />
       {CATEGORY_LABEL[category]}
       {showSeverity && (
         <>
@@ -142,7 +142,7 @@ export function Flag({ code, className }: { code: string; className?: string }) 
   const F = (Flags as Record<string, (p: { title?: string; className?: string }) => ReactNode>)[code];
   if (!F) return null;
   return (
-    <span className={cx("inline-flex overflow-hidden rounded-[2px] shadow-[0_0_0_1px_rgb(0_0_0/0.08)]", className ?? "h-3 w-[18px]")}>
+    <span className={cx("inline-flex overflow-hidden rounded-[2px] shadow-[0_0_0_1px_var(--color-background-overlay)]", className ?? "h-3 w-[18px]")}>
       <F title={jurisdictionByCode[code]?.name} className="h-full w-full" />
     </span>
   );
@@ -153,7 +153,7 @@ export function NewTag({ dark }: { dark?: boolean }) {
     <span
       className={cx(
         "inline-flex h-[18px] items-center rounded-[3px] border px-1.5 text-[11px] font-semibold",
-        dark ? "border-brand-300/60 bg-brand-50 text-brand-800" : "border-brand-300 bg-brand-50 text-brand-700",
+        dark ? "border-border-accent/60 bg-interactive-accent text-interactive-control" : "border-border-accent bg-interactive-accent text-interactive-primary",
       )}
     >
       New
@@ -202,26 +202,26 @@ export function Dialog({
         onClose();
       }}
       onClick={(e) => e.target === ref.current && onClose()}
-      className="m-auto max-h-[calc(100dvh-32px)] w-[calc(100vw-32px)] overflow-hidden rounded-[8px] bg-white p-0 text-ink shadow-dialog"
+      className="m-auto max-h-[calc(100dvh-32px)] w-[calc(100vw-32px)] overflow-hidden rounded-[8px] bg-white p-0 text-content-primary shadow-dialog"
       style={{ maxWidth: width }}
     >
       {open && bare && children}
       {open && !bare && (
         <div className="flex max-h-[calc(100dvh-32px)] flex-col">
-          <header className="flex items-start justify-between gap-4 border-b border-line px-6 pt-5 pb-4">
-            <h2 id={labelledBy} className="text-[18px] leading-snug font-semibold text-ink">
+          <header className="flex items-start justify-between gap-4 border-b border-border-subtle px-6 pt-5 pb-4">
+            <h2 id={labelledBy} className="text-[18px] leading-snug font-semibold text-content-primary">
               {title}
             </h2>
             <button
               onClick={onClose}
-              className="-mr-2 grid size-8 place-items-center rounded-[4px] text-ink-3 hover:bg-wash hover:text-ink"
+              className="-mr-2 grid size-8 place-items-center rounded-[4px] text-content-tertiary hover:bg-background-subtle hover:text-content-primary"
               aria-label="Close"
             >
               <X className="size-4" />
             </button>
           </header>
           <div className="overflow-y-auto px-6 py-5">{children}</div>
-          {footer && <footer className="flex items-center justify-end gap-3 border-t border-line bg-canvas px-6 py-4">{footer}</footer>}
+          {footer && <footer className="flex items-center justify-end gap-3 border-t border-border-subtle bg-base-contrast px-6 py-4">{footer}</footer>}
         </div>
       )}
     </dialog>
@@ -299,7 +299,7 @@ export function Menu({
           e.stopPropagation();
           setOpen((o) => !o);
         }}
-        className={triggerClassName ?? "grid size-8 place-items-center rounded-[4px] text-ink-3 hover:bg-wash hover:text-ink max-sm:size-11"}
+        className={triggerClassName ?? "grid size-8 place-items-center rounded-[4px] text-content-tertiary hover:bg-background-subtle hover:text-content-primary max-sm:size-11"}
       >
         {trigger}
       </button>
@@ -312,7 +312,7 @@ export function Menu({
               role="menu"
               aria-label={label}
               onKeyDown={move}
-              className="fixed z-50 w-[200px] rounded-[6px] border border-line bg-white py-1 shadow-pop"
+              className="fixed z-50 w-[200px] rounded-[6px] border border-border-subtle bg-white py-1 shadow-pop"
               style={pos}
             >
               {items.map((it) => (
@@ -327,8 +327,8 @@ export function Menu({
                     it.onSelect();
                   }}
                   className={cx(
-                    "flex min-h-9 w-full items-center gap-2 px-3 py-2 text-left text-[13px] hover:bg-wash focus-visible:bg-wash focus-visible:outline-none",
-                    it.danger ? "text-high" : "text-ink",
+                    "flex min-h-9 w-full items-center gap-2 px-3 py-2 text-left text-[13px] hover:bg-background-subtle focus-visible:bg-background-subtle focus-visible:outline-none",
+                    it.danger ? "text-high" : "text-content-primary",
                   )}
                 >
                   {it.icon && <it.icon className="size-4" />}
@@ -375,12 +375,12 @@ function ToastItem({ t, onDismiss }: { t: Toast; onDismiss: () => void }) {
       onMouseLeave={resume}
       onFocus={pause}
       onBlur={(e) => !e.currentTarget.contains(e.relatedTarget as Node | null) && resume()}
-      className="toast-in pointer-events-auto flex gap-3 rounded-[6px] bg-navy-900 px-4 py-3 text-white shadow-pop"
+      className="toast-in pointer-events-auto flex gap-3 rounded-[6px] bg-background-system px-4 py-3 text-white shadow-pop"
     >
-      <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-brand-400" aria-hidden />
+      <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-chrome-accent" aria-hidden />
       <div className="min-w-0 flex-1">
         <p className="text-[13px] font-semibold">{t.title}</p>
-        {t.body && <p className="mt-0.5 text-[13px] text-white/70">{t.body}</p>}
+        {t.body && <p className="mt-0.5 text-[13px] text-chrome-content-tertiary">{t.body}</p>}
       </div>
       {t.action && (
         <button
@@ -388,12 +388,12 @@ function ToastItem({ t, onDismiss }: { t: Toast; onDismiss: () => void }) {
             t.action!.onClick();
             onDismiss();
           }}
-          className="-my-1 h-8 shrink-0 rounded-[4px] px-2 text-[13px] font-semibold text-brand-400 hover:bg-white/10"
+          className="-my-1 h-8 shrink-0 rounded-[4px] px-2 text-[13px] font-semibold text-chrome-accent hover:bg-chrome-control-hover"
         >
           {t.action.label}
         </button>
       )}
-      <button onClick={onDismiss} aria-label="Dismiss" className="grid size-6 shrink-0 place-items-center rounded-[4px] text-white/60 hover:text-white">
+      <button onClick={onDismiss} aria-label="Dismiss" className="grid size-6 shrink-0 place-items-center rounded-[4px] text-chrome-content-tertiary hover:text-white">
         <X className="size-4" />
       </button>
     </div>
@@ -426,11 +426,11 @@ export function Select({
 }) {
   return (
     <label className={cx("flex flex-col gap-1", className)}>
-      <span className="text-[12px] font-medium text-ink-2">{label}</span>
+      <span className="text-[12px] font-medium text-content-main">{label}</span>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="h-9 rounded-[4px] border border-line-strong bg-white px-2.5 text-[13px] text-ink hover:border-ink-3 focus:border-brand-600 max-sm:h-11 max-sm:text-[16px]"
+        className="h-9 rounded-[4px] border border-interactive-secondary bg-white px-2.5 text-[13px] text-content-primary hover:border-content-main focus:border-interactive-primary max-sm:h-11 max-sm:text-[16px]"
       >
         {options.map((o) => (
           <option key={o.value} value={o.value}>

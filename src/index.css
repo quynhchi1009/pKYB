@@ -9,52 +9,113 @@
 @import "@fontsource/noto-sans-sc/chinese-simplified-400.css";
 @import "@fontsource/noto-sans-sc/chinese-simplified-600.css";
 
-/* AsiaVerify Portal tokens, sampled from the pKYB Figma frames. */
-@theme {
+/* pKYB colour tokens, built on the AsiaVerify semantic sheet. The full reference (hex, rgb, hsl,
+   usage) is docs/color-tokens.md. A sheet name maps to code as content.main → --color-content-main
+   → `text-content-main`. Notes say where a value is new or adjusted from the brand sheet.
+   `static` emits every variable, because the aliases below reference them through var(). */
+@theme static {
   /* Open Sans for running text and UI; Roboto for every heading (h1–h6). Noto Sans SC covers Chinese names in both. */
   --font-sans: "Open Sans", "Noto Sans SC", ui-sans-serif, system-ui, sans-serif;
   --font-heading: "Roboto", "Noto Sans SC", ui-sans-serif, system-ui, sans-serif;
 
+  /* content */
+  --color-content-primary: #1b1c1e;
+  --color-content-main: #444444;
+  --color-content-disabled: #5e5e5e;
+  /* adjusted: sheet #6f6f6f drops to 4.29:1 on neutral and 4.33:1 on accent fills. */
+  --color-content-tertiary: #6b6b6b;
+  --color-content-link: #004d3f;
+  --color-content-on-negative-elevated: #95231e;
+  /* adjusted: sheet #bb7600 is 3.44:1 on warning_elevated. Same 38° hue, 4.76:1. */
+  --color-content-on-warning-elevated: #9a6200;
+  --color-content-on-positive-elevated: #397300;
+
+  /* interactive */
+  --color-interactive-primary: #00735f;
+  --color-interactive-accent: #e5f1e8;
+  --color-interactive-secondary: #626262;
+  --color-interactive-control: #004d3f;
+  --color-interactive-contrast: #009a7e;
+  /* new: hover on accent fills, keeps interactive.primary text at 4.57:1. */
+  --color-interactive-accent-hover: #d6e9da;
+  /* new: accent at 70% over white, solid so pinned table cells hide what scrolls beneath. */
+  --color-interactive-selected: #edf5ef;
+  /* new: selected status filter chip and the pressed primary button. */
+  --color-interactive-inverse: var(--color-navy-800);
+
+  /* background */
+  --color-background-elevated: #fdfdfd;
+  --color-background-demoted: #292929;
+  --color-background-accent: #f8f7f4;
+  --color-background-neutral: rgb(165 165 165 / 0.2);
+  --color-background-overlay: rgb(14 15 12 / 0.12);
+  /* new: hover rows, quiet fills, the Low severity chip. */
+  --color-background-subtle: #f1f1f1;
+  /* new: system feedback inside the content area (toasts, tooltips, bulk and pending bars, unreviewed dot). */
+  --color-background-system: var(--color-navy-900);
+  /* new: behind dialogs and the mobile navigation drawer. */
+  --color-background-scrim: rgb(11 16 22 / 0.55);
+
+  /* sentiment */
+  --color-sentiment-negative: #d14343;
+  /* adjusted: sheet hex #73c322 is 2.20:1 on white; this is the swatch's painted fill, 4.94:1. */
+  --color-sentiment-positive: #1b813d;
+  --color-sentiment-warning: #ffaa52;
+  --color-sentiment-negative-elevated: #ffefef;
+  --color-sentiment-positive-elevated: #f6ffed;
+  --color-sentiment-warning-elevated: #fff6e8;
+  /* new: pressed/hover state of negative buttons, white text 7.07:1. */
+  --color-sentiment-negative-hover: #a52b25;
+
+  /* border */
+  --color-border-neutral: #a5a5a5;
+  /* new: hairlines between table rows and around panels, lighter than border.neutral. */
+  --color-border-subtle: #e3e3e3;
+  /* new: edges of accent, negative and warning chips. */
+  --color-border-accent: #8fcaa9;
+  --color-border-negative: #f2c4c0;
+  --color-border-warning: #efd7a3;
+
+  /* base */
+  --color-base-light: #ffffff;
+  --color-base-dark: #1b1c1e;
+  --color-base-contrast: #f7f7f7;
+
+  /* chrome: the navy Portal shell (top bar, sidebar, Create-monitor side panel) and its content.
+     navy-* are the primitive stops of the shell gradient. */
   --color-navy-950: #0b1016;
   --color-navy-900: #111a24;
   --color-navy-800: #172636;
   --color-navy-700: #1f3954;
   --color-navy-600: #2a4a6a;
+  /* new: green on navy. interactive.contrast is only 3.34:1 on navy-700, where the logo sits. */
+  --color-chrome-accent: #2fbf87;
+  /* new: text on navy. Base.light for primary; these two pass 9.02:1 and 6.72:1 on navy-700. */
+  --color-chrome-content-main: rgb(255 255 255 / 0.85);
+  --color-chrome-content-tertiary: rgb(255 255 255 / 0.7);
+  /* new: fills and edges on navy. */
+  --color-chrome-hover: rgb(255 255 255 / 0.05);
+  --color-chrome-selected: rgb(255 255 255 / 0.07);
+  --color-chrome-control-hover: rgb(255 255 255 / 0.1);
+  --color-chrome-border: rgb(255 255 255 / 0.12);
 
-  --color-brand-50: #eaf5ef;
-  /* brand-50 at 70% over white, solid so pinned table cells can carry it without showing what scrolls beneath. */
-  --color-row-selected: #f0f8f4;
-  --color-brand-100: #d3eadd;
-  --color-brand-300: #8fcaa9;
-  --color-brand-400: #2fbf87;
-  --color-brand-600: #0d7a58;
-  --color-brand-700: #0a6a4d;
-  --color-brand-800: #08573f;
-
-  --color-ink: #1d2329;
-  --color-ink-2: #4d5761;
-  --color-ink-3: #646e77;
-  --color-line: #e3e7ea;
-  --color-line-strong: #cfd5da;
-  --color-canvas: #f7f8f8;
-  --color-wash: #f1f3f4;
-
-  --color-high: #c2362f;
-  --color-high-bg: #fdeeed;
-  --color-high-line: #f2c4c0;
-  --color-high-cell: #d9473f;
-  --color-high-hover: #a52b25;
-  --color-high-ramp-1: #f6cfcb;
-  --color-high-ramp-2: #e9928a;
+  /* Severity tiers: the product layer. Text always uses the on_*_elevated colour, so it passes
+     on the tinted chip and on white alike. */
+  --color-high: var(--color-content-on-negative-elevated);
+  --color-high-bg: var(--color-sentiment-negative-elevated);
+  --color-high-line: var(--color-border-negative);
+  --color-high-cell: var(--color-sentiment-negative);
+  --color-high-ramp-1: #f3cccc;
+  --color-high-ramp-2: #e38e8e;
   --color-high-on-dark: #ffb4ae;
-  --color-medium: #9a6200;
-  --color-medium-bg: #fdf4e1;
-  --color-medium-line: #efd7a3;
-  --color-medium-cell: #e7a83a;
-  --color-low: #4f5c67;
-  --color-low-bg: #f0f2f4;
-  --color-low-line: #d6dbe0;
-  --color-low-cell: #a9b4bd;
+  --color-medium: var(--color-content-on-warning-elevated);
+  --color-medium-bg: var(--color-sentiment-warning-elevated);
+  --color-medium-line: var(--color-border-warning);
+  --color-medium-cell: var(--color-sentiment-warning);
+  --color-low: var(--color-content-main);
+  --color-low-bg: var(--color-background-subtle);
+  --color-low-line: #d6d6d6;
+  --color-low-cell: var(--color-border-neutral);
 
   --shadow-pop: 0 8px 24px -6px rgb(13 22 32 / 0.18), 0 2px 6px -2px rgb(13 22 32 / 0.12);
   --shadow-dialog: 0 24px 64px -12px rgb(13 22 32 / 0.35);
@@ -64,8 +125,8 @@
 
 @layer base {
   html {
-    color: var(--color-ink);
-    background: var(--color-canvas);
+    color: var(--color-content-primary);
+    background: var(--color-base-contrast);
     -webkit-font-smoothing: antialiased;
   }
   body {
@@ -82,25 +143,25 @@
     font-family: var(--font-heading);
   }
   ::selection {
-    background: var(--color-brand-100);
-    color: var(--color-navy-900);
+    background: var(--color-interactive-accent-hover);
+    color: var(--color-content-primary);
   }
   :focus-visible {
-    outline: 2px solid var(--color-brand-600);
+    outline: 2px solid var(--color-interactive-primary);
     outline-offset: 2px;
     border-radius: 4px;
   }
   input,
   select,
   textarea {
-    caret-color: var(--color-brand-700);
+    caret-color: var(--color-interactive-primary);
   }
   .tnum {
     font-variant-numeric: tabular-nums;
   }
   * {
     scrollbar-width: thin;
-    scrollbar-color: var(--color-line-strong) transparent;
+    scrollbar-color: var(--color-border-neutral) transparent;
   }
   .nav-scroll {
     scrollbar-color: var(--color-navy-600) transparent;
@@ -111,7 +172,7 @@
 }
 
 dialog::backdrop {
-  background: rgb(11 16 22 / 0.55);
+  background: var(--color-background-scrim);
 }
 dialog[open] {
   animation: dialog-in 220ms var(--ease-out-expo);

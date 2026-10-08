@@ -12,7 +12,7 @@ import { StatusBadge } from "./Monitoring";
 import { Button, CategoryChip, Dialog, EventSeverity, Flag, Menu, SEV_STYLE, cx, formatDate, formatDateLong, nf } from "../components/ui";
 
 const CELL: Record<Severity | "none", string> = {
-  none: "var(--color-wash)",
+  none: "var(--color-background-subtle)",
   low: "var(--color-low-cell)",
   medium: "var(--color-medium-cell)",
   high: "var(--color-high-cell)",
@@ -90,7 +90,7 @@ export function MonitorDetail() {
     return (
       <div className="mx-auto max-w-[720px] px-4 py-20 text-center">
         <h1 className="text-[16px] font-semibold">This monitor doesn't exist</h1>
-        <Link to="/pkyb/monitoring" className="mt-2 inline-block text-brand-700 hover:underline">
+        <Link to="/pkyb/monitoring" className="mt-2 inline-block text-content-link hover:underline">
           Back to Monitoring
         </Link>
       </div>
@@ -182,10 +182,10 @@ export function MonitorDetail() {
 
   const queueArrow = (to: string | undefined, label: string, dir: "prev" | "next") => {
     const Icon = dir === "prev" ? ChevronLeft : ChevronRight;
-    const base = "grid size-8 place-items-center rounded-[4px] border border-line";
+    const base = "grid size-8 place-items-center rounded-[4px] border border-border-subtle";
     // An unavailable arrow is not a link: it leaves the tab order instead of pointing at "#".
     return to ? (
-      <Link to={to} aria-label={label} className={cx(base, "hover:bg-wash")}>
+      <Link to={to} aria-label={label} className={cx(base, "hover:bg-background-subtle")}>
         <Icon className="size-4" />
       </Link>
     ) : (
@@ -198,11 +198,11 @@ export function MonitorDetail() {
   return (
     <div className="mx-auto max-w-[1360px] px-4 pt-5 pb-16 lg:px-8">
       <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-        <Link to={backTo} className="inline-flex h-8 items-center gap-1.5 text-[13px] font-semibold text-brand-700 hover:underline">
+        <Link to={backTo} className="inline-flex h-8 items-center gap-1.5 text-[13px] font-semibold text-content-link hover:underline">
           <ArrowLeft className="size-4" /> Back to {inQueue ? queue!.label : "Monitoring"}
         </Link>
         {inQueue && (
-          <nav aria-label="Review queue" className="flex items-center gap-1 text-[13px] text-ink-2">
+          <nav aria-label="Review queue" className="flex items-center gap-1 text-[13px] text-content-main">
             <span className="mr-1 tnum">
               {nf.format(pos + 1)} of {nf.format(queue!.ids.length)}
             </span>
@@ -218,8 +218,8 @@ export function MonitorDetail() {
             <h1 className="text-[26px] leading-tight font-semibold tracking-[-0.015em]">{m.name}</h1>
             <Flag code={m.jurisdiction} className="h-4 w-6 shrink-0" />
           </div>
-          {m.localName && <p className="text-[16px] text-ink-2">{m.localName}</p>}
-          <p className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] text-ink-2">
+          {m.localName && <p className="text-[16px] text-content-main">{m.localName}</p>}
+          <p className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] text-content-main">
             <StatusBadge status={m.status} />
             <span>
               {j.regLabel} <span className="tnum">{m.regNo}</span> · {j.name}
@@ -246,14 +246,14 @@ export function MonitorDetail() {
         <div className="flex min-w-0 flex-col gap-6">
           {/* Stopped and Inactive say so first: no checks run, and the way forward is a new monitor. */}
           {!active && (
-            <section aria-labelledby="status-h" className="rounded-[6px] border border-line-strong bg-white p-5 lg:p-6">
-              <div className="flex items-center gap-2 text-ink">
-                {m.status === "inactive" ? <CircleAlert className="size-5 text-ink-2" aria-hidden /> : <CirclePause className="size-5 text-ink-2" aria-hidden />}
+            <section aria-labelledby="status-h" className="rounded-[6px] border border-border-neutral bg-white p-5 lg:p-6">
+              <div className="flex items-center gap-2 text-content-primary">
+                {m.status === "inactive" ? <CircleAlert className="size-5 text-content-main" aria-hidden /> : <CirclePause className="size-5 text-content-main" aria-hidden />}
                 <h2 id="status-h" className="text-[18px] font-semibold">
                   {m.status === "inactive" ? "Monitoring never started" : `Stopped ${formatDate(m.endedAt ?? m.lastChecked)}`}
                 </h2>
               </div>
-              <p className="mt-2 max-w-[62ch] text-[14px] text-ink-2">
+              <p className="mt-2 max-w-[62ch] text-[14px] text-content-main">
                 {m.status === "inactive"
                   ? "Setup failed, so no checks have run for this company. Inactive orders can't be restarted; create a new monitor instead."
                   : `You stopped this monitor, so checks no longer run. ${
@@ -264,7 +264,7 @@ export function MonitorDetail() {
                 <Button variant={m.status === "inactive" ? "primary" : "secondary"} onClick={() => setCreating(asCompany(m))}>
                   <Radar className="size-4" /> Create pKYB monitor
                 </Button>
-                <span className="text-[12px] text-ink-3">Starts a new order with a new KYB Basic baseline.</span>
+                <span className="text-[12px] text-content-tertiary">Starts a new order with a new KYB Basic baseline.</span>
               </div>
             </section>
           )}
@@ -272,17 +272,17 @@ export function MonitorDetail() {
           {/* Lead: what needs attention on this company right now. */}
           {m.events.length === 0 ? (
             active && (
-              <section aria-labelledby="idle-h" className="rounded-[6px] border border-brand-300 bg-brand-50/60 p-5 lg:p-6">
-                <div className="flex items-center gap-2 text-brand-800">
+              <section aria-labelledby="idle-h" className="rounded-[6px] border border-border-accent bg-interactive-accent/60 p-5 lg:p-6">
+                <div className="flex items-center gap-2 text-interactive-control">
                   {baselineReady ? <Radar className="size-5" aria-hidden /> : <LoaderCircle className="size-5 animate-spin" aria-hidden />}
                   <h2 id="idle-h" className="text-[18px] font-semibold">
                     {baselineReady ? "Monitoring is running" : "Setting up your baseline"}
                   </h2>
                 </div>
-                <p className="mt-2 max-w-[62ch] text-[14px] text-ink-2">
+                <p className="mt-2 max-w-[62ch] text-[14px] text-content-main">
                   {baselineReady ? "No changes since the baseline." : "The KYB Basic baseline report is being generated. Nothing to review yet."} Checks run automatically, and you'll be alerted in-app and by
                   email based on your{" "}
-                  <Link to="/pkyb/settings" className="font-semibold text-brand-700 hover:underline">
+                  <Link to="/pkyb/settings" className="font-semibold text-content-link hover:underline">
                     severity settings
                   </Link>
                   . New changes will be listed here.
@@ -294,7 +294,7 @@ export function MonitorDetail() {
               <div className="p-5 lg:p-6">
                 <div className="flex flex-wrap items-center gap-3">
                   <EventSeverity event={lead} />
-                  <span className="text-[13px] text-ink-2">
+                  <span className="text-[13px] text-content-main">
                     Detected {formatDate(lead.date)}
                     {unreviewed.length > 1 && ` · ${unreviewed.length - 1} more unreviewed`}
                   </span>
@@ -304,31 +304,31 @@ export function MonitorDetail() {
                 </h2>
 
                 {/* What changed, field by field: the analyst judges the change before deciding whether a report is worth buying. */}
-                <div className="mt-4 rounded-[6px] border border-line">
-                  <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-x-4 border-b border-line bg-canvas px-4 py-2 text-[12px] font-semibold text-ink-2 max-md:hidden md:grid-cols-[168px_minmax(0,1fr)_minmax(0,1fr)]">
+                <div className="mt-4 rounded-[6px] border border-border-subtle">
+                  <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-x-4 border-b border-border-subtle bg-base-contrast px-4 py-2 text-[12px] font-semibold text-content-main max-md:hidden md:grid-cols-[168px_minmax(0,1fr)_minmax(0,1fr)]">
                     <span>Field</span>
                     <span>
-                      Baseline <span className="font-normal text-ink-3 tnum">· {formatDate(m.createdAt)}</span>
+                      Baseline <span className="font-normal text-content-tertiary tnum">· {formatDate(m.createdAt)}</span>
                     </span>
                     <span>
-                      Registry now <span className="font-normal text-ink-3 tnum">· {formatDate(lead.date)}</span>
+                      Registry now <span className="font-normal text-content-tertiary tnum">· {formatDate(lead.date)}</span>
                     </span>
                   </div>
-                  <ul className="divide-y divide-line">
+                  <ul className="divide-y divide-border-subtle">
                     {leadFields.map((f) => (
                       <li key={f.category} className="grid gap-x-4 gap-y-2 px-4 py-3 md:grid-cols-[168px_minmax(0,1fr)_minmax(0,1fr)]">
                         <span className="flex min-w-0 flex-col items-start gap-1">
                           <CategoryChip category={f.category} />
-                          <span className="text-[13px] font-semibold text-ink">{f.field}</span>
+                          <span className="text-[13px] font-semibold text-content-primary">{f.field}</span>
                         </span>
-                        <span className="min-w-0 text-[13px] text-ink-2">
-                          <span className="block text-[11px] font-semibold text-ink-3 md:hidden">Baseline · {formatDate(m.createdAt)}</span>
+                        <span className="min-w-0 text-[13px] text-content-main">
+                          <span className="block text-[11px] font-semibold text-content-tertiary md:hidden">Baseline · {formatDate(m.createdAt)}</span>
                           {f.before}
                         </span>
-                        <span className="min-w-0 text-[13px] font-medium text-ink">
-                          <span className="block text-[11px] font-semibold text-ink-3 md:hidden">Now · {formatDate(lead.date)}</span>
+                        <span className="min-w-0 text-[13px] font-medium text-content-primary">
+                          <span className="block text-[11px] font-semibold text-content-tertiary md:hidden">Now · {formatDate(lead.date)}</span>
                           {f.after}
-                          <span className="mt-1 block text-[12px] font-normal text-ink-3">In the fresh report: {CATEGORY_SECTION[f.category]}</span>
+                          <span className="mt-1 block text-[12px] font-normal text-content-tertiary">In the fresh report: {CATEGORY_SECTION[f.category]}</span>
                         </span>
                       </li>
                     ))}
@@ -338,14 +338,14 @@ export function MonitorDetail() {
                 <div className="mt-4 flex flex-wrap items-center gap-3">
                   {freshReport("primary")}
                   {reportState === "ready" ? (
-                    <span className="text-[12px] text-brand-700">Ready · generated {formatDate(iso(TODAY))}</span>
+                    <span className="text-[12px] text-interactive-primary">Ready · generated {formatDate(iso(TODAY))}</span>
                   ) : (
-                    <span className="text-[12px] text-ink-3">The full current record, including fields pKYB doesn't track.</span>
+                    <span className="text-[12px] text-content-tertiary">The full current record, including fields pKYB doesn't track.</span>
                   )}
                 </div>
               </div>
 
-              <div className="border-t border-line bg-canvas px-5 py-4 lg:px-6">
+              <div className="border-t border-border-subtle bg-base-contrast px-5 py-4 lg:px-6">
                 <h3 className="text-[14px] font-semibold">Record your review</h3>
                 <div className="mt-3">
                   <DecisionFields decision={decision} setDecision={setDecision} note={note} setNote={setNote} />
@@ -354,19 +354,19 @@ export function MonitorDetail() {
                   <Button variant="secondary" onClick={recordLead} disabled={!decision} className="max-sm:w-full">
                     <Check className="size-4" /> Record review
                   </Button>
-                  <span className="text-[12px] text-ink-3">{decision ? "Saved to the change log with your name and today's date." : "Choose a decision to record the review."}</span>
+                  <span className="text-[12px] text-content-tertiary">{decision ? "Saved to the change log with your name and today's date." : "Choose a decision to record the review."}</span>
                 </div>
               </div>
             </section>
           ) : (
-            <section className="flex flex-wrap items-center gap-x-4 gap-y-3 rounded-[6px] border border-line bg-white px-5 py-4">
-              <Check className="size-5 shrink-0 text-brand-700" aria-hidden />
+            <section className="flex flex-wrap items-center gap-x-4 gap-y-3 rounded-[6px] border border-border-subtle bg-white px-5 py-4">
+              <Check className="size-5 shrink-0 text-interactive-primary" aria-hidden />
               <p id="done-h" tabIndex={-1} className="min-w-0 flex-1 text-[14px] focus:outline-none">
                 <span className="font-semibold">All changes reviewed.</span>{" "}
                 {inQueue && !nextUnreviewed ? (
-                  <span className="text-ink-2">That was the last company to review in {queue!.label}.</span>
+                  <span className="text-content-main">That was the last company to review in {queue!.label}.</span>
                 ) : (
-                  <span className="text-ink-2">Latest detected {formatDate(m.events[0].date)}.</span>
+                  <span className="text-content-main">Latest detected {formatDate(m.events[0].date)}.</span>
                 )}
               </p>
               {inQueue &&
@@ -384,12 +384,12 @@ export function MonitorDetail() {
 
           {m.events.length > 0 && (
             <>
-              <section aria-labelledby="heat-h" className="rounded-[6px] border border-line bg-white p-5">
+              <section aria-labelledby="heat-h" className="rounded-[6px] border border-border-subtle bg-white p-5">
                 <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
                   <h2 id="heat-h" className="text-[16px] font-semibold">
                     Activity, last 365 days
                   </h2>
-                  <span className="flex items-center gap-3 text-[11px] text-ink-3">
+                  <span className="flex items-center gap-3 text-[11px] text-content-tertiary">
                     {(["low", "medium", "high"] as Severity[]).map((s) => (
                       <span key={s} className="flex items-center gap-1">
                         <span className="size-2.5 rounded-[2px]" style={{ background: CELL[s] }} />
@@ -414,19 +414,19 @@ export function MonitorDetail() {
                     };
                   }}
                 />
-                <p className="mt-2 text-[12px] text-ink-3">Each day takes the colour of its most severe change. Select a coloured day to filter the log.</p>
+                <p className="mt-2 text-[12px] text-content-tertiary">Each day takes the colour of its most severe change. Select a coloured day to filter the log.</p>
               </section>
 
-              <section aria-labelledby="log-h" className="overflow-hidden rounded-[6px] border border-line bg-white">
-                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-5 py-3.5">
+              <section aria-labelledby="log-h" className="overflow-hidden rounded-[6px] border border-border-subtle bg-white">
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border-subtle px-5 py-3.5">
                   <h2 id="log-h" className="text-[16px] font-semibold">
-                    Change log <span className="font-normal text-ink-3 tnum">({nf.format(log.length)})</span>
+                    Change log <span className="font-normal text-content-tertiary tnum">({nf.format(log.length)})</span>
                   </h2>
                   <span className="flex flex-wrap items-center gap-2">
                   {day && (
-                    <span className="inline-flex h-7 items-center gap-1.5 rounded-full border border-brand-300 bg-brand-50 pr-1 pl-3 text-[12px] font-semibold text-brand-800">
+                    <span className="inline-flex h-7 items-center gap-1.5 rounded-full border border-border-accent bg-interactive-accent pr-1 pl-3 text-[12px] font-semibold text-interactive-control">
                       {formatDateLong(day)}
-                      <button aria-label="Show all dates" onClick={() => setDay(null)} className="grid size-5 place-items-center rounded-full hover:bg-brand-100">
+                      <button aria-label="Show all dates" onClick={() => setDay(null)} className="grid size-5 place-items-center rounded-full hover:bg-interactive-accent-hover">
                         <X className="size-3" />
                       </button>
                     </span>
@@ -437,16 +437,16 @@ export function MonitorDetail() {
                   </span>
                 </div>
                 {log.length === 0 ? (
-                  <p className="px-5 py-10 text-center text-[13px] text-ink-2">Nothing was detected on this day.</p>
+                  <p className="px-5 py-10 text-center text-[13px] text-content-main">Nothing was detected on this day.</p>
                 ) : (
                   <>
-                    <ul className="divide-y divide-line md:hidden">
+                    <ul className="divide-y divide-border-subtle md:hidden">
                       {log.slice(page * LOG_PAGE, (page + 1) * LOG_PAGE).map((e) => (
-                        <li key={e.id} className={cx("px-5 py-3.5", lead?.id === e.id && "bg-canvas")}>
+                        <li key={e.id} className={cx("px-5 py-3.5", lead?.id === e.id && "bg-base-contrast")}>
                           <div className="flex items-center justify-between gap-3">
                             <span className="flex flex-wrap items-center gap-2">
                               <EventSeverity event={e} size="sm" />
-                              <span className="text-[13px] tnum text-ink-2">{formatDate(e.date)}</span>
+                              <span className="text-[13px] tnum text-content-main">{formatDate(e.date)}</span>
                             </span>
                             {!e.reviewed && <ReviewMenu event={e} name={m.name} compact />}
                           </div>
@@ -465,7 +465,7 @@ export function MonitorDetail() {
                     </ul>
                     <div className="overflow-x-auto max-md:hidden">
                       <table className="w-full min-w-[620px] text-left text-[13px]">
-                        <thead className="border-b border-line text-[12px] text-ink-2">
+                        <thead className="border-b border-border-subtle text-[12px] text-content-main">
                           <tr>
                             <th className="px-5 py-2.5 font-semibold">Detected</th>
                             <th className="px-3 py-2.5 font-semibold">Severity</th>
@@ -473,9 +473,9 @@ export function MonitorDetail() {
                             <th className="px-5 py-2.5 text-right font-semibold">Review decision</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-line">
+                        <tbody className="divide-y divide-border-subtle">
                           {log.slice(page * LOG_PAGE, (page + 1) * LOG_PAGE).map((e) => (
-                            <tr key={e.id} className={cx("align-top", lead?.id === e.id && "bg-canvas")}>
+                            <tr key={e.id} className={cx("align-top", lead?.id === e.id && "bg-base-contrast")}>
                               <td className="px-5 py-3.5 whitespace-nowrap tnum">{formatDate(e.date)}</td>
                               <td className="px-3 py-3">
                                 <EventSeverity event={e} size="sm" />
@@ -496,14 +496,14 @@ export function MonitorDetail() {
                   </>
                 )}
                 {pages > 1 && (
-                  <div className="flex items-center justify-end gap-3 border-t border-line px-5 py-3 text-[13px] text-ink-2">
+                  <div className="flex items-center justify-end gap-3 border-t border-border-subtle px-5 py-3 text-[13px] text-content-main">
                     <span className="tnum">
                       Page {page + 1} of {pages}
                     </span>
-                    <button aria-label="Previous page" disabled={page === 0} onClick={() => setPage(page - 1)} className="grid size-8 place-items-center rounded-[4px] border border-line hover:bg-wash disabled:opacity-40">
+                    <button aria-label="Previous page" disabled={page === 0} onClick={() => setPage(page - 1)} className="grid size-8 place-items-center rounded-[4px] border border-border-subtle hover:bg-background-subtle disabled:opacity-40">
                       <ChevronLeft className="size-4" />
                     </button>
-                    <button aria-label="Next page" disabled={page >= pages - 1} onClick={() => setPage(page + 1)} className="grid size-8 place-items-center rounded-[4px] border border-line hover:bg-wash disabled:opacity-40">
+                    <button aria-label="Next page" disabled={page >= pages - 1} onClick={() => setPage(page + 1)} className="grid size-8 place-items-center rounded-[4px] border border-border-subtle hover:bg-background-subtle disabled:opacity-40">
                       <ChevronRight className="size-4" />
                     </button>
                   </div>
@@ -514,36 +514,36 @@ export function MonitorDetail() {
         </div>
 
         <aside className="flex flex-col gap-4 lg:sticky lg:top-[80px] lg:self-start">
-          <section aria-labelledby="facts-h" className="rounded-[6px] border border-line bg-white">
-            <div className="border-b border-line px-5 py-3.5">
+          <section aria-labelledby="facts-h" className="rounded-[6px] border border-border-subtle bg-white">
+            <div className="border-b border-border-subtle px-5 py-3.5">
               <h2 id="facts-h" className="text-[16px] font-semibold">
                 Monitor
               </h2>
-              {active && <p className="mt-0.5 text-[12px] text-ink-2">{STATUS_COPY.active.explain}</p>}
+              {active && <p className="mt-0.5 text-[12px] text-content-main">{STATUS_COPY.active.explain}</p>}
             </div>
-            <dl className="divide-y divide-line text-[13px]">
+            <dl className="divide-y divide-border-subtle text-[13px]">
               {facts.map(([k, v]) => (
                 <div key={k} className="flex justify-between gap-4 px-5 py-3">
-                  <dt className="text-ink-2">{k}</dt>
+                  <dt className="text-content-main">{k}</dt>
                   <dd className="text-right font-medium tnum">{v}</dd>
                 </div>
               ))}
             </dl>
             {m.status !== "inactive" && (
-              <div className="border-t border-line px-5 py-4">
-                <p className="text-[12px] font-semibold text-ink-2">Baseline report · attached</p>
+              <div className="border-t border-border-subtle px-5 py-4">
+                <p className="text-[12px] font-semibold text-content-main">Baseline report · attached</p>
                 <div className="mt-2 flex items-center gap-3">
-                  {baselineReady ? <FileCheck2 className="size-5 shrink-0 text-brand-700" aria-hidden /> : <LoaderCircle className="size-5 shrink-0 animate-spin text-ink-3" aria-hidden />}
+                  {baselineReady ? <FileCheck2 className="size-5 shrink-0 text-interactive-primary" aria-hidden /> : <LoaderCircle className="size-5 shrink-0 animate-spin text-content-tertiary" aria-hidden />}
                   <div className="min-w-0 flex-1">
                     <p className="text-[13px] font-semibold">KYB Basic</p>
-                    <p className="text-[12px] text-ink-3">{baselineReady ? `Generated ${formatDate(m.createdAt)}` : "Generating…"}</p>
+                    <p className="text-[12px] text-content-tertiary">{baselineReady ? `Generated ${formatDate(m.createdAt)}` : "Generating…"}</p>
                   </div>
                   {baselineReady && (
                     <div className="-mr-2 flex items-center">
-                      <Link to={`/reports/${m.id}`} className="inline-flex h-8 items-center px-2 text-[13px] font-semibold text-brand-700 hover:underline">
+                      <Link to={`/reports/${m.id}`} className="inline-flex h-8 items-center px-2 text-[13px] font-semibold text-content-link hover:underline">
                         View
                       </Link>
-                      <button onClick={downloadBaseline} className="inline-flex h-8 items-center px-2 text-[13px] font-semibold text-brand-700 hover:underline">
+                      <button onClick={downloadBaseline} className="inline-flex h-8 items-center px-2 text-[13px] font-semibold text-content-link hover:underline">
                         Download
                       </button>
                     </div>
@@ -554,7 +554,7 @@ export function MonitorDetail() {
           </section>
 
           {m.events.length > 0 && (
-            <section aria-labelledby="mix-h" className="rounded-[6px] border border-line bg-white p-5">
+            <section aria-labelledby="mix-h" className="rounded-[6px] border border-border-subtle bg-white p-5">
               <h2 id="mix-h" className="text-[16px] font-semibold">
                 Last 365 days
               </h2>
@@ -564,7 +564,7 @@ export function MonitorDetail() {
                   return (
                     <li key={s} className="grid grid-cols-[72px_minmax(0,1fr)_28px] items-center gap-3 text-[13px]">
                       <span className={cx("font-medium", SEV_STYLE[s].text)}>{s[0].toUpperCase() + s.slice(1)}</span>
-                      <span className="h-2 overflow-hidden rounded-full bg-wash">
+                      <span className="h-2 overflow-hidden rounded-full bg-background-subtle">
                         <span className="block h-full rounded-full" style={{ width: `${(stats.counts[s] / total) * 100}%`, background: CELL[s] }} />
                       </span>
                       <span className="text-right font-semibold tnum">{stats.counts[s]}</span>
@@ -572,7 +572,7 @@ export function MonitorDetail() {
                   );
                 })}
               </ul>
-              <Link to="/pkyb/settings" className="mt-3 -ml-1 inline-flex h-8 items-center gap-1.5 px-1 text-[13px] font-semibold text-brand-700 hover:underline">
+              <Link to="/pkyb/settings" className="mt-3 -ml-1 inline-flex h-8 items-center gap-1.5 px-1 text-[13px] font-semibold text-content-link hover:underline">
                 <SlidersHorizontal className="size-3.5" /> Adjust severity mapping
               </Link>
             </section>
@@ -605,9 +605,9 @@ export function MonitorDetail() {
           </>
         }
       >
-        <div className="flex flex-col gap-3 text-[14px] text-ink-2">
+        <div className="flex flex-col gap-3 text-[14px] text-content-main">
           <p>
-            This uses <span className="font-semibold text-ink tnum">{price}</span> for <span className="font-semibold text-ink">{m.name}</span>. The report shows the registry's
+            This uses <span className="font-semibold text-content-primary tnum">{price}</span> for <span className="font-semibold text-content-primary">{m.name}</span>. The report shows the registry's
             current record, so you can compare it with your baseline from {formatDate(m.createdAt)}.
           </p>
           <p>Each fresh report is charged separately.</p>

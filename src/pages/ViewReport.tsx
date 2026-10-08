@@ -45,10 +45,10 @@ export function ViewReport() {
     return (
       <div className="mx-auto max-w-[640px] px-4 py-24 text-center">
         <p className="text-[16px] font-semibold">{m ? "This monitor has no baseline report" : "We couldn't find that report"}</p>
-        <p className="mt-1 text-[14px] text-ink-2">
+        <p className="mt-1 text-[14px] text-content-main">
           {m ? "Setup failed before the KYB Basic report was generated." : "The link may be out of date. Open the company from Monitoring to find its report."}
         </p>
-        <Link to={m ? `/pkyb/monitoring/${m.id}` : "/pkyb/monitoring"} className="mt-4 inline-block font-semibold text-brand-700 hover:underline">
+        <Link to={m ? `/pkyb/monitoring/${m.id}` : "/pkyb/monitoring"} className="mt-4 inline-block font-semibold text-content-link hover:underline">
           {m ? "View pKYB" : "Go to Monitoring"}
         </Link>
       </div>
@@ -109,12 +109,12 @@ function Report({ m }: { m: Monitor }) {
     <div className="mx-auto max-w-[1360px] px-4 pt-6 pb-16 lg:px-8">
       <header className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between lg:gap-8">
         <div className="min-w-0 lg:flex-1">
-          <h1 className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[24px] leading-tight font-semibold tracking-[-0.01em] text-ink">
+          <h1 className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[24px] leading-tight font-semibold tracking-[-0.01em] text-content-primary">
             <span>
               {m.name}
               {m.localName && (
                 <>
-                  <span className="mx-2 font-normal text-ink-3" aria-hidden>
+                  <span className="mx-2 font-normal text-content-tertiary" aria-hidden>
                     |
                   </span>
                   <span lang="zh">{m.localName}</span>
@@ -123,41 +123,41 @@ function Report({ m }: { m: Monitor }) {
             </span>
             <Flag code={m.jurisdiction} className="h-5 w-[30px] shrink-0" />
           </h1>
-          <p className="mt-1.5 text-[13px] tracking-[0.04em] text-ink-2 uppercase">
-            {j.regLabel} <span className="tnum tracking-normal text-ink">{m.regNo}</span>
+          <p className="mt-1.5 text-[13px] tracking-[0.04em] text-content-main uppercase">
+            {j.regLabel} <span className="tnum tracking-normal text-content-primary">{m.regNo}</span>
           </p>
         </div>
 
         <div className="flex shrink-0 items-center gap-4 max-lg:flex-row-reverse max-lg:justify-end max-sm:flex-col max-sm:items-stretch max-sm:gap-2">
           <p className="text-[12px] leading-snug max-sm:order-2 lg:text-right">
-            <span className="flex items-center gap-1.5 font-semibold text-ink-2 lg:justify-end">
-              <span className={cx("size-1.5 rounded-full", m.status === "active" ? "bg-brand-600" : "bg-ink-3")} aria-hidden />
+            <span className="flex items-center gap-1.5 font-semibold text-content-main lg:justify-end">
+              <span className={cx("size-1.5 rounded-full", m.status === "active" ? "bg-interactive-primary" : "bg-content-tertiary")} aria-hidden />
               {m.status === "active" ? "pKYB baseline report" : "pKYB monitor stopped"}
             </span>
-            <span className="text-ink-3">
+            <span className="text-content-tertiary">
               {m.status === "active" ? `Monitoring since ${formatDate(m.createdAt)}` : `Baseline from ${formatDate(m.createdAt)}`}
             </span>
           </p>
           <Link
             to={`/pkyb/monitoring/${m.id}`}
-            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-[4px] bg-brand-700 px-4 text-[14px] font-semibold text-white transition-colors duration-150 hover:bg-brand-800 active:bg-navy-800 max-sm:h-11"
+            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-[4px] bg-interactive-primary px-4 text-[14px] font-semibold text-white transition-colors duration-150 hover:bg-interactive-control active:bg-interactive-inverse max-sm:h-11"
           >
             <Radar className="size-4" aria-hidden /> View pKYB <ArrowRight className="size-4" aria-hidden />
           </Link>
         </div>
       </header>
 
-      <div className="rounded-[6px] border border-line bg-white">
+      <div className="rounded-[6px] border border-border-subtle bg-white">
         {/* Viewer toolbar */}
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-3 border-b border-line px-4 py-3 lg:px-6">
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-3 border-b border-border-subtle px-4 py-3 lg:px-6">
           <div className="flex items-center gap-3">
-            <span className="text-[16px] font-semibold text-ink">View report:</span>
-            <span className="inline-flex h-9 items-center rounded-[4px] bg-navy-900 px-4 text-[14px] font-semibold text-white">KYB Basic</span>
+            <span className="text-[16px] font-semibold text-content-primary">View report:</span>
+            <span className="inline-flex h-9 items-center rounded-[4px] bg-background-system px-4 text-[14px] font-semibold text-white">KYB Basic</span>
           </div>
 
           <div className="ml-auto flex flex-wrap items-center gap-x-4 gap-y-2">
             <nav aria-label="Report pages" className="flex items-center gap-1">
-              <span className="mr-2 text-[13px] text-ink-2 tnum" aria-live="polite">
+              <span className="mr-2 text-[13px] text-content-main tnum" aria-live="polite">
                 Page {page} of {PAGES}
               </span>
               <IconBtn label="First page" disabled={page === 1} onClick={() => goPage(1)}>
@@ -173,7 +173,7 @@ function Report({ m }: { m: Monitor }) {
                 <ChevronsRight className="size-4" />
               </IconBtn>
             </nav>
-            <span className="h-6 w-px bg-line max-sm:hidden" aria-hidden />
+            <span className="h-6 w-px bg-border-subtle max-sm:hidden" aria-hidden />
             <div className="flex items-center gap-1">
               <IconBtn label="Share report" onClick={() => toast({ title: "Share link copied", body: `Anyone in your organisation can open the KYB Basic report for ${m.name}.` })}>
                 <Share2 className="size-[18px]" />
@@ -181,7 +181,7 @@ function Report({ m }: { m: Monitor }) {
               <IconBtn label="Download report" onClick={() => toast({ title: "Downloading KYB Basic report", body: `${m.name} · generated ${formatDate(facts.generated)}` })}>
                 <Download className="size-[18px]" />
               </IconBtn>
-              <div role="group" aria-label="Report language" className="ml-1 flex rounded-[4px] bg-wash p-0.5">
+              <div role="group" aria-label="Report language" className="ml-1 flex rounded-[4px] bg-background-subtle p-0.5">
                 {(["en", "og"] as const).map((l) => (
                   <button
                     key={l}
@@ -190,7 +190,7 @@ function Report({ m }: { m: Monitor }) {
                     onClick={() => setLang(l)}
                     className={cx(
                       "h-8 rounded-[3px] px-3 text-[13px] font-semibold transition-colors",
-                      lang === l ? "bg-white text-brand-700 shadow-[0_0_0_1px_var(--color-line)]" : "text-ink-2 hover:text-ink",
+                      lang === l ? "bg-white text-interactive-primary shadow-[0_0_0_1px_var(--color-border-subtle)]" : "text-content-main hover:text-content-primary",
                     )}
                   >
                     {l.toUpperCase()}
@@ -203,17 +203,17 @@ function Report({ m }: { m: Monitor }) {
 
         <div className="grid lg:grid-cols-[272px_minmax(0,1fr)]">
           {/* Section rail */}
-          <aside className="border-line bg-canvas/70 max-lg:border-b lg:border-r">
+          <aside className="border-border-subtle bg-base-contrast/70 max-lg:border-b lg:border-r">
             <div className="lg:sticky lg:top-14 lg:max-h-[calc(100dvh-56px)] lg:overflow-y-auto">
               <div className="px-4 py-4 lg:hidden">
-                <label htmlFor="jump" className="mb-1 block text-[12px] font-medium text-ink-2">
+                <label htmlFor="jump" className="mb-1 block text-[12px] font-medium text-content-main">
                   Jump to section
                 </label>
                 <select
                   id="jump"
                   value={active}
                   onChange={(e) => jump(e.target.value)}
-                  className="h-11 w-full rounded-[4px] border border-line-strong bg-white px-2.5 text-[16px] text-ink"
+                  className="h-11 w-full rounded-[4px] border border-interactive-secondary bg-white px-2.5 text-[16px] text-content-primary"
                 >
                   {SECTIONS.map((s) => (
                     <option key={s.id} value={s.id}>
@@ -224,7 +224,7 @@ function Report({ m }: { m: Monitor }) {
               </div>
 
               <nav aria-labelledby="jump-h" className="px-3 pt-5 pb-4 max-lg:hidden">
-                <h2 id="jump-h" className="px-3 pb-2 text-[12px] font-semibold tracking-[0.06em] text-ink-3 uppercase">
+                <h2 id="jump-h" className="px-3 pb-2 text-[12px] font-semibold tracking-[0.06em] text-content-tertiary uppercase">
                   Jump to section
                 </h2>
                 <ul className="flex flex-col">
@@ -239,8 +239,8 @@ function Report({ m }: { m: Monitor }) {
                             className={cx(
                               "relative flex min-h-10 flex-1 items-center rounded-[4px] px-3 py-2 text-left text-[14px] transition-colors",
                               isActive
-                                ? "bg-brand-50 font-semibold text-brand-800 before:absolute before:inset-y-1.5 before:left-0 before:w-[2px] before:rounded-full before:bg-brand-700"
-                                : "text-ink-2 hover:bg-wash hover:text-ink",
+                                ? "bg-interactive-accent font-semibold text-interactive-control before:absolute before:inset-y-1.5 before:left-0 before:w-[2px] before:rounded-full before:bg-interactive-primary"
+                                : "text-content-main hover:bg-background-subtle hover:text-content-primary",
                             )}
                           >
                             {s.label}
@@ -250,14 +250,14 @@ function Report({ m }: { m: Monitor }) {
                               onClick={() => setCompanyOpen((o) => !o)}
                               aria-expanded={companyOpen}
                               aria-label={`${companyOpen ? "Hide" : "Show"} ${s.label} subsections`}
-                              className="absolute right-1 grid size-8 place-items-center rounded-[4px] text-ink-3 hover:bg-wash hover:text-ink"
+                              className="absolute right-1 grid size-8 place-items-center rounded-[4px] text-content-tertiary hover:bg-background-subtle hover:text-content-primary"
                             >
                               <ChevronDown className={cx("size-4 transition-transform", !companyOpen && "-rotate-90")} />
                             </button>
                           )}
                         </div>
                         {s.children && companyOpen && (
-                          <ul className="mb-1 ml-6 border-l border-line pl-2">
+                          <ul className="mb-1 ml-6 border-l border-border-subtle pl-2">
                             {s.children.map((c) => (
                               <li key={c.id}>
                                 <button
@@ -265,7 +265,7 @@ function Report({ m }: { m: Monitor }) {
                                   aria-current={active === c.id ? "location" : undefined}
                                   className={cx(
                                     "flex min-h-8 w-full items-center rounded-[4px] px-3 text-left text-[13px] transition-colors",
-                                    active === c.id ? "font-semibold text-brand-800" : "text-ink-2 hover:bg-wash hover:text-ink",
+                                    active === c.id ? "font-semibold text-interactive-control" : "text-content-main hover:bg-background-subtle hover:text-content-primary",
                                   )}
                                 >
                                   {c.label}
@@ -279,8 +279,8 @@ function Report({ m }: { m: Monitor }) {
                   })}
                 </ul>
 
-                <div className="mt-4 border-t border-line pt-5">
-                  <h2 id="rec-h" className="px-3 pb-2 text-[12px] font-semibold tracking-[0.06em] text-ink-3 uppercase">
+                <div className="mt-4 border-t border-border-subtle pt-5">
+                  <h2 id="rec-h" className="px-3 pb-2 text-[12px] font-semibold tracking-[0.06em] text-content-tertiary uppercase">
                     Share recommendation
                   </h2>
                   <ul aria-labelledby="rec-h" className="flex flex-col">
@@ -297,10 +297,10 @@ function Report({ m }: { m: Monitor }) {
                             }}
                             className={cx(
                               "flex min-h-10 w-full items-center gap-2.5 rounded-[4px] px-3 text-left text-[14px] transition-colors",
-                              on ? "font-semibold text-brand-800" : "text-ink-2 hover:bg-wash hover:text-ink",
+                              on ? "font-semibold text-interactive-control" : "text-content-main hover:bg-background-subtle hover:text-content-primary",
                             )}
                           >
-                            <Icon className={cx("size-[18px] shrink-0", on ? "text-brand-700" : "text-ink-3")} strokeWidth={1.75} />
+                            <Icon className={cx("size-[18px] shrink-0", on ? "text-interactive-primary" : "text-content-tertiary")} strokeWidth={1.75} />
                             {r}
                           </button>
                         </li>
@@ -309,16 +309,16 @@ function Report({ m }: { m: Monitor }) {
                   </ul>
                 </div>
 
-                <div className="mt-4 border-t border-line pt-5">
-                  <h2 className="px-3 pb-2 text-[12px] font-semibold tracking-[0.06em] text-ink-3 uppercase">Add-ons</h2>
+                <div className="mt-4 border-t border-border-subtle pt-5">
+                  <h2 className="px-3 pb-2 text-[12px] font-semibold tracking-[0.06em] text-content-tertiary uppercase">Add-ons</h2>
                   <div className="flex items-start justify-between gap-3 px-3 py-1">
                     <span className="text-[13px]">
-                      <span className="block font-semibold text-ink">AML Report</span>
-                      <span className="block text-ink-2">Sanctions, PEP and adverse media</span>
+                      <span className="block font-semibold text-content-primary">AML Report</span>
+                      <span className="block text-content-main">Sanctions, PEP and adverse media</span>
                     </span>
                     <button
                       onClick={() => toast({ title: "AML Report added to cart", body: `For ${m.name}. You'll see the price at checkout.` })}
-                      className="-mr-1 inline-flex h-8 shrink-0 items-center px-1 text-[13px] font-semibold text-brand-700 hover:underline"
+                      className="-mr-1 inline-flex h-8 shrink-0 items-center px-1 text-[13px] font-semibold text-content-link hover:underline"
                     >
                       Add
                     </button>
@@ -338,21 +338,21 @@ function Report({ m }: { m: Monitor }) {
             {page === 2 && <PageTwo m={m} facts={facts} name={name} />}
             {page === 3 && <PageThree m={m} facts={facts} />}
 
-            <div className="mt-8 flex items-center justify-between border-t border-line pt-4">
+            <div className="mt-8 flex items-center justify-between border-t border-border-subtle pt-4">
               <button
                 onClick={() => goPage(page - 1)}
                 disabled={page === 1}
-                className="inline-flex h-9 items-center gap-1.5 rounded-[4px] px-3 text-[14px] font-semibold whitespace-nowrap text-ink-2 hover:bg-wash hover:text-ink disabled:invisible"
+                className="inline-flex h-9 items-center gap-1.5 rounded-[4px] px-3 text-[14px] font-semibold whitespace-nowrap text-content-main hover:bg-background-subtle hover:text-content-primary disabled:invisible"
               >
                 <ChevronLeft className="size-4" /> Previous page
               </button>
-              <span className="text-[12px] whitespace-nowrap text-ink-3 tnum max-sm:hidden">
+              <span className="text-[12px] whitespace-nowrap text-content-tertiary tnum max-sm:hidden">
                 Page {page} of {PAGES}
               </span>
               <button
                 onClick={() => goPage(page + 1)}
                 disabled={page === PAGES}
-                className="inline-flex h-9 items-center gap-1.5 rounded-[4px] px-3 text-[14px] font-semibold whitespace-nowrap text-brand-700 hover:bg-brand-50 disabled:invisible"
+                className="inline-flex h-9 items-center gap-1.5 rounded-[4px] px-3 text-[14px] font-semibold whitespace-nowrap text-interactive-primary hover:bg-interactive-accent disabled:invisible"
               >
                 Next page <ChevronRight className="size-4" />
               </button>
@@ -369,7 +369,7 @@ function IconBtn({ label, children, ...rest }: { label: string; children: ReactN
     <button
       aria-label={label}
       title={label}
-      className="grid size-9 place-items-center rounded-[4px] text-ink-2 transition-colors hover:bg-wash hover:text-ink disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent"
+      className="grid size-9 place-items-center rounded-[4px] text-content-main transition-colors hover:bg-background-subtle hover:text-content-primary disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent"
       {...rest}
     >
       {children}
@@ -382,11 +382,11 @@ function ReportSection({ id, title, children, level = 2 }: { id: string; title: 
   return (
     <section id={`sec-${id}`} aria-labelledby={`h-${id}`} className="scroll-mt-[72px]">
       {level === 2 ? (
-        <H id={`h-${id}`} className="border-b-2 border-brand-700 bg-brand-50 px-4 py-2.5 text-[18px] font-semibold text-brand-800">
+        <H id={`h-${id}`} className="border-b-2 border-interactive-primary bg-interactive-accent px-4 py-2.5 text-[18px] font-semibold text-interactive-control">
           {title}
         </H>
       ) : (
-        <H id={`h-${id}`} className="mb-2 text-[14px] font-semibold text-ink">
+        <H id={`h-${id}`} className="mb-2 text-[14px] font-semibold text-content-primary">
           {title}
         </H>
       )}
@@ -398,7 +398,7 @@ function ReportSection({ id, title, children, level = 2 }: { id: string; title: 
 /** The printed cover: a typographic sheet in the report's mint-to-sky wash, with the vertical REPORT band. */
 function Cover({ m, facts, name, showLocal }: { m: Monitor; facts: ReportFacts; name: string; showLocal: boolean }) {
   return (
-    <div className="@container relative mx-auto aspect-[1/1.32] w-full max-w-[780px] overflow-hidden border border-line bg-[linear-gradient(165deg,#eef6f1_0%,#e7eff3_58%,#eef6e9_100%)]">
+    <div className="@container relative mx-auto aspect-[1/1.32] w-full max-w-[780px] overflow-hidden border border-border-subtle bg-[linear-gradient(165deg,#eef6f1_0%,#e7eff3_58%,#eef6e9_100%)]">
       {/* Façade band: a window grid under the vertical REPORT lettering. Decorative. */}
       <div
         aria-hidden
@@ -412,27 +412,27 @@ function Cover({ m, facts, name, showLocal }: { m: Monitor; facts: ReportFacts; 
           REPORT
         </span>
       </div>
-      <p aria-hidden className="absolute top-[6%] left-[35.5%] rotate-180 text-[max(11px,1.7cqw)] tracking-[0.3em] text-ink [writing-mode:vertical-rl] tnum">
+      <p aria-hidden className="absolute top-[6%] left-[35.5%] rotate-180 text-[max(11px,1.7cqw)] tracking-[0.3em] text-content-primary [writing-mode:vertical-rl] tnum">
         No. {facts.reportNo}
       </p>
 
       <p className="absolute top-[6%] right-[8%] flex items-center gap-1.5 text-[max(13px,2.6cqw)] font-bold tracking-[-0.01em]">
-        <BadgeCheck className="size-[1.3em] text-brand-700" strokeWidth={2} aria-hidden />
-        <span className="text-brand-700">Asia</span>
+        <BadgeCheck className="size-[1.3em] text-interactive-primary" strokeWidth={2} aria-hidden />
+        <span className="text-interactive-primary">Asia</span>
         <span className="-ml-1.5 text-navy-900">Verify</span>
       </p>
 
       <div className="absolute right-[8%] bottom-[7%] left-[42%] text-right">
-        <p className="text-[max(12px,1.7cqw)] font-semibold tracking-[0.12em] text-brand-800 uppercase">KYB Basic Report</p>
-        <p className="mt-[1.2cqw] text-[max(18px,4.2cqw)] leading-tight font-semibold tracking-[-0.015em] text-ink [text-wrap:balance]" lang={showLocal ? "zh" : undefined}>
+        <p className="text-[max(12px,1.7cqw)] font-semibold tracking-[0.12em] text-interactive-control uppercase">KYB Basic Report</p>
+        <p className="mt-[1.2cqw] text-[max(18px,4.2cqw)] leading-tight font-semibold tracking-[-0.015em] text-content-primary [text-wrap:balance]" lang={showLocal ? "zh" : undefined}>
           {name}
         </p>
         {m.localName && !showLocal && (
-          <p className="mt-[0.6cqw] text-[max(15px,3.4cqw)] leading-tight font-semibold text-ink" lang="zh">
+          <p className="mt-[0.6cqw] text-[max(15px,3.4cqw)] leading-tight font-semibold text-content-primary" lang="zh">
             {m.localName}
           </p>
         )}
-        <p className="mt-[2.4cqw] border-t border-ink/15 pt-[1.6cqw] text-[max(11px,1.6cqw)] text-ink-2 tnum">
+        <p className="mt-[2.4cqw] border-t border-content-primary/15 pt-[1.6cqw] text-[max(11px,1.6cqw)] text-content-main tnum">
           {jurisdictionByCode[m.jurisdiction].name} · <span className="whitespace-nowrap">Generated {formatDate(facts.generated)}</span>
         </p>
       </div>
@@ -442,11 +442,11 @@ function Cover({ m, facts, name, showLocal }: { m: Monitor; facts: ReportFacts; 
 
 function Facts({ rows }: { rows: Array<[string, ReactNode]> }) {
   return (
-    <dl className="divide-y divide-line rounded-[6px] border border-line text-[13px]">
+    <dl className="divide-y divide-border-subtle rounded-[6px] border border-border-subtle text-[13px]">
       {rows.map(([k, v]) => (
         <div key={k} className="grid gap-1 px-4 py-3 sm:grid-cols-[220px_minmax(0,1fr)] sm:gap-4">
-          <dt className="text-ink-2">{k}</dt>
-          <dd className="font-medium text-ink">{v}</dd>
+          <dt className="text-content-main">{k}</dt>
+          <dd className="font-medium text-content-primary">{v}</dd>
         </div>
       ))}
     </dl>
@@ -455,23 +455,23 @@ function Facts({ rows }: { rows: Array<[string, ReactNode]> }) {
 
 /** A small data table that becomes stacked rows below md. */
 function Rows<T>({ cols, rows, empty }: { cols: Array<{ label: string; cell: (r: T) => ReactNode; className?: string }>; rows: T[]; empty: string }) {
-  if (rows.length === 0) return <p className="rounded-[6px] border border-line px-4 py-3 text-[13px] text-ink-2">{empty}</p>;
+  if (rows.length === 0) return <p className="rounded-[6px] border border-border-subtle px-4 py-3 text-[13px] text-content-main">{empty}</p>;
   const grid = { gridTemplateColumns: `minmax(0,1.6fr) ${cols.slice(1).map(() => "minmax(0,1fr)").join(" ")}` };
   return (
-    <div role="table" className="rounded-[6px] border border-line text-[13px]">
-      <div role="row" className="grid gap-4 border-b border-line px-4 py-2.5 text-[12px] font-semibold text-ink-2 max-md:hidden" style={grid}>
+    <div role="table" className="rounded-[6px] border border-border-subtle text-[13px]">
+      <div role="row" className="grid gap-4 border-b border-border-subtle px-4 py-2.5 text-[12px] font-semibold text-content-main max-md:hidden" style={grid}>
         {cols.map((c) => (
           <span key={c.label} role="columnheader" className={c.className}>
             {c.label}
           </span>
         ))}
       </div>
-      <div role="rowgroup" className="divide-y divide-line">
+      <div role="rowgroup" className="divide-y divide-border-subtle">
         {rows.map((r, i) => (
           <div key={i} role="row" className="grid gap-x-4 gap-y-0.5 px-4 py-3 max-md:!grid-cols-1" style={grid}>
             {cols.map((c, ci) => (
-              <span key={c.label} role="cell" className={cx(ci === 0 ? "font-medium text-ink" : "text-ink-2 max-md:text-[12px]", c.className)}>
-                {ci > 0 && <span className="text-ink-3 md:hidden">{c.label}: </span>}
+              <span key={c.label} role="cell" className={cx(ci === 0 ? "font-medium text-content-primary" : "text-content-main max-md:text-[12px]", c.className)}>
+                {ci > 0 && <span className="text-content-tertiary md:hidden">{c.label}: </span>}
                 {c.cell(r)}
               </span>
             ))}
@@ -489,7 +489,7 @@ function PageTwo({ m, facts, name }: { m: Monitor; facts: ReportFacts; name: str
   return (
     <div className="flex flex-col gap-8">
       <ReportSection id="risk-overview" title="Risk Overview">
-        <p className="mb-4 max-w-[64ch] text-[14px] text-ink-2">
+        <p className="mb-4 max-w-[64ch] text-[14px] text-content-main">
           A summary of the registry record on {formatDate(facts.generated)}. It reflects what the {j.name} registry holds, not a credit or compliance rating.
         </p>
         <Facts
@@ -600,10 +600,10 @@ function PageThree({ m, facts }: { m: Monitor; facts: ReportFacts }) {
           ]}
         />
         {m.status === "active" && (
-          <p className="mt-3 flex flex-wrap items-center gap-x-2 text-[13px] text-ink-2">
-            <Radar className="size-4 text-brand-700" aria-hidden />
+          <p className="mt-3 flex flex-wrap items-center gap-x-2 text-[13px] text-content-main">
+            <Radar className="size-4 text-interactive-primary" aria-hidden />
             Changes after {formatDate(facts.generated)} are tracked by your pKYB monitor.
-            <Link to={`/pkyb/monitoring/${m.id}`} className="font-semibold text-brand-700 hover:underline">
+            <Link to={`/pkyb/monitoring/${m.id}`} className="font-semibold text-content-link hover:underline">
               View pKYB
             </Link>
           </p>
@@ -615,11 +615,11 @@ function PageThree({ m, facts }: { m: Monitor; facts: ReportFacts }) {
       </ReportSection>
 
       <ReportSection id="legal-alerts" title="Legal Alerts">
-        <p className="rounded-[6px] border border-line px-4 py-3 text-[13px] text-ink-2">No legal alerts found in the registry sources searched for this report.</p>
+        <p className="rounded-[6px] border border-border-subtle px-4 py-3 text-[13px] text-content-main">No legal alerts found in the registry sources searched for this report.</p>
       </ReportSection>
 
       <ReportSection id="sources" title="Data Source & Disclaimers">
-        <div className="max-w-[68ch] space-y-2 text-[13px] text-ink-2">
+        <div className="max-w-[68ch] space-y-2 text-[13px] text-content-main">
           <p>
             Data retrieved from the {j.name} company registry on {formatDate(facts.generated)}. Report No. <span className="tnum">{facts.reportNo}</span>.
           </p>

@@ -97,7 +97,7 @@ export function SeveritySettings() {
     <div className="mx-auto max-w-[1280px] px-4 pt-6 pb-16 lg:px-8">
       <header className="max-w-[72ch]">
         <h1 className="text-[26px] leading-tight font-semibold tracking-[-0.015em]">Severity Settings</h1>
-        <p className="mt-1 text-[14px] text-ink-2">
+        <p className="mt-1 text-[14px] text-content-main">
           Set a severity for each change category, and choose which severities notify you. Severity drives the colours in the monitoring table, heatmaps and change feed.
           Nothing changes until you save.
         </p>
@@ -111,7 +111,7 @@ export function SeveritySettings() {
               <h2 id="map-h" className="text-[18px] font-semibold">
                 Category severity
               </h2>
-              <p className="mt-0.5 text-[13px] text-ink-2">
+              <p className="mt-0.5 text-[13px] text-content-main">
                 Applies to all your monitors. When one change touches several categories, it takes the most severe tier. Earlier changes keep the severity they had when detected, shown as “was Low”.
               </p>
             </div>
@@ -124,12 +124,12 @@ export function SeveritySettings() {
             </div>
           </div>
 
-          <div className="overflow-hidden rounded-[6px] border border-line bg-white">
-            <div className="grid grid-cols-[minmax(132px,1fr)_minmax(124px,200px)] gap-4 border-b border-line bg-wash px-5 py-2.5 text-[12px] font-semibold text-ink-2">
+          <div className="overflow-hidden rounded-[6px] border border-border-subtle bg-white">
+            <div className="grid grid-cols-[minmax(132px,1fr)_minmax(124px,200px)] gap-4 border-b border-border-subtle bg-background-subtle px-5 py-2.5 text-[12px] font-semibold text-content-main">
               <span>Change category</span>
               <span>Severity</span>
             </div>
-            <ul className="divide-y divide-line">
+            <ul className="divide-y divide-border-subtle">
               {CATEGORIES.map((c) => {
                 const Icon = CATEGORY_ICON[c];
                 const cur = draftMap[c];
@@ -137,13 +137,13 @@ export function SeveritySettings() {
                 return (
                   <li key={c} className="grid grid-cols-[minmax(132px,1fr)_minmax(124px,200px)] items-center gap-4 px-5 py-3">
                     <span className="flex min-w-0 items-start gap-3">
-                      <Icon className="mt-0.5 size-[18px] shrink-0 text-brand-700" aria-hidden />
+                      <Icon className="mt-0.5 size-[18px] shrink-0 text-interactive-primary" aria-hidden />
                       <span className="min-w-0">
                         <span className="block text-[14px] font-medium">{CATEGORY_LABEL[c]}</span>
                         {unsaved ? (
-                          <span className="block text-[11px] font-medium text-ink">Unsaved · was {SEVERITY_LABEL[severity[c]]}</span>
+                          <span className="block text-[11px] font-medium text-content-primary">Unsaved · was {SEVERITY_LABEL[severity[c]]}</span>
                         ) : (
-                          cur !== DEFAULT_SEVERITY[c] && <span className="block text-[11px] text-ink-3">Default: Medium</span>
+                          cur !== DEFAULT_SEVERITY[c] && <span className="block text-[11px] text-content-tertiary">Default: Medium</span>
                         )}
                       </span>
                     </span>
@@ -160,7 +160,7 @@ export function SeveritySettings() {
                         )}
                       >
                         {TIERS_HIGH_FIRST.map((s) => (
-                          <option key={s} value={s} className="bg-white text-ink">
+                          <option key={s} value={s} className="bg-white text-content-primary">
                             {SEVERITY_LABEL[s]}
                           </option>
                         ))}
@@ -171,8 +171,8 @@ export function SeveritySettings() {
                 );
               })}
             </ul>
-            <div className="flex items-center justify-between gap-3 border-t border-line bg-canvas px-5 py-3">
-              <span className="text-[12px] text-ink-3">
+            <div className="flex items-center justify-between gap-3 border-t border-border-subtle bg-base-contrast px-5 py-3">
+              <span className="text-[12px] text-content-tertiary">
                 {customised ? "Your team has customised this mapping." : "Every category is at the default, Medium."}
                 {severityChange && (
                   <span className="block">
@@ -187,20 +187,20 @@ export function SeveritySettings() {
           </div>
         </section>
 
-        <section aria-labelledby="notif-h" className="self-start rounded-[6px] border border-line bg-white xl:sticky xl:top-[80px]">
-          <div className="flex items-center gap-2 border-b border-line px-5 py-4">
-            <Bell className="size-5 text-brand-700" aria-hidden />
+        <section aria-labelledby="notif-h" className="self-start rounded-[6px] border border-border-subtle bg-white xl:sticky xl:top-[80px]">
+          <div className="flex items-center gap-2 border-b border-border-subtle px-5 py-4">
+            <Bell className="size-5 text-interactive-primary" aria-hidden />
             <h2 id="notif-h" className="text-[18px] font-semibold">
               Notifications
             </h2>
           </div>
           {/* Stacked under the mapping (below xl), the three channels sit side by side instead of as a tall column. */}
-          <div className="divide-y divide-line md:grid md:grid-cols-3 md:divide-x md:divide-y-0 xl:block xl:divide-x-0 xl:divide-y">
+          <div className="divide-y divide-border-subtle md:grid md:grid-cols-3 md:divide-x md:divide-y-0 xl:block xl:divide-x-0 xl:divide-y">
             {CHANNELS.map((ch) => (
               <fieldset key={ch.key} className="px-5 py-4">
                 <legend className="sr-only">{ch.title}</legend>
                 <p className="text-[14px] font-semibold">{ch.title}</p>
-                <p className="text-[13px] text-ink-2">{ch.desc}</p>
+                <p className="text-[13px] text-content-main">{ch.desc}</p>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {TIERS_HIGH_FIRST.map((s) => {
                     const on = draft[ch.key][s];
@@ -209,7 +209,7 @@ export function SeveritySettings() {
                         key={s}
                         className={cx(
                           "inline-flex h-8 cursor-pointer items-center gap-2 rounded-[4px] border px-3 text-[13px] transition-colors select-none max-sm:h-11",
-                          on ? cx(SEV_STYLE[s].bg, SEV_STYLE[s].line, SEV_STYLE[s].text, "font-semibold") : "border-line-strong text-ink-3 hover:border-ink-3",
+                          on ? cx(SEV_STYLE[s].bg, SEV_STYLE[s].line, SEV_STYLE[s].text, "font-semibold") : "border-interactive-secondary text-content-tertiary hover:border-content-main",
                         )}
                       >
                         <input
@@ -231,18 +231,18 @@ export function SeveritySettings() {
       </div>
 
       {preview && (
-        <div role="region" aria-label="Unsaved changes" className="sticky bottom-4 z-20 mt-8 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-[6px] bg-navy-900 px-4 py-3 text-[13px] text-white shadow-pop">
+        <div role="region" aria-label="Unsaved changes" className="sticky bottom-4 z-20 mt-8 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-[6px] bg-background-system px-4 py-3 text-[13px] text-white shadow-pop">
           <p className="min-w-0 flex-1 max-sm:basis-full" aria-live="polite">
             <span className="font-semibold tnum">
               {nf.format(pending)} unsaved {pending === 1 ? "change" : "changes"}
             </span>
-            <span className="text-white/75"> · {details.join(" · ")}</span>
+            <span className="text-chrome-content-tertiary"> · {details.join(" · ")}</span>
           </p>
           <span className="ml-auto flex items-center gap-2 max-sm:w-full max-sm:justify-end">
-            <button onClick={discard} className="inline-flex h-9 items-center rounded-[4px] px-3 font-semibold text-white/85 hover:bg-white/10 hover:text-white max-sm:h-11">
+            <button onClick={discard} className="inline-flex h-9 items-center rounded-[4px] px-3 font-semibold text-chrome-content-main hover:bg-chrome-control-hover hover:text-white max-sm:h-11">
               Discard
             </button>
-            <button onClick={save} className="inline-flex h-9 items-center rounded-[4px] bg-white px-4 font-semibold text-navy-900 hover:bg-brand-50 max-sm:h-11">
+            <button onClick={save} className="inline-flex h-9 items-center rounded-[4px] bg-white px-4 font-semibold text-content-primary hover:bg-interactive-accent max-sm:h-11">
               Save changes
             </button>
           </span>

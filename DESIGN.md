@@ -2,38 +2,57 @@
 name: AsiaVerify Portal (pKYB)
 description: The AsiaVerify Portal's navy-and-green compliance workspace, as used by Perpetual KYB monitoring.
 colors:
+  content-primary: "#1b1c1e"
+  content-main: "#444444"
+  content-disabled: "#5e5e5e"
+  content-tertiary: "#6b6b6b"
+  content-link: "#004d3f"
+  content-on-negative-elevated: "#95231e"
+  content-on-warning-elevated: "#9a6200"
+  content-on-positive-elevated: "#397300"
+  interactive-primary: "#00735f"
+  interactive-accent: "#e5f1e8"
+  interactive-accent-hover: "#d6e9da"
+  interactive-selected: "#edf5ef"
+  interactive-secondary: "#626262"
+  interactive-control: "#004d3f"
+  interactive-contrast: "#009a7e"
+  background-elevated: "#fdfdfd"
+  background-demoted: "#292929"
+  background-accent: "#f8f7f4"
+  background-subtle: "#f1f1f1"
+  sentiment-negative: "#d14343"
+  sentiment-negative-hover: "#a52b25"
+  sentiment-positive: "#1b813d"
+  sentiment-warning: "#ffaa52"
+  sentiment-negative-elevated: "#ffefef"
+  sentiment-positive-elevated: "#f6ffed"
+  sentiment-warning-elevated: "#fff6e8"
+  border-neutral: "#a5a5a5"
+  border-subtle: "#e3e3e3"
+  border-accent: "#8fcaa9"
+  border-negative: "#f2c4c0"
+  border-warning: "#efd7a3"
+  base-light: "#ffffff"
+  base-dark: "#1b1c1e"
+  base-contrast: "#f7f7f7"
   navy-950: "#0b1016"
   navy-900: "#111a24"
   navy-800: "#172636"
   navy-700: "#1f3954"
-  brand-50: "#eaf5ef"
-  row-selected: "#f0f8f4"
-  brand-100: "#d3eadd"
-  brand-300: "#8fcaa9"
-  brand-400: "#2fbf87"
-  brand-600: "#0d7a58"
-  brand-700: "#0a6a4d"
-  brand-800: "#08573f"
-  ink: "#1d2329"
-  ink-2: "#4d5761"
-  ink-3: "#646e77"
-  line: "#e3e7ea"
-  line-strong: "#cfd5da"
-  canvas: "#f7f8f8"
-  wash: "#f1f3f4"
-  white: "#ffffff"
-  high: "#c2362f"
-  high-bg: "#fdeeed"
+  chrome-accent: "#2fbf87"
+  high: "#95231e"
+  high-bg: "#ffefef"
   high-line: "#f2c4c0"
-  high-cell: "#d9473f"
+  high-cell: "#d14343"
   medium: "#9a6200"
-  medium-bg: "#fdf4e1"
+  medium-bg: "#fff6e8"
   medium-line: "#efd7a3"
-  medium-cell: "#e7a83a"
-  low: "#4f5c67"
-  low-bg: "#f0f2f4"
-  low-line: "#d6dbe0"
-  low-cell: "#a9b4bd"
+  medium-cell: "#ffaa52"
+  low: "#444444"
+  low-bg: "#f1f1f1"
+  low-line: "#d6d6d6"
+  low-cell: "#a5a5a5"
 typography:
   display:
     fontFamily: "Open Sans, Noto Sans SC, ui-sans-serif, system-ui, sans-serif"
@@ -100,52 +119,52 @@ spacing:
   3xl: "32px"
 components:
   button-primary:
-    backgroundColor: "{colors.brand-700}"
-    textColor: "{colors.white}"
+    backgroundColor: "{colors.interactive-primary}"
+    textColor: "{colors.base-light}"
     typography: "{typography.body}"
     rounded: "{rounded.control}"
     padding: "0 16px"
     height: "36px"
   button-primary-hover:
-    backgroundColor: "{colors.brand-800}"
+    backgroundColor: "{colors.interactive-control}"
   button-primary-active:
     backgroundColor: "{colors.navy-800}"
   button-secondary:
-    backgroundColor: "{colors.white}"
-    textColor: "{colors.brand-700}"
+    backgroundColor: "{colors.base-light}"
+    textColor: "{colors.interactive-primary}"
     rounded: "{rounded.control}"
     padding: "0 16px"
     height: "36px"
   button-secondary-hover:
-    backgroundColor: "{colors.brand-50}"
+    backgroundColor: "{colors.interactive-accent}"
   button-ghost:
-    textColor: "{colors.ink-2}"
+    textColor: "{colors.content-main}"
     rounded: "{rounded.control}"
     padding: "0 16px"
     height: "36px"
   button-ghost-hover:
-    backgroundColor: "{colors.wash}"
-    textColor: "{colors.ink}"
+    backgroundColor: "{colors.background-subtle}"
+    textColor: "{colors.content-primary}"
   button-danger:
     backgroundColor: "{colors.high}"
-    textColor: "{colors.white}"
+    textColor: "{colors.base-light}"
     rounded: "{rounded.control}"
     padding: "0 16px"
     height: "36px"
   input:
-    backgroundColor: "{colors.white}"
-    textColor: "{colors.ink}"
+    backgroundColor: "{colors.base-light}"
+    textColor: "{colors.content-primary}"
     typography: "{typography.body-dense}"
     rounded: "{rounded.control}"
     padding: "0 10px"
     height: "36px"
   panel:
-    backgroundColor: "{colors.white}"
+    backgroundColor: "{colors.base-light}"
     rounded: "{rounded.panel}"
     padding: "20px"
   dialog:
-    backgroundColor: "{colors.white}"
-    textColor: "{colors.ink}"
+    backgroundColor: "{colors.base-light}"
+    textColor: "{colors.content-primary}"
     rounded: "{rounded.dialog}"
     padding: "20px 24px"
   severity-pill-high:
@@ -167,18 +186,18 @@ components:
     padding: "0 10px"
     height: "24px"
   category-chip:
-    backgroundColor: "{colors.white}"
-    textColor: "{colors.ink-2}"
+    backgroundColor: "{colors.base-light}"
+    textColor: "{colors.content-main}"
     rounded: "{rounded.control}"
     padding: "0 8px"
     height: "24px"
   tab-active:
-    textColor: "{colors.ink}"
+    textColor: "{colors.content-primary}"
     typography: "{typography.body}"
     height: "44px"
   toast:
     backgroundColor: "{colors.navy-900}"
-    textColor: "{colors.white}"
+    textColor: "{colors.base-light}"
     rounded: "{rounded.panel}"
     padding: "12px 16px"
 ---
@@ -189,14 +208,14 @@ components:
 
 **Creative North Star: "The Night Desk Ledger"**
 
-This is the established AsiaVerify Portal, and pKYB runs inside it as a native module. Nothing about it was reinvented for pKYB. A dark navy gradient frames the workspace in the top bar and sidebar. Inside that frame the content sits on near-white canvas, in white panels with hairline borders. One deep green carries every committed action, and a three-step severity scale carries every status. The frame is calm and heavy, and the content is light and dense: the dark frame holds the room and the ledger inside does the work.
+This is the established AsiaVerify Portal, and pKYB runs inside it as a native module. Nothing about it was reinvented for pKYB. A dark navy gradient frames the workspace in the top bar and sidebar. Inside that frame the content sits on near-white base-contrast, in white panels with hairline borders. One deep green carries every committed action, and a three-step severity scale carries every status. The frame is calm and heavy, and the content is light and dense: the dark frame holds the room and the ledger inside does the work.
 
-The density is analyst-grade. Body text is 14px, tables and secondary text are 13px, and meta text is 12px. Panels are flat, with no ambient shadow. Depth comes from the navy frame against the pale canvas and from two shadows reserved for things that float: menus, toasts, tooltips and dialogs. Colour is rationed. Green means "act or go here", red, amber and slate mean severity, and navy means "the system is speaking": selections, toasts, tooltips and the unreviewed marker.
+The density is analyst-grade. Body text is 14px, tables and secondary text are 13px, and meta text is 12px. Panels are flat, with no ambient shadow. Depth comes from the navy frame against the pale base-contrast and from two shadows reserved for things that float: menus, toasts, tooltips and dialogs. Colour is rationed. Green means "act or go here", red, amber and slate mean severity, and navy means "the system is speaking": selections, toasts, tooltips and the unreviewed marker.
 
 Severity is the only status colour. The nine change categories are told apart by green line icons, never by hue, so whenever a user remaps severity in Severity Settings, the colour of every table row, chip dot, feed entry, heatmap and alert follows.
 
 **Key Characteristics:**
-- Navy gradient chrome (top bar and sidebar) around a light content area on canvas.
+- Navy gradient chrome (top bar and sidebar) around a light content area on base-contrast.
 - A single green primary action per view, plus green outline and ghost buttons for everything else.
 - Severity is a three-step scale (High red, Medium amber, Low slate). Each step has text, background, border and cell tints.
 - Category identity is a green line icon inside a neutral chip.
@@ -205,35 +224,40 @@ Severity is the only status colour. The nine change categories are told apart by
 
 ## Colors
 
-The palette is a dark navy frame, one green action colour, a cool grey ink and line ramp, and a severity scale that is the only other source of hue.
+The palette is AsiaVerify's semantic colour sheet (content, interactive, background, sentiment, border, base), framed by the Portal's navy chrome. Token names in code mirror the sheet: `content.main` is `--color-content-main` and `text-content-main`. Three values are adjusted from the sheet to pass WCAG AA, and a handful of proposed tokens fill roles the sheet doesn't cover yet. Both are listed in `docs/color-tokens.md`.
 
-### Primary
-- **Ledger Green** (brand-700): the one filled action per view, secondary-button outlines and text, link text, the active tab underline, checkbox accent and caret. Brand-800 is the hover state and darker green text on brand-50 fills. Brand-600 is the focus ring and focused input border.
-- **Mint Wash** (brand-50, with brand-100 and brand-300): selected rows (at 70%), secondary-button hover, active filter rows, the pKYB promo panel header, and the "New" tag. Brand-100 is text selection, and brand-300 is the border of green-tinted panels and the New tag.
-- **Signal Green** (brand-400): appears only on navy. It is used for the "Asia" in the logo, the active sub-nav marker, the notification count badge, the active pKYB nav icon, and the toast check icon.
+### Interactive
+- **Interactive Primary** (interactive-primary, #00735f): the one filled action per view, secondary-button outlines and text, the active tab underline, checkbox marks, the focus ring, focused input borders and the caret. White on it is 5.81:1.
+- **Control** (interactive-control, #004d3f): the primary button's hover, and green text on interactive-accent fills (for example the active section in the report rail).
+- **Link** (content-link, #004d3f): inline text links, underlined on hover.
+- **Accent** (interactive-accent, with interactive-accent-hover, interactive-selected and border-accent): selected rows (interactive-selected), secondary-button hover, active filter rows, the pKYB promo panel header and the "New" tag. Accent-hover is the hover of accent fills and text selection.
+- **Secondary** (interactive-secondary, #626262): the border of every input, select, textarea, checkbox-style toggle and unselected filter chip. Hover darkens it to content-main.
+- **Chrome Accent** (chrome-accent): appears only on navy. It is used for the "Asia" in the logo, the active sub-nav marker, the notification count badge, the active pKYB nav icon and the toast check icon. interactive-contrast is not used here, because it is only 3.34:1 on navy-700.
 
-### Secondary
+### Portal chrome
 - **Night Navy** (navy-700 → navy-900 → navy-950): the chrome gradient. The top bar runs 90deg and the sidebar 180deg, both from navy-700 through navy-900 at 55% to navy-950. Navy-900 also fills toasts, tooltips, the bulk-selection bar, the selected heatmap-cell stroke and the unreviewed dot. Navy-800 is the selected state of status filter chips and the pressed primary button. The dialog backdrop is navy-950 at 55%.
 
-### Tertiary (Severity)
-- **High** (high, high-bg, high-line, high-cell): red. It marks High severity and doubles as the destructive colour (danger button, danger menu items).
-- **Medium** (medium, medium-bg, medium-line, medium-cell): amber. Text uses the dark medium value so it stays legible on medium-bg.
-- **Low** (low, low-bg, low-line, low-cell): slate. It is deliberately quiet, not green, so Low never reads as "good".
-- Each step has four roles: `text` for the label, `bg` for the pill fill, `line` for pill and lead-card borders, and `cell` for dots, heatmap cells and legend swatches.
+### Severity
+Severity is a product layer over the sentiment tokens:
+- **High** (high, high-bg, high-line, high-cell): text is content-on-negative-elevated, the fill is sentiment-negative-elevated, the cell is sentiment-negative. Red also marks destructive actions: the danger button is sentiment-negative with white text, and its hover is sentiment-negative-hover.
+- **Medium** (medium, medium-bg, medium-line, medium-cell): text is content-on-warning-elevated, the fill is sentiment-warning-elevated, the cell is sentiment-warning.
+- **Low** (low, low-bg, low-line, low-cell): content-main on background-subtle, with a border-neutral cell. It is deliberately quiet, not green, so Low never reads as "good".
+- Each step has four roles: `text` for the label, `bg` for the pill fill, `line` for pill and lead-card borders, and `cell` for dots, heatmap cells and legend swatches. Text always uses the on_*_elevated colour so it passes on the tinted pill and on white.
 
 ### Neutral
-- **Ink** (ink): headings and primary text.
-- **Ink 2** (ink-2): secondary text, table headers, panel labels, inactive tabs.
-- **Ink 3** (ink-3): meta text, placeholder, icons at rest, heatmap axis labels.
-- **Hairline** (line): every panel border, divider and table rule.
-- **Hairline Strong** (line-strong): input and select borders, unselected filter chips, scrollbar thumb.
-- **Canvas** (canvas): page background, dialog footer, table row hover, the heatmap half of the triage band (at 60%).
-- **Wash** (wash): ghost and menu-item hover, inactive count badges, and the empty heatmap cell.
+- **Content Primary** (content-primary): headings and primary text.
+- **Content Main** (content-main): secondary text, table headers, panel labels, inactive tabs.
+- **Content Tertiary** (content-tertiary): meta text, placeholder, icons at rest, heatmap axis labels.
+- **Border Subtle** (border-subtle): every panel border, divider and table rule.
+- **Border Neutral** (border-neutral): stronger static edges (the status panel, dashed section separators, status badges, the Required tag) and the scrollbar thumb.
+- **Base Contrast** (base-contrast): page background, dialog footer, table row hover, the heatmap half of the triage band (at 60%).
+- **Background Subtle** (background-subtle): ghost and menu-item hover, inactive count badges, and the empty heatmap cell.
+- **Background Overlay** (background-overlay): the 1px edge around flags.
 
 ### Named Rules
 **The Severity Is the Only Status Colour Rule.** Red, amber and slate mean High, Medium and Low and nothing else, except that red also marks destructive actions. Categories never get their own hue. They are shown with a green line icon in a neutral chip, and a severity dot when severity matters. A multi-category event takes the colour of its worst severity.
 
-**The Green on Navy Rule.** Signal Green (brand-400) appears only on the navy chrome and on navy surfaces such as toasts. On white, green is always brand-700 or darker.
+**The Green on Navy Rule.** Chrome Accent (chrome-accent) appears only on the navy chrome and on navy surfaces such as toasts. On white, green is always interactive-primary or darker.
 
 **The Navy Speaks for the System Rule.** Navy-900 surfaces inside the content area (toasts, tooltips, the bulk-selection bar, the unreviewed dot) mark system state or feedback, never a brand moment.
 
@@ -250,13 +274,13 @@ The palette is a dark navy frame, one green action colour, a cool grey ink and l
 - **Lead title** (Roboto 600, 20px, snug leading, -0.01em): the lead change headline on a company page.
 - **Title** (Roboto 600, 18px, snug leading): dialog titles, section headings, result counts.
 - **Body** (400, 14px, 1.5): page intros, dialog prose, buttons and tabs. Prose is capped at 62–64ch.
-- **Body dense** (400, 13px): table cells, filter controls, menus, toasts, panel labels (as 600 in ink-2).
-- **Label** (600, 12px): table headers and select labels (500 in ink-2), meta lines and timestamps (400 in ink-3). Use 11px only for chip counts, the New tag and legend text.
+- **Body dense** (400, 13px): table cells, filter controls, menus, toasts, panel labels (as 600 in content-main).
+- **Label** (600, 12px): table headers and select labels (500 in content-main), meta lines and timestamps (400 in content-tertiary). Use 11px only for chip counts, the New tag and legend text.
 
 ### Named Rules
 **The Tabular Figures Rule.** Every count, date, registration number and credit figure is set with tabular figures so columns line up across thousands of rows.
 
-**The Sentence-Case Label Rule.** Panel and section labels are sentence case, semibold, ink-2, 12–13px (for example "Needs review" or "Active monitors"). Weight and colour carry the hierarchy.
+**The Sentence-Case Label Rule.** Panel and section labels are sentence case, semibold, content-main, 12–13px (for example "Needs review" or "Active monitors"). Weight and colour carry the hierarchy.
 
 ## Layout
 
@@ -271,7 +295,7 @@ The palette is a dark navy frame, one green action colour, a cool grey ink and l
 
 ## Elevation & Depth
 
-The system is flat at rest. Depth comes from the navy frame against the pale canvas, from canvas against white panels, and from 1px hairline borders. Panels, tables and cards carry no shadow. Shadows only appear on elements that float above the page.
+The system is flat at rest. Depth comes from the navy frame against the pale base-contrast, from base-contrast against white panels, and from 1px hairline borders. Panels, tables and cards carry no shadow. Shadows only appear on elements that float above the page.
 
 ### Shadow Vocabulary
 - **Pop** (`box-shadow: 0 8px 24px -6px rgb(13 22 32 / 0.18), 0 2px 6px -2px rgb(13 22 32 / 0.12)`): menus, the notification popover, toasts, heatmap tooltips.
@@ -282,36 +306,36 @@ The system is flat at rest. Depth comes from the navy frame against the pale can
 
 ## Shapes
 
-Corners are small and consistent, and the radius grows with the size of the container. Controls (buttons, inputs, selects, category chips, nav rows, icon buttons) are 4px. Panels, tables, menus, popovers and toasts are 6px. Dialogs are 8px. Severity pills, status filter chips, count badges and dots are fully round. Flags are 2px with a 1px inner hairline, and heatmap cells have 2px corners. Borders are always 1px hairlines in line or line-strong. Heavier lines are reserved for state: the 2px active-tab underline and the 2px brand-400 active sub-nav marker.
+Corners are small and consistent, and the radius grows with the size of the container. Controls (buttons, inputs, selects, category chips, nav rows, icon buttons) are 4px. Panels, tables, menus, popovers and toasts are 6px. Dialogs are 8px. Severity pills, status filter chips, count badges and dots are fully round. Flags are 2px with a 1px inner hairline, and heatmap cells have 2px corners. Borders are always 1px hairlines in line or interactive-secondary. Heavier lines are reserved for state: the 2px active-tab underline and the 2px chrome-accent active sub-nav marker.
 
 ## Components
 
 ### Buttons
 Buttons are compact and decisive.
 - **Shape:** gently squared (4px). Medium is 36px tall with 16px padding at 14px semibold. Small is 32px with 12px padding at 13px. Icon and label have a 6px gap.
-- **Primary:** Ledger Green fill, white text. Hover is brand-800 and pressed is navy-800.
-- **Secondary:** white with a 1px brand-700 border and brand-700 text. Hover is mint wash. It is the default variant and serves page-level creation actions ("New monitor").
-- **Ghost:** ink-2 text, no border. Hover is wash with ink text. Used for Cancel and low-stakes actions.
+- **Primary:** Interactive Primary fill, white text. Hover is interactive-control and pressed is navy-800.
+- **Secondary:** white with a 1px interactive-primary border and interactive-primary text. Hover is mint background-subtle. It is the default variant and serves page-level creation actions ("New monitor").
+- **Ghost:** content-main text, no border. Hover is background-subtle with content-primary text. Used for Cancel and low-stakes actions.
 - **Danger:** high-red fill, white text. Used only as the confirm button inside a destructive confirm dialog.
-- **Link:** brand-700 text, underlined on hover.
-- **Focus:** a 2px brand-600 outline at 2px offset on every focusable element. Disabled is 50% opacity.
+- **Link:** interactive-primary text, underlined on hover.
+- **Focus:** a 2px interactive-primary outline at 2px offset on every focusable element. Disabled is 50% opacity.
 
 **The One Filled Primary Rule.** Each view has at most one primary (filled green) button: the next step in triage ("Review High first", "Download fresh report"). When a lead change takes the primary on a company page, the header download becomes secondary.
 
 ### Severity pills and category chips
 - **Severity pill:** fully round, 24px tall (20px small), with a severity bg fill, severity-line border and severity text, a 6px cell-colour dot, and the label "High", "Medium" or "Low".
 - **Triage chips:** 32px round chips in the same severity tints, showing a count and label. They are filter buttons.
-- **Category chip:** 4px radius, white, hairline border, ink-2 12px text, a 14px green line icon for the category, and a trailing severity dot that follows the user's mapping. Icons: Identity user, Address map-pin, BusinessActivity briefcase, Officers users, Ownership pie-chart, Capital landmark, Status circle-check, AnnualReturn calendar, Other ellipsis.
-- **Status filter chips:** round, white with a line-strong border. Selected is a navy-800 fill with white text.
+- **Category chip:** 4px radius, white, hairline border, content-main 12px text, a 14px green line icon for the category, and a trailing severity dot that follows the user's mapping. Icons: Identity user, Address map-pin, BusinessActivity briefcase, Officers users, Ownership pie-chart, Capital landmark, Status circle-check, AnnualReturn calendar, Other ellipsis.
+- **Status filter chips:** round, white with a interactive-secondary border. Selected is a navy-800 fill with white text.
 - **Triage chips as filters:** they carry `aria-pressed`. Pressed shows a check in place of the dot and a 1px inset ring in the chip's own colour; pressing again clears the filter. They are the only severity filter on Active monitors.
-- **Severity annotation:** severity is a lens the client can re-aim, so each change keeps the severity it had when detected. Where today's mapping reads differently, the pill is followed by "was Low" in 11px ink-3. The pill always shows today's value.
-- **Status badge:** Active is a mint tint, Stopped a wash tint with a solid dot, Inactive white with a hollow dot. Amber is never used for a status, only for Medium severity.
+- **Severity annotation:** severity is a lens the client can re-aim, so each change keeps the severity it had when detected. Where today's mapping reads differently, the pill is followed by "was Low" in 11px content-tertiary. The pill always shows today's value.
+- **Status badge:** Active is a mint tint, Stopped a background-subtle tint with a solid dot, Inactive white with a hollow dot. Amber is never used for a status, only for Medium severity.
 
 ### Panels and tables
 - **Corner style:** 6px.
-- **Background:** white on canvas, with a 1px hairline border and no shadow.
+- **Background:** white on base-contrast, with a 1px hairline border and no shadow.
 - **Internal padding:** 20px, 24px at lg.
-- **Tables:** 13px cells, 12px semibold ink-2 headers, hairline row dividers. Rows highlight in canvas on hover and in row-selected (solid brand-50 at 70% over white) when selected. The whole row is clickable. Columns that support sorting show a down arrow when active.
+- **Tables:** 13px cells, 12px semibold content-main headers, hairline row dividers. Rows highlight in base-contrast on hover and in interactive-selected (solid interactive-accent at 70% over white) when selected. The whole row is clickable. Columns that support sorting show a down arrow when active.
 - **Pinned identity columns:** on wide portfolio tables the checkbox and Company columns are sticky on horizontal scroll, with a 1px inset hairline on the right edge. Pinned cells carry their own solid fill, so every cell takes the row state. Secondary facts such as "Checked 02 Oct 2026" go on the company's meta line rather than in a column of their own.
 - **Bulk selection:** when rows are selected, a navy-900 bar appears above the table with the selected count, a visible "Clear selection", the review action ("Review N changes…") and a ⋯ menu holding the destructive action. Row selectors are real checkboxes (`role="checkbox"`, 24px).
 - **Result bar:** an action on the whole filtered result ("Review all N…") sits in a bar at the top of the result with the count, never among the filters. CSV export sits in the result's footer, beside the pager.
@@ -322,41 +346,41 @@ Buttons are compact and decisive.
 ### Review decisions
 A review is a decision, not a tick, because the change log is the client's audit trail.
 - **Decisions:** "No action needed" or "Actioned". Each review records the decision, the reviewer, the date and an optional note of up to 500 characters.
-- **Lead card (company page):** the lead change shows a field diff, then the primary "Get fresh KYB Basic report", then a canvas footer titled "Record your review". The footer holds the two decisions as radio cards (white with a line-strong border; selected has a brand-700 border on brand-50), a note field, and a secondary "Record review" that stays disabled until a decision is chosen. Ordering a fresh report pre-selects Actioned and pre-fills the note.
-- **Field diff:** a hairline-bordered list with Field, Baseline (date) and Registry now (date) columns. Each row has the category chip, the field name in 13px semibold, the baseline value in ink-2 and the current value in ink at 500, and "In the fresh report: <section>" in 12px ink-3. Below md the columns stack, with inline 11px labels. Changed values are never colour-coded, because severity is the only status colour.
+- **Lead card (company page):** the lead change shows a field diff, then the primary "Get fresh KYB Basic report", then a base-contrast footer titled "Record your review". The footer holds the two decisions as radio cards (white with a interactive-secondary border; selected has a interactive-primary border on interactive-accent), a note field, and a secondary "Record review" that stays disabled until a decision is chosen. Ordering a fresh report pre-selects Actioned and pre-fills the note.
+- **Field diff:** a hairline-bordered list with Field, Baseline (date) and Registry now (date) columns. Each row has the category chip, the field name in 13px semibold, the baseline value in content-main and the current value in content-primary at 500, and "In the fresh report: <section>" in 12px content-tertiary. Below md the columns stack, with inline 11px labels. Changed values are never colour-coded, because severity is the only status colour.
 - **Review menu (lists):** in the change log and the feed, each unreviewed change has a 32px outlined "Review ▾" menu with the two decisions and "Add a note…", which opens the review dialog.
 - **Review dialog:** used for bulk review, for a whole company's changes from its ⋯ menu, and for a single change with a note. It always asks for the decision. When High changes are included it names how many and suggests reviewing them one by one.
-- **Recorded outcome:** the decision in 12px semibold ink-2, then "reviewer · date" in ink-3, then "Note: …" in ink-2. After a review, focus moves to this outcome. Where the list hides reviewed changes (the feed), focus moves to the next row's Review button.
+- **Recorded outcome:** the decision in 12px semibold content-main, then "reviewer · date" in content-tertiary, then "Note: …" in content-main. After a review, focus moves to this outcome. Where the list hides reviewed changes (the feed), focus moves to the next row's Review button.
 
 ### Inputs and fields
-- **Style:** 36px tall (40px on the Search hero), 4px radius, white with a 1px line-strong border, 13px ink text, ink-3 placeholder. A 12px medium ink-2 label sits above.
-- **Hover / focus:** the border darkens to ink-3 on hover and turns brand-600 on focus, with no glow, and the global 2px brand-600 focus outline still shows: inputs never suppress it. Checkboxes use the native control with a brand-700 accent. On phones inputs and selects are 44px tall and 16px, so iOS does not zoom them.
+- **Style:** 36px tall (40px on the Search hero), 4px radius, white with a 1px interactive-secondary border, 13px content-primary text, content-tertiary placeholder. A 12px medium content-main label sits above.
+- **Hover / focus:** the border darkens to content-tertiary on hover and turns interactive-primary on focus, with no glow, and the global 2px interactive-primary focus outline still shows: inputs never suppress it. Checkboxes use the native control with a interactive-primary accent. On phones inputs and selects are 44px tall and 16px, so iOS does not zoom them.
 
 ### Navigation
-- **Top bar:** navy gradient, logo ("Asia" in brand-400, "Verify" in white, 17px bold), product title at 16px semibold, and 36px icon buttons in white at 85%. Hover is a 10% white overlay.
-- **Sidebar:** navy gradient, 40px rows at 14px with 18px line icons (1.75 stroke). Rest is white at 75%, hover adds a 5% white fill, active adds a 7% white fill with white text. Sub-items indent under a 12% white rule, and the active sub-item is semibold with a 2px brand-400 marker on that rule. A "New" tag marks new modules.
-- **Tabs:** 44px tall, 14px. Active is semibold ink with a 2px brand-700 underline and a mint count badge. Inactive is ink-2 with a wash count badge. Labels shorten below sm.
+- **Top bar:** navy gradient, logo ("Asia" in chrome-accent, "Verify" in white, 17px bold), product title at 16px semibold, and 36px icon buttons in white at 85%. Hover is a 10% white overlay.
+- **Sidebar:** navy gradient, 40px rows at 14px with 18px line icons (1.75 stroke). Rest is white at 75%, hover adds a 5% white fill, active adds a 7% white fill with white text. Sub-items indent under a 12% white rule, and the active sub-item is semibold with a 2px chrome-accent marker on that rule. A "New" tag marks new modules.
+- **Tabs:** 44px tall, 14px. Active is semibold content-primary with a 2px interactive-primary underline and a accent count badge. Inactive is content-main with a background-subtle count badge. Labels shorten below sm.
 
 ### Menus, dialogs and toasts
-- **⋯ menu:** a 32px ghost icon trigger opens a 200px, 6px-radius white menu with the pop shadow. It is rendered in a portal so tables never clip it. It follows its trigger while the page scrolls, opens upward when there is no room below, and closes only when the trigger leaves the viewport. Items are 13px, with wash on hover and focus, and danger items are high-red text.
-- **Dialog:** a native modal, 8px radius, dialog shadow, navy-950 backdrop at 55%. The header has an 18px title and a close button above a hairline. The body is padded 20px by 24px. The footer sits on canvas, right-aligned, with a ghost Cancel before the confirming button. It enters over 220ms (8px rise, 0.985 scale) on the out-expo curve.
-- **Toast:** navy-900, 6px radius, pop shadow, brand-400 check icon, 13px semibold title with a 70% white body, bottom-right, up to 380px wide. It enters over 260ms with a 10px rise. Its timer pauses while the pointer or keyboard focus is on it, so Undo is never taken away mid-reach.
+- **⋯ menu:** a 32px ghost icon trigger opens a 200px, 6px-radius white menu with the pop shadow. It is rendered in a portal so tables never clip it. It follows its trigger while the page scrolls, opens upward when there is no room below, and closes only when the trigger leaves the viewport. Items are 13px, with background-subtle on hover and focus, and danger items are high-red text.
+- **Dialog:** a native modal, 8px radius, dialog shadow, navy-950 backdrop at 55%. The header has an 18px title and a close button above a hairline. The body is padded 20px by 24px. The footer sits on base-contrast, right-aligned, with a ghost Cancel before the confirming button. It enters over 220ms (8px rise, 0.985 scale) on the out-expo curve.
+- **Toast:** navy-900, 6px radius, pop shadow, chrome-accent check icon, 13px semibold title with a 70% white body, bottom-right, up to 380px wide. It enters over 260ms with a 10px rise. Its timer pauses while the pointer or keyboard focus is on it, so Undo is never taken away mid-reach.
 - **Credit-spending confirm:** ordering a monitor or a fresh KYB Basic report states the price before the click (on the button and in the dialog) and focuses Cancel first, so Enter on open never spends credits. Until the KYB Basic price is confirmed it reads "xx credits", from one place in `data/model.ts`.
 
 **The Confirm Before Destroy Rule.** "Stop monitoring" is never a visible row or header button. A single company's stop lives in its ⋯ menu as a red item. Bulk stop lives in the navy selection bar. Both open a confirm dialog that names the company or count, leads with any unreviewed changes (and how many are High), explains what stays (history under Order history) and that no further monitoring credits are charged, and confirms with the danger button, with Cancel focused first.
 
 ### Report viewer (KYB Basic baseline)
 `/reports/:monitorId` shows the KYB Basic report a monitor was ordered with, rebuilt from the Portal's View Report Figma. It is opened from the monitor page's baseline panel ("View"). Confirming a new monitor does not land here: it lands on the monitor's details page, `/pkyb/monitoring/:id?new=1`, where the baseline shows as generating.
-- **Header:** the company name and local name at 24px, separated by an ink-3 bar, with the flag after them. Below that, the registry label in uppercase 13px ink-2. On the right, a two-line meta ("pKYB baseline report" / "Monitoring since …") and the page's one primary, **View pKYB**, a link to `/pkyb/monitoring/:id`. Below lg it stacks, and on phones the button is full width.
+- **Header:** the company name and local name at 24px, separated by an content-tertiary bar, with the flag after them. Below that, the registry label in uppercase 13px content-main. On the right, a two-line meta ("pKYB baseline report" / "Monitoring since …") and the page's one primary, **View pKYB**, a link to `/pkyb/monitoring/:id`. Below lg it stacks, and on phones the button is full width.
 - **Toolbar:** "View report:" with a navy-900 report chip, then the pager ("Page N of 3", first/prev/next/last), share and download icon buttons, and the EN / OG language toggle (`aria-pressed`).
-- **Section rail:** 272px, canvas at 70%, sticky under the top bar. "Jump to section", "Share recommendation" and "Add-ons" headings are uppercase 12px ink-3, matching the Portal's existing viewer. The active section is brand-50 with a 2px brand-700 marker, like the sidebar's sub-nav. Below lg the rail becomes a "Jump to section" select.
-- **Section heading:** a brand-50 band, 18px brand-800, with a 2px brand-700 rule underneath.
-- **Cover sheet:** printed-document art, so it keeps its own wash (mint to sky) and a slate façade band (#c3d3db → #7f98a7) under a vertical REPORT. These colours stay on the cover and never reach the UI.
+- **Section rail:** 272px, base-contrast at 70%, sticky under the top bar. "Jump to section", "Share recommendation" and "Add-ons" headings are uppercase 12px content-tertiary, matching the Portal's existing viewer. The active section is interactive-accent with a 2px interactive-primary marker, like the sidebar's sub-nav. Below lg the rail becomes a "Jump to section" select.
+- **Section heading:** a interactive-accent band, 18px interactive-control, with a 2px interactive-primary rule underneath.
+- **Cover sheet:** printed-document art, so it keeps its own background-subtle (mint to sky) and a slate façade band (#c3d3db → #7f98a7) under a vertical REPORT. These colours stay on the cover and never reach the UI.
 - **Report content:** facts are hairline `dl` lists, and tables follow the Stacked Rows rule. Historical Changes ends with "Changes after <date> are tracked by your pKYB monitor · View pKYB". The monitor page's baseline panel links back with "View".
 
 ### Signature: unreviewed marker and heatmap
 - **Unreviewed dot:** an 8px navy-900 dot before the company name, with the name in semibold instead of medium. It means "has unreviewed changes" and stays separate from severity, so it is never tinted.
-- **Heatmap:** an SVG grid with weeks as columns and Monday at the top. Cells are 12–13px with a 3px gap and 2px corners. Month labels and Mon/Wed/Fri labels are 9–10px ink-3. Hovering shows a navy-900 tooltip, and the selected day gets a 1.5px navy-900 stroke. The portfolio High-severity ramp is four steps: wash for none, then #f6cfcb, #e9928a and high-cell, with a matching inline legend. The grid opens scrolled to the most recent weeks. Below md, the portfolio heatmap in the triage band collapses behind a "Show unreviewed High changes per day" toggle, so the table starts within the first screen.
+- **Heatmap:** an SVG grid with weeks as columns and Monday at the top. Cells are 12–13px with a 3px gap and 2px corners. Month labels and Mon/Wed/Fri labels are 9–10px content-tertiary. Hovering shows a navy-900 tooltip, and the selected day gets a 1.5px navy-900 stroke. The portfolio High-severity ramp is four steps: background-subtle for none, then #f6cfcb, #e9928a and high-cell, with a matching inline legend. The grid opens scrolled to the most recent weeks. Below md, the portfolio heatmap in the triage band collapses behind a "Show unreviewed High changes per day" toggle, so the table starts within the first screen.
 
 ## Do's and Don'ts
 
@@ -378,7 +402,7 @@ A review is a decision, not a tick, because the change log is the client's audit
 
 ### Don't:
 - **Don't** give categories their own colours or rainbow badges.
-- **Don't** use Signal Green (brand-400) on white surfaces.
+- **Don't** use Chrome Accent (chrome-accent) on white surfaces.
 - **Don't** place a visible "Stop" or "Delete" link inline in a table row.
 - **Don't** promise a check cadence: no "checks every N days", no countdowns, no next-check dates.
 - **Don't** add shadows to panels or cards at rest, or use radii larger than 8px.

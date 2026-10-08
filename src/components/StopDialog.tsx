@@ -38,19 +38,19 @@ export function StopDialog({ targets, onClose, onDone }: { targets: Array<{ id: 
         </>
       }
     >
-      <div className="flex flex-col gap-3 text-[14px] text-ink-2">
+      <div className="flex flex-col gap-3 text-[14px] text-content-main">
         {!single && (
-          <ul className="rounded-[6px] border border-line bg-canvas px-4 py-2.5 text-[13px] text-ink">
+          <ul className="rounded-[6px] border border-border-subtle bg-base-contrast px-4 py-2.5 text-[13px] text-content-primary">
             {shown.map((t) => (
               <li key={t.id} className="truncate py-0.5">
                 {t.name}
               </li>
             ))}
-            {targets.length > shown.length && <li className="py-0.5 text-ink-2">and {nf.format(targets.length - shown.length)} more</li>}
+            {targets.length > shown.length && <li className="py-0.5 text-content-main">and {nf.format(targets.length - shown.length)} more</li>}
           </ul>
         )}
         {unreviewed > 0 && (
-          <p className="font-medium text-ink">
+          <p className="font-medium text-content-primary">
             {nf.format(unreviewed)} {unreviewed === 1 ? "change is" : "changes are"} still unreviewed
             {high > 0 && (
               <>

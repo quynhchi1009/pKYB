@@ -65,7 +65,7 @@ export function CreateMonitorDialog({ company, onClose }: { company: Company | n
           <button
             onClick={onClose}
             aria-label="Close"
-            className="absolute top-3 right-3 z-10 grid size-9 place-items-center rounded-[4px] text-white/80 hover:bg-white/10 hover:text-white md:text-ink-3 md:hover:bg-wash md:hover:text-ink"
+            className="absolute top-3 right-3 z-10 grid size-9 place-items-center rounded-[4px] text-chrome-content-main hover:bg-chrome-control-hover hover:text-white md:text-content-tertiary md:hover:bg-background-subtle md:hover:text-content-primary"
           >
             <X className="size-4" />
           </button>
@@ -76,23 +76,23 @@ export function CreateMonitorDialog({ company, onClose }: { company: Company | n
               {title}
             </h2>
 
-            <div className="rounded-[6px] bg-white/[0.06] p-4 shadow-[inset_0_0_0_1px_rgb(255_255_255/0.1)]">
+            <div className="rounded-[6px] bg-chrome-selected p-4 shadow-[inset_0_0_0_1px_var(--color-chrome-border)]">
               <div className="flex items-start gap-3">
                 <Flag code={company.jurisdiction} className="mt-1 h-4 w-6 shrink-0" />
                 <div className="min-w-0">
                   <p className="text-[16px] leading-snug font-semibold">{company.name}</p>
-                  {company.localName && <p className="mt-0.5 text-[14px] text-white/75">{company.localName}</p>}
+                  {company.localName && <p className="mt-0.5 text-[14px] text-chrome-content-tertiary">{company.localName}</p>}
                 </div>
               </div>
-              <dl className="mt-3 border-t border-white/10 pt-3 text-[12px]">
-                <dt className="text-white/65">
+              <dl className="mt-3 border-t border-chrome-border pt-3 text-[12px]">
+                <dt className="text-chrome-content-tertiary">
                   {j.name} · {j.regLabel}
                 </dt>
-                <dd className="mt-0.5 font-medium tnum text-white/90">{company.regNo}</dd>
+                <dd className="mt-0.5 font-medium tnum text-chrome-content-main">{company.regNo}</dd>
               </dl>
-              <p className={cx("mt-3 flex items-start gap-2 text-[13px]", unsupported ? "text-white" : "text-brand-300")}>
+              <p className={cx("mt-3 flex items-start gap-2 text-[13px]", unsupported ? "text-white" : "text-border-accent")}>
                 {unsupported ? (
-                  <CircleAlert className="mt-0.5 size-4 shrink-0 text-white/80" />
+                  <CircleAlert className="mt-0.5 size-4 shrink-0 text-chrome-content-main" />
                 ) : (
                   <CircleCheck className="mt-0.5 size-4 shrink-0" />
                 )}
@@ -106,15 +106,15 @@ export function CreateMonitorDialog({ company, onClose }: { company: Company | n
 
             {ordering && (
               <ol aria-label="What happens" className="relative flex flex-col gap-5 max-md:hidden">
-                <span aria-hidden className="absolute top-4 bottom-4 left-[15px] w-px bg-white/15" />
+                <span aria-hidden className="absolute top-4 bottom-4 left-[15px] w-px bg-chrome-border" />
                 {STEPS.map((s) => (
                   <li key={s.when} className="relative flex gap-3">
-                    <span className="grid size-8 shrink-0 place-items-center rounded-full bg-navy-900 shadow-[inset_0_0_0_1px_rgb(47_191_135/0.55)]">
-                      <s.icon className="size-4 text-brand-400" strokeWidth={1.75} />
+                    <span className="grid size-8 shrink-0 place-items-center rounded-full bg-background-system shadow-[inset_0_0_0_1px_rgb(47_191_135/0.55)]">
+                      <s.icon className="size-4 text-chrome-accent" strokeWidth={1.75} />
                     </span>
                     <span className="pt-1 text-[13px] leading-snug">
                       <span className="block font-semibold text-white">{s.when}</span>
-                      <span className="block text-white/75">{s.what}</span>
+                      <span className="block text-chrome-content-tertiary">{s.what}</span>
                     </span>
                   </li>
                 ))}
@@ -132,7 +132,7 @@ export function CreateMonitorDialog({ company, onClose }: { company: Company | n
               ) : (
                 <div className="flex flex-col gap-6">
                   <section aria-labelledby="watch-h">
-                    <h3 id="watch-h" className="text-[16px] font-semibold text-ink">
+                    <h3 id="watch-h" className="text-[16px] font-semibold text-content-primary">
                       We'll watch 9 change categories for you
                     </h3>
                     <div className="mt-3 flex flex-wrap gap-1.5">
@@ -142,26 +142,26 @@ export function CreateMonitorDialog({ company, onClose }: { company: Company | n
                     </div>
                   </section>
 
-                  <section aria-labelledby="sev-h" className="border-t border-line pt-5">
-                    <h3 id="sev-h" className="flex items-center gap-2 text-[14px] font-semibold text-ink">
-                      <SlidersHorizontal className="size-4 text-brand-700" /> You define the severity
+                  <section aria-labelledby="sev-h" className="border-t border-border-subtle pt-5">
+                    <h3 id="sev-h" className="flex items-center gap-2 text-[14px] font-semibold text-content-primary">
+                      <SlidersHorizontal className="size-4 text-interactive-primary" /> You define the severity
                     </h3>
                     {customised ? (
-                      <p className="mt-1 text-[13px] text-ink-2">
+                      <p className="mt-1 text-[13px] text-content-main">
                         Your team's mapping applies to this monitor:{" "}
-                        <span className="font-semibold text-ink tnum">
+                        <span className="font-semibold text-content-primary tnum">
                           {tierCount("high")} High · {tierCount("medium")} Medium · {tierCount("low")} Low
                         </span>
                         . Severity is set once for all your monitors in{" "}
-                        <Link to="/pkyb/settings" onClick={onClose} className="font-semibold text-brand-700 hover:underline">
+                        <Link to="/pkyb/settings" onClick={onClose} className="font-semibold text-content-link hover:underline">
                           Severity Settings
                         </Link>
                         .
                       </p>
                     ) : (
-                      <p className="mt-1 text-[13px] text-ink-2">
-                        Every category starts at <span className="font-semibold text-ink">Medium</span>. Set each one to Low, Medium or High in{" "}
-                        <Link to="/pkyb/settings" onClick={onClose} className="font-semibold text-brand-700 hover:underline">
+                      <p className="mt-1 text-[13px] text-content-main">
+                        Every category starts at <span className="font-semibold text-content-primary">Medium</span>. Set each one to Low, Medium or High in{" "}
+                        <Link to="/pkyb/settings" onClick={onClose} className="font-semibold text-content-link hover:underline">
                           Severity Settings
                         </Link>
                         ; it applies to all your monitors.
@@ -171,14 +171,14 @@ export function CreateMonitorDialog({ company, onClose }: { company: Company | n
                       {TIERS.map((t) => (
                         <li key={t.level} className="flex flex-col items-start gap-1">
                           <SeverityPill level={t.level} size="sm" />
-                          <span className="text-[12px] text-ink-2">{t.desc}</span>
+                          <span className="text-[12px] text-content-main">{t.desc}</span>
                         </li>
                       ))}
                     </ul>
                   </section>
 
-                  <section aria-labelledby="order-h" className="border-t border-dashed border-line-strong pt-5">
-                    <h3 id="order-h" className="mb-3 text-[14px] font-semibold text-ink">
+                  <section aria-labelledby="order-h" className="border-t border-dashed border-border-neutral pt-5">
+                    <h3 id="order-h" className="mb-3 text-[14px] font-semibold text-content-primary">
                       Your order
                     </h3>
                     <dl className="flex flex-col gap-3 text-[13px]">
@@ -187,14 +187,14 @@ export function CreateMonitorDialog({ company, onClose }: { company: Company | n
                         label={
                           <span className="flex flex-wrap items-center gap-2">
                             KYB Basic report
-                            <span className="rounded-[3px] border border-line-strong bg-wash px-1.5 text-[11px] font-semibold text-ink-2">Required</span>
+                            <span className="rounded-[3px] border border-border-neutral bg-background-subtle px-1.5 text-[11px] font-semibold text-content-main">Required</span>
                           </span>
                         }
                         sub="Attached to this monitor as your baseline and downloaded when monitoring starts. Every later change is compared against it."
                         value={creditsLabel(PRICING.kybBasicCredits)}
                       />
                     </dl>
-                    <p className="mt-3 max-w-[52ch] text-[12px] text-ink-2">
+                    <p className="mt-3 max-w-[52ch] text-[12px] text-content-main">
                       The baseline is charged once, today. Fresh KYB Basic reports you request later are charged separately.
                     </p>
                   </section>
@@ -202,11 +202,11 @@ export function CreateMonitorDialog({ company, onClose }: { company: Company | n
               )}
             </div>
 
-            <footer className="flex flex-col gap-3 border-t border-line bg-white px-6 py-4 sm:flex-row sm:items-center">
+            <footer className="flex flex-col gap-3 border-t border-border-subtle bg-white px-6 py-4 sm:flex-row sm:items-center">
               {ordering && (
                 <p className="flex shrink-0 items-baseline gap-2 whitespace-nowrap">
-                  <span className="text-[13px] text-ink-2">Total today</span>
-                  <span className="text-[18px] font-semibold tracking-[-0.01em] tnum text-ink">{totalTodayLabel()}</span>
+                  <span className="text-[13px] text-content-main">Total today</span>
+                  <span className="text-[18px] font-semibold tracking-[-0.01em] tnum text-content-primary">{totalTodayLabel()}</span>
                 </p>
               )}
               <div className="flex flex-col-reverse gap-2 sm:ml-auto sm:flex-row sm:items-center">
@@ -243,17 +243,17 @@ export function CreateMonitorDialog({ company, onClose }: { company: Company | n
 }
 
 function Note({ children }: { children: ReactNode }) {
-  return <p className="max-w-[48ch] text-[14px] leading-relaxed text-ink-2">{children}</p>;
+  return <p className="max-w-[48ch] text-[14px] leading-relaxed text-content-main">{children}</p>;
 }
 
 function Line({ label, sub, value }: { label: ReactNode; sub: string; value: string }) {
   return (
     <div className="flex items-start justify-between gap-6">
       <dt className="min-w-0">
-        <span className="block font-medium text-ink">{label}</span>
-        <span className="mt-0.5 block max-w-[46ch] text-[12px] text-ink-2">{sub}</span>
+        <span className="block font-medium text-content-primary">{label}</span>
+        <span className="mt-0.5 block max-w-[46ch] text-[12px] text-content-main">{sub}</span>
       </dt>
-      <dd className="shrink-0 pt-px tnum text-ink">{value}</dd>
+      <dd className="shrink-0 pt-px tnum text-content-primary">{value}</dd>
     </div>
   );
 }

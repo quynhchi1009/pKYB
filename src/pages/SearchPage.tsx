@@ -30,7 +30,7 @@ export function SearchPage() {
   return (
     <div className="mx-auto max-w-[1280px] px-4 pt-6 pb-16 lg:px-8">
       {fromPkyb && (
-        <div className="mb-4 flex items-center gap-3 rounded-[6px] border border-brand-300 bg-brand-50 px-4 py-3 text-[13px] text-brand-800">
+        <div className="mb-4 flex items-center gap-3 rounded-[6px] border border-border-accent bg-interactive-accent px-4 py-3 text-[13px] text-interactive-control">
           <Radar className="size-4 shrink-0" />
           <span>
             Find the company you want to monitor, then choose <span className="font-semibold">Create pKYB monitor</span> in its row.
@@ -38,7 +38,7 @@ export function SearchPage() {
         </div>
       )}
       <form
-        className="rounded-[6px] border border-line bg-white p-5 lg:p-6"
+        className="rounded-[6px] border border-border-subtle bg-white p-5 lg:p-6"
         onSubmit={(e) => {
           e.preventDefault();
           const next = new URLSearchParams(params);
@@ -50,8 +50,8 @@ export function SearchPage() {
         <h1 className="text-[26px] font-semibold tracking-[-0.01em]">Search for a business to verify</h1>
         <div className="mt-4 grid gap-3 sm:grid-cols-[220px_minmax(0,1fr)_auto] sm:items-end">
           <label className="flex flex-col gap-1">
-            <span className="text-[12px] font-medium text-ink-2">Jurisdiction</span>
-            <select value={jur} onChange={(e) => setJur(e.target.value)} className="h-10 rounded-[4px] border border-line-strong bg-white px-2.5 text-[14px] focus:border-brand-600 max-sm:h-11 max-sm:text-[16px]">
+            <span className="text-[12px] font-medium text-content-main">Jurisdiction</span>
+            <select value={jur} onChange={(e) => setJur(e.target.value)} className="h-10 rounded-[4px] border border-interactive-secondary bg-white px-2.5 text-[14px] focus:border-interactive-primary max-sm:h-11 max-sm:text-[16px]">
               <option value="all">All jurisdictions</option>
               {JURISDICTIONS.map((j) => (
                 <option key={j.code} value={j.code}>
@@ -61,8 +61,8 @@ export function SearchPage() {
             </select>
           </label>
           <label className="flex flex-col gap-1">
-            <span className="text-[12px] font-medium text-ink-2">Business Name / Registration No.</span>
-            <input value={draft} onChange={(e) => setDraft(e.target.value)} className="h-10 rounded-[4px] border border-line-strong px-3 text-[14px] focus:border-brand-600 max-sm:h-11 max-sm:text-[16px]" />
+            <span className="text-[12px] font-medium text-content-main">Business Name / Registration No.</span>
+            <input value={draft} onChange={(e) => setDraft(e.target.value)} className="h-10 rounded-[4px] border border-interactive-secondary px-3 text-[14px] focus:border-interactive-primary max-sm:h-11 max-sm:text-[16px]" />
           </label>
           <Button variant="primary" type="submit" className="h-10 px-6">
             Search
@@ -76,7 +76,7 @@ export function SearchPage() {
 
       <div className="grid gap-6 lg:grid-cols-[200px_minmax(0,1fr)]">
         <div className="min-w-0">
-          <p className="mb-2 text-[12px] font-semibold text-ink-2">Filter by jurisdiction</p>
+          <p className="mb-2 text-[12px] font-semibold text-content-main">Filter by jurisdiction</p>
           <div className="flex gap-1 overflow-x-auto lg:flex-col">
             {[["all", results.length] as [string, number], ...groups].map(([code, n]) => (
               <button
@@ -85,38 +85,38 @@ export function SearchPage() {
                 onClick={() => setFilter(code)}
                 className={cx(
                   "flex h-9 shrink-0 items-center justify-between gap-3 rounded-[4px] px-3 text-left text-[13px]",
-                  filter === code ? "bg-brand-50 font-semibold text-brand-800" : "text-ink-2 hover:bg-wash",
+                  filter === code ? "bg-interactive-accent font-semibold text-interactive-control" : "text-content-main hover:bg-background-subtle",
                 )}
               >
                 <span>{code === "all" ? "All jurisdictions" : jurisdictionByCode[code].name}</span>
-                <span className="tnum text-ink-3">{n}</span>
+                <span className="tnum text-content-tertiary">{n}</span>
               </button>
             ))}
           </div>
         </div>
 
-        <div className="min-w-0 overflow-hidden rounded-[6px] border border-line bg-white">
-          <ul className="divide-y divide-line md:hidden">
+        <div className="min-w-0 overflow-hidden rounded-[6px] border border-border-subtle bg-white">
+          <ul className="divide-y divide-border-subtle md:hidden">
             {shown.map((c) => {
               const mon = monitors.find((m) => m.regNo === c.regNo && m.status === "active");
               return (
                 <li key={c.id} className="px-4 py-3.5">
-                  <p className="font-semibold text-ink">{c.name}</p>
-                  {c.localName && <p className="text-[13px] text-ink-2">{c.localName}</p>}
-                  <p className="mt-1 flex items-center gap-1.5 text-[12px] text-ink-3">
+                  <p className="font-semibold text-content-primary">{c.name}</p>
+                  {c.localName && <p className="text-[13px] text-content-main">{c.localName}</p>}
+                  <p className="mt-1 flex items-center gap-1.5 text-[12px] text-content-tertiary">
                     <Flag code={c.jurisdiction} /> {jurisdictionByCode[c.jurisdiction].name} · <span className="tnum">{c.regNo}</span>
                   </p>
                   <div className="mt-3 flex items-center gap-2">
                     {mon ? (
-                      <Link to={`/pkyb/monitoring/${mon.id}`} aria-label={`Monitoring ${c.name}: open its pKYB page`} className="inline-flex h-8 items-center gap-1.5 rounded-full bg-brand-50 px-3 text-[12px] font-semibold text-brand-800">
-                        <span className="size-1.5 rounded-full bg-brand-600" /> Monitoring
+                      <Link to={`/pkyb/monitoring/${mon.id}`} aria-label={`Monitoring ${c.name}: open its pKYB page`} className="inline-flex h-8 items-center gap-1.5 rounded-full bg-interactive-accent px-3 text-[12px] font-semibold text-interactive-control">
+                        <span className="size-1.5 rounded-full bg-interactive-primary" /> Monitoring
                       </Link>
                     ) : (
                       <Button size="sm" variant="secondary" onClick={() => setCreating(c)} aria-label={`Create pKYB monitor for ${c.name}`}>
                         <Radar className="size-3.5" /> Create pKYB monitor
                       </Button>
                     )}
-                    <Link to={`/report/${c.id}`} aria-label={`View report options for ${c.name}`} className="inline-flex h-8 items-center px-2 text-[13px] font-semibold text-brand-700">
+                    <Link to={`/report/${c.id}`} aria-label={`View report options for ${c.name}`} className="inline-flex h-8 items-center px-2 text-[13px] font-semibold text-interactive-primary">
                       View
                     </Link>
                   </div>
@@ -126,7 +126,7 @@ export function SearchPage() {
           </ul>
           <div className="overflow-x-auto max-md:hidden">
           <table className="w-full min-w-[720px] text-left text-[13px]">
-            <thead className="border-b border-line bg-wash text-[12px] text-ink-2">
+            <thead className="border-b border-border-subtle bg-background-subtle text-[12px] text-content-main">
               <tr>
                 <th className="px-4 py-2.5 font-semibold">Country</th>
                 <th className="px-4 py-2.5 font-semibold">Business name</th>
@@ -134,11 +134,11 @@ export function SearchPage() {
                 <th className="px-4 py-2.5 text-right font-semibold">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-line">
+            <tbody className="divide-y divide-border-subtle">
               {shown.map((c) => {
                 const mon = monitors.find((m) => m.regNo === c.regNo && m.status === "active");
                 return (
-                  <tr key={c.id} className="hover:bg-canvas">
+                  <tr key={c.id} className="hover:bg-base-contrast">
                     <td className="px-4 py-3">
                       <span className="flex items-center gap-2">
                         <Flag code={c.jurisdiction} />
@@ -146,22 +146,22 @@ export function SearchPage() {
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      <span className="block font-semibold text-ink">{c.name}</span>
-                      {c.localName && <span className="block text-ink-2">{c.localName}</span>}
+                      <span className="block font-semibold text-content-primary">{c.name}</span>
+                      {c.localName && <span className="block text-content-main">{c.localName}</span>}
                     </td>
-                    <td className="px-4 py-3 tnum text-ink-2">{c.regNo}</td>
+                    <td className="px-4 py-3 tnum text-content-main">{c.regNo}</td>
                     <td className="px-4 py-3">
                       <span className="flex items-center justify-end gap-2">
                         {mon ? (
-                          <Link to={`/pkyb/monitoring/${mon.id}`} aria-label={`Monitoring ${c.name}: open its pKYB page`} className="inline-flex h-8 items-center gap-1.5 rounded-full bg-brand-50 px-3 text-[12px] font-semibold text-brand-800 hover:bg-brand-100">
-                            <span className="size-1.5 rounded-full bg-brand-600" /> Monitoring
+                          <Link to={`/pkyb/monitoring/${mon.id}`} aria-label={`Monitoring ${c.name}: open its pKYB page`} className="inline-flex h-8 items-center gap-1.5 rounded-full bg-interactive-accent px-3 text-[12px] font-semibold text-interactive-control hover:bg-interactive-accent-hover">
+                            <span className="size-1.5 rounded-full bg-interactive-primary" /> Monitoring
                           </Link>
                         ) : (
                           <Button size="sm" variant="secondary" onClick={() => setCreating(c)} aria-label={`Create pKYB monitor for ${c.name}`}>
                             <Radar className="size-3.5" /> Create pKYB monitor
                           </Button>
                         )}
-                        <Link to={`/report/${c.id}`} aria-label={`View report options for ${c.name}`} className="inline-flex h-8 items-center px-2 text-[13px] font-semibold text-brand-700 hover:underline">
+                        <Link to={`/report/${c.id}`} aria-label={`View report options for ${c.name}`} className="inline-flex h-8 items-center px-2 text-[13px] font-semibold text-content-link hover:underline">
                           View
                         </Link>
                       </span>
