@@ -136,22 +136,18 @@ export function SeveritySettings() {
         <h1 className="text-[26px] leading-tight font-semibold tracking-[-0.015em]">Severity Settings</h1>
         {/* 62ch, not 72: Open Sans runs narrower than its "0", so 72ch let lines reach ~88 characters. */}
         <p className="mt-1 max-w-[62ch] text-[14px] text-content-main">
-          Set a severity for each change category, and choose which severities notify you. Severity drives the colours in the monitoring table, company heatmaps and change feed.
-          Nothing changes until you save.
+          Choose how serious each type of change is, and when you're notified.
         </p>
       </header>
 
       {/* Two columns only from xl: at lg the 380px notifications column squeezed the category names to a few letters. */}
       <div className="mt-8 grid gap-8 xl:grid-cols-[minmax(0,1fr)_380px]">
         <section aria-labelledby="map-h">
-          <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
             <div className="max-w-[60ch]">
               <h2 id="map-h" className="text-[18px] font-semibold">
                 Category severity
               </h2>
-              <p className="mt-0.5 text-[13px] text-content-main">
-                Applies to all your monitors. When one change touches several categories, it takes the most severe tier. Earlier changes keep the severity they had when detected, shown as “was Low”.
-              </p>
             </div>
             <div className="flex items-center gap-1.5">
               {TIERS_HIGH_FIRST.map((s) => (

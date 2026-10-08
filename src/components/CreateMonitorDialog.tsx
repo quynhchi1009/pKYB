@@ -3,20 +3,12 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ArrowDown, ArrowRight, BellRing, CircleAlert, CircleCheck, FileCheck2, Radar, SlidersHorizontal, X } from "lucide-react";
 import { CATEGORIES, DEFAULT_SEVERITY, PKYB_UNSUPPORTED, PRICING, TODAY, balanceAfterLabel, creditsLabel, iso, jurisdictionByCode, totalTodayLabel, type Company, type Severity } from "../data/model";
 import { useStore } from "../state/store";
-import { Button, CategoryChip, Dialog, Flag, SeverityPill, cx, formatDate } from "./ui";
-
-// Tiers lead with High, as Monitoring does. The copy describes the tier as the client's own intent,
-// because the client decides what each tier means.
-const TIERS: Array<{ level: Severity; desc: string }> = [
-  { level: "high", desc: "Changes you want to act on first." },
-  { level: "medium", desc: "Changes to review when you can." },
-  { level: "low", desc: "Changes to keep on record." },
-];
+import { Button, CategoryChip, Dialog, Flag, cx, formatDate } from "./ui";
 
 const STEPS: Array<{ when: string; what: string; icon: typeof Radar }> = [
-  { when: "Today", what: "A KYB Basic report is generated and attached as your baseline.", icon: FileCheck2 },
-  { when: "From then on", what: "Checks run automatically, until you stop the monitor.", icon: Radar },
-  { when: "When something changes", what: "You're alerted based on the severity you set.", icon: BellRing },
+  { when: "Today", what: "KYB Basic baseline report attached", icon: FileCheck2 },
+  { when: "Ongoing", what: "Automatic checks until you stop", icon: Radar },
+  { when: "On change", what: "Alerts based on your severity", icon: BellRing },
 ];
 
 /**
@@ -100,7 +92,7 @@ export function CreateMonitorDialog({ company, onClose }: { company: Company | n
                   ? `Monitored since ${formatDate(existing.createdAt)}`
                   : unsupported
                     ? `Not covered by pKYB in ${j.name}`
-                    : `${j.regLabel} verified for monitoring`}
+                    : `${j.regLabel} verified`}
               </p>
             </div>
 
@@ -126,14 +118,14 @@ export function CreateMonitorDialog({ company, onClose }: { company: Company | n
           <div className="flex min-h-0 flex-col bg-white">
             <div className="flex-1 px-6 pt-6 pb-4 md:max-h-[calc(100dvh-32px-76px)] md:overflow-y-auto md:pt-14">
               {existing ? (
-                <Note>This company already has an active monitor, so there's nothing new to order. Opening it won't place an order or use credits.</Note>
+                <Note>Already monitored. Opening it uses no credits.</Note>
               ) : unsupported ? (
-                <Note>Perpetual KYB doesn't cover {j.name} companies yet. You can still order a one-off KYB report for this company.</Note>
+                <Note>pKYB doesn't cover {j.name} yet. You can still order a one-off KYB report.</Note>
               ) : (
                 <div className="flex flex-col gap-6">
                   <section aria-labelledby="watch-h">
                     <h3 id="watch-h" className="text-[16px] font-semibold text-content-primary">
-                      We'll watch 9 change categories for you
+                      9 change categories monitored
                     </h3>
                     <div className="mt-3 flex flex-wrap gap-1.5">
                       {CATEGORIES.map((c) => (
@@ -144,15 +136,15 @@ export function CreateMonitorDialog({ company, onClose }: { company: Company | n
 
                   <section aria-labelledby="sev-h" className="border-t border-border-subtle pt-5">
                     <h3 id="sev-h" className="flex items-center gap-2 text-[14px] font-semibold text-content-primary">
-                      <SlidersHorizontal className="size-4 text-interactive-primary" /> You define the severity
+                      <SlidersHorizontal className="size-4 text-interactive-primary" /> Severity
                     </h3>
                     {customised ? (
                       <p className="mt-1 text-[13px] text-content-main">
-                        Your team's mapping applies to this monitor:{" "}
+                        Your team's settings:{" "}
                         <span className="font-semibold text-content-primary tnum">
                           {tierCount("high")} High · {tierCount("medium")} Medium · {tierCount("low")} Low
                         </span>
-                        . Severity is set once for all your monitors in{" "}
+                        . Change in{" "}
                         <Link to="/pkyb/settings" onClick={onClose} className="font-semibold text-content-link hover:underline">
                           Severity Settings
                         </Link>
@@ -160,21 +152,13 @@ export function CreateMonitorDialog({ company, onClose }: { company: Company | n
                       </p>
                     ) : (
                       <p className="mt-1 text-[13px] text-content-main">
-                        Every category starts at <span className="font-semibold text-content-primary">Medium</span>. Set each one to Low, Medium or High in{" "}
+                        All start at <span className="font-semibold text-content-primary">Medium</span>. Change in{" "}
                         <Link to="/pkyb/settings" onClick={onClose} className="font-semibold text-content-link hover:underline">
                           Severity Settings
                         </Link>
-                        ; it applies to all your monitors.
+                        .
                       </p>
                     )}
-                    <ul className="mt-3 grid gap-x-4 gap-y-2 sm:grid-cols-3">
-                      {TIERS.map((t) => (
-                        <li key={t.level} className="flex flex-col items-start gap-1">
-                          <SeverityPill level={t.level} size="sm" />
-                          <span className="text-[12px] text-content-main">{t.desc}</span>
-                        </li>
-                      ))}
-                    </ul>
                   </section>
 
                   <section aria-labelledby="order-h" className="border-t border-dashed border-border-neutral pt-5">
@@ -182,7 +166,7 @@ export function CreateMonitorDialog({ company, onClose }: { company: Company | n
                       Your order
                     </h3>
                     <dl className="flex flex-col gap-3 text-[13px]">
-                      <Line label="pKYB monitor" sub={`Starts ${formatDate(iso(TODAY))} · runs until you stop it`} value={`${PRICING.monitorCredits} credits / year`} />
+                      <Line label="pKYB monitor" sub={`From ${formatDate(iso(TODAY))} · until you stop it`} value={`${PRICING.monitorCredits} credits / year`} />
                       <Line
                         label={
                           <span className="flex flex-wrap items-center gap-2">
@@ -190,12 +174,12 @@ export function CreateMonitorDialog({ company, onClose }: { company: Company | n
                             <span className="rounded-[3px] border border-border-neutral bg-background-subtle px-1.5 text-[11px] font-semibold text-content-main">Required</span>
                           </span>
                         }
-                        sub="Attached to this monitor as your baseline and downloaded when monitoring starts. Every later change is compared against it."
+                        sub="Your baseline for spotting changes"
                         value={creditsLabel(PRICING.kybBasicCredits)}
                       />
                     </dl>
                     <p className="mt-3 max-w-[52ch] text-[12px] text-content-main">
-                      The baseline is charged once, today. Fresh KYB Basic reports you request later are charged separately.
+                      Charged once. Later reports are charged separately.
                     </p>
                   </section>
                 </div>
@@ -221,21 +205,21 @@ export function CreateMonitorDialog({ company, onClose }: { company: Company | n
                 </Button>
                 {existing ? (
                   <Button variant="primary" data-autofocus="" onClick={() => go(`/pkyb/monitoring/${existing.id}`)}>
-                    Open existing monitor <ArrowRight className="size-4" />
+                    Open monitor <ArrowRight className="size-4" />
                   </Button>
                 ) : unsupported ? (
                   reportsHere ? (
                     <Button variant="primary" data-autofocus="" onClick={showReports}>
-                      Choose a report on this page <ArrowDown className="size-4" />
+                      Choose a report <ArrowDown className="size-4" />
                     </Button>
                   ) : (
                     <Button variant="primary" data-autofocus="" onClick={() => go(`/report/${company.id}`)}>
-                      Choose a one-off KYB report <ArrowRight className="size-4" />
+                      Choose a report <ArrowRight className="size-4" />
                     </Button>
                   )
                 ) : (
                   <Button variant="primary" onClick={confirm}>
-                    Confirm & start monitoring <ArrowRight className="size-4" />
+                    Start monitoring <ArrowRight className="size-4" />
                   </Button>
                 )}
               </div>
